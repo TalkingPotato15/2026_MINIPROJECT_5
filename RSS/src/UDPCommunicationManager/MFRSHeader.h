@@ -36,6 +36,9 @@ enum class InnerICD_MessageID
 	InnerStopSimulationAck,
 	InnerStopSimulationToModel = 0x29,
 
+	// RSS ICD 내부 메시지
+	InnerRSSStatusToComm = 0x30,
+
 	// ATS ICD 내부 메시지
 	InnerAirThreatDetonationToATM = 0x40,
 	InnerAirThreatInfoToComm,
