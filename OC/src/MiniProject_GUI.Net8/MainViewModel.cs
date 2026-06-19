@@ -86,15 +86,22 @@ namespace MiniProject_GUI
         // ---------------------------------------------------------------
         // CSC 연결 상태 표시
         // ---------------------------------------------------------------
-        [ObservableProperty] private string _atsStatusText  = "ATS ✗";
-        [ObservableProperty] private string _rssStatusText  = "RSS ✗";
-        [ObservableProperty] private string _mlsStatusText  = "MLS ✗";
-        [ObservableProperty] private string _mssStatusText  = "MSS ✗";
+        [ObservableProperty] private string _atsStatusText  = "ATS 미연결";
+        [ObservableProperty] private string _rssStatusText  = "RSS 미연결";
+        [ObservableProperty] private string _mlsStatusText  = "MLS 미연결";
+        [ObservableProperty] private string _mssStatusText  = "MSS 미연결";
 
         [ObservableProperty] private SolidColorBrush _atsStatusColor = new SolidColorBrush(Color.FromRgb(80, 30, 30));
         [ObservableProperty] private SolidColorBrush _rssStatusColor = new SolidColorBrush(Color.FromRgb(80, 30, 30));
         [ObservableProperty] private SolidColorBrush _mlsStatusColor = new SolidColorBrush(Color.FromRgb(80, 30, 30));
         [ObservableProperty] private SolidColorBrush _mssStatusColor = new SolidColorBrush(Color.FromRgb(80, 30, 30));
+
+        private static readonly TimeSpan SimulatorConnectionTimeout = TimeSpan.FromSeconds(5);
+        private readonly DispatcherTimer simulatorConnectionTimer;
+        private DateTime? lastAtsStatusAt;
+        private DateTime? lastRssStatusAt;
+        private DateTime? lastMlsStatusAt;
+        private DateTime? lastMssStatusAt;
 
         // ---------------------------------------------------------------
         // 상태 데이터 컬렉션
@@ -141,6 +148,13 @@ namespace MiniProject_GUI
             nomHandler = new NOMHandler(nomFilePaths);
             nomHandler.MessageReceived += OnNOMMessageReceived;
             nomHandler.MessageSent     += OnNOMMessageSent;
+
+            simulatorConnectionTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            simulatorConnectionTimer.Tick += (_, _) => RefreshSimulatorConnectionStates();
+            simulatorConnectionTimer.Start();
         }
 
         public void Initialize(IntPtr windowHandle)
@@ -207,6 +221,7 @@ namespace MiniProject_GUI
             IsStopEnabled    = false;
             IsLaunchEnabled  = false;
             IsPlugInEnabled  = true;
+            ResetSimulatorConnectionStates();
             AddLog("[시스템] Plug Out.");
         }
 
@@ -343,11 +358,8 @@ namespace MiniProject_GUI
             {
                 try
                 {
-                    if (operation == EMessageOperation.Receive)
-                    {
-                        var nom = nomInstance.clone();
-                        RouteReceivedMessage(nom);
-                    }
+                    var nom = nomInstance.clone();
+                    RouteReceivedMessage(nom);
                 }
                 catch (Exception ex)
                 {
@@ -361,6 +373,8 @@ namespace MiniProject_GUI
         /// </summary>
         private void RouteReceivedMessage(NOM nom)
         {
+            MarkSimulatorConnectedByMessageId(nom);
+
             switch (nom.name)
             {
                 case "ATSStatus":      HandleATSStatus(nom);      break;
@@ -380,9 +394,7 @@ namespace MiniProject_GUI
         // ---------------------------------------------------------------
         private void HandleATSStatus(NOM nom)
         {
-            SetConnected(ref _atsStatusText, ref _atsStatusColor, "ATS ✓");
-            OnPropertyChanged(nameof(AtsStatusText));
-            OnPropertyChanged(nameof(AtsStatusColor));
+            MarkSimulatorConnected("ATS");
 
             uint count = 0;
             var countVal = nom.getValue("targetCount");
@@ -412,16 +424,12 @@ namespace MiniProject_GUI
 
         private void HandleRSSStatus(NOM nom)
         {
-            SetConnected(ref _rssStatusText, ref _rssStatusColor, "RSS ✓");
-            OnPropertyChanged(nameof(RssStatusText));
-            OnPropertyChanged(nameof(RssStatusColor));
+            MarkSimulatorConnected("RSS");
         }
 
         private void HandleMLSStatus(NOM nom)
         {
-            SetConnected(ref _mlsStatusText, ref _mlsStatusColor, "MLS ✓");
-            OnPropertyChanged(nameof(MlsStatusText));
-            OnPropertyChanged(nameof(MlsStatusColor));
+            MarkSimulatorConnected("MLS");
 
             var li = nom.getValue("launcherInfo.missileStatus1");
             MlsMissile1 = GetMissileStatusText(nom.getValue("launcherInfo.missileStatus1"));
@@ -434,9 +442,7 @@ namespace MiniProject_GUI
 
         private void HandleMSSStatus(NOM nom)
         {
-            SetConnected(ref _mssStatusText, ref _mssStatusColor, "MSS ✓");
-            OnPropertyChanged(nameof(MssStatusText));
-            OnPropertyChanged(nameof(MssStatusColor));
+            MarkSimulatorConnected("MSS");
 
             uint count = 0;
             var countVal = nom.getValue("missileCount");
@@ -522,10 +528,101 @@ namespace MiniProject_GUI
         private static readonly SolidColorBrush ConnectedColor =
             new SolidColorBrush(Color.FromRgb(29, 92, 56));
 
-        private void SetConnected(ref string text, ref SolidColorBrush color, string label)
+        private static readonly SolidColorBrush DisconnectedColor =
+            new SolidColorBrush(Color.FromRgb(80, 30, 30));
+
+        private void MarkSimulatorConnected(string simulator)
         {
-            text  = label;
-            color = ConnectedColor;
+            var now = DateTime.UtcNow;
+
+            switch (simulator)
+            {
+                case "ATS":
+                    lastAtsStatusAt = now;
+                    AtsStatusText = "ATS 연결됨";
+                    AtsStatusColor = ConnectedColor;
+                    break;
+                case "RSS":
+                    lastRssStatusAt = now;
+                    RssStatusText = "RSS 연결됨";
+                    RssStatusColor = ConnectedColor;
+                    break;
+                case "MLS":
+                    lastMlsStatusAt = now;
+                    MlsStatusText = "MLS 연결됨";
+                    MlsStatusColor = ConnectedColor;
+                    break;
+                case "MSS":
+                    lastMssStatusAt = now;
+                    MssStatusText = "MSS 연결됨";
+                    MssStatusColor = ConnectedColor;
+                    break;
+            }
+        }
+
+        private void MarkSimulatorConnectedByMessageId(NOM nom)
+        {
+            var messageIdValue = nom.getValue("Header.MessageID");
+            if (messageIdValue == null) return;
+
+            switch (messageIdValue.toUInt())
+            {
+                case 0x02:
+                    MarkSimulatorConnected("ATS");
+                    break;
+                case 0x03:
+                    MarkSimulatorConnected("RSS");
+                    break;
+                case 0x04:
+                    MarkSimulatorConnected("MSS");
+                    break;
+                case 0x05:
+                    MarkSimulatorConnected("MLS");
+                    break;
+            }
+        }
+
+        private void RefreshSimulatorConnectionStates()
+        {
+            var now = DateTime.UtcNow;
+
+            if (IsTimedOut(now, lastAtsStatusAt))
+            {
+                AtsStatusText = "ATS 미연결";
+                AtsStatusColor = DisconnectedColor;
+            }
+
+            if (IsTimedOut(now, lastRssStatusAt))
+            {
+                RssStatusText = "RSS 미연결";
+                RssStatusColor = DisconnectedColor;
+            }
+
+            if (IsTimedOut(now, lastMlsStatusAt))
+            {
+                MlsStatusText = "MLS 미연결";
+                MlsStatusColor = DisconnectedColor;
+            }
+
+            if (IsTimedOut(now, lastMssStatusAt))
+            {
+                MssStatusText = "MSS 미연결";
+                MssStatusColor = DisconnectedColor;
+            }
+        }
+
+        private static bool IsTimedOut(DateTime now, DateTime? lastStatusAt)
+        {
+            return !lastStatusAt.HasValue || now - lastStatusAt.Value > SimulatorConnectionTimeout;
+        }
+
+        private void ResetSimulatorConnectionStates()
+        {
+            lastAtsStatusAt = null;
+            lastRssStatusAt = null;
+            lastMlsStatusAt = null;
+            lastMssStatusAt = null;
+            RefreshSimulatorConnectionStates();
         }
 
         private string GetMissileStatusText(NValueType val)

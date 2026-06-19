@@ -1,12 +1,6 @@
-#pragma once
 #include "UIManager.h"
 
-/**
- * @class  UIManager
- * @brief  WPF ↔ nFramework 브릿지
- *         - sendMsg(): WPF가 발행 요청한 NOM을 MEC로 버스 발행
- *         - recvMsg(): 내부 버스에서 수신된 NOM을 funcMap으로 분기
- */
+#include "UIMessageEnum.h"
 
 /************************************************************************
 	Constructor / Destructor
@@ -41,21 +35,46 @@ void UIManager::release(void)
 	delete mec;
 	mec = nullptr;
 	meb = nullptr;
+	winHandle = nullptr;
 }
 
 void UIManager::funcMapInit()
 {
-	// 내부 버스에서 수신 가능한 메시지와 처리 함수 바인딩
-	funcMap[_T("ATSStatus")]      = std::bind(&UIManager::onATSStatus,      this, std::placeholders::_1);
-	funcMap[_T("RSSStatus")]      = std::bind(&UIManager::onRSSStatus,      this, std::placeholders::_1);
-	funcMap[_T("MSSStatus")]      = std::bind(&UIManager::onMSSStatus,      this, std::placeholders::_1);
-	funcMap[_T("MLSStatus")]      = std::bind(&UIManager::onMLSStatus,      this, std::placeholders::_1);
-	funcMap[_T("TargetDetection")]= std::bind(&UIManager::onTargetDetection, this, std::placeholders::_1);
-	funcMap[_T("TargetDestroyed")]= std::bind(&UIManager::onTargetDestroyed, this, std::placeholders::_1);
+	funcMap[_T("ATSStatus")] = std::bind(&UIManager::onATSStatus, this, std::placeholders::_1);
+	funcMap[_T("RSSStatus")] = std::bind(&UIManager::onRSSStatus, this, std::placeholders::_1);
+	funcMap[_T("MSSStatus")] = std::bind(&UIManager::onMSSStatus, this, std::placeholders::_1);
+	funcMap[_T("MLSStatus")] = std::bind(&UIManager::onMLSStatus, this, std::placeholders::_1);
+	funcMap[_T("TargetDetection")] = std::bind(&UIManager::onTargetDetection, this, std::placeholders::_1);
+	funcMap[_T("TargetDestroyed")] = std::bind(&UIManager::onTargetDestroyed, this, std::placeholders::_1);
+}
+
+void UIManager::notifyGui(std::shared_ptr<NOM> nomMsg, UINT message)
+{
+	if (winHandle == nullptr || nomMsg == nullptr)
+	{
+		return;
+	}
+
+	uint nomLen = 0;
+	byte* nomBytes = nomMsg->serialize(nomLen);
+	if (nomBytes == nullptr)
+	{
+		return;
+	}
+
+	NOMInfo nomInfo;
+	_tcsncpy_s(nomInfo.MsgName, _countof(nomInfo.MsgName), nomMsg->getName().c_str(), _TRUNCATE);
+	nomInfo.MsgID = nomMsg->getMessageID();
+	nomInfo.MsgInstanceID = nomMsg->getInstanceID();
+	nomInfo.MsgLen = static_cast<int>(nomLen);
+
+	::SendMessage(winHandle, message, (WPARAM)&nomInfo, (LPARAM)nomBytes);
+
+	delete[] nomBytes;
 }
 
 /************************************************************************
-	BaseManager 순수 가상 함수 구현
+	BaseManager inherited functions
 ************************************************************************/
 std::shared_ptr<NOM> UIManager::registerMsg(tstring msgName)
 {
@@ -69,6 +88,7 @@ void UIManager::discoverMsg(std::shared_ptr<NOM> nomMsg)
 {
 	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
 	discoveredMsgMap.emplace(nomMsg->getInstanceID(), nomMsg);
+	notifyGui(nomMsg, WM_DISCOVERED_MSG_DATA);
 }
 
 void UIManager::updateMsg(std::shared_ptr<NOM> nomMsg)
@@ -80,6 +100,7 @@ void UIManager::updateMsg(std::shared_ptr<NOM> nomMsg)
 void UIManager::reflectMsg(std::shared_ptr<NOM> nomMsg)
 {
 	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
+	notifyGui(nomMsg, WM_SEND_DATA);
 }
 
 void UIManager::deleteMsg(std::shared_ptr<NOM> nomMsg)
@@ -93,22 +114,15 @@ void UIManager::removeMsg(std::shared_ptr<NOM> nomMsg)
 {
 	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
 	discoveredMsgMap.erase(nomMsg->getInstanceID());
+	notifyGui(nomMsg, WM_REMOVED_MSG_DATA);
 }
 
-/**
- * @brief WPF(NOMHandler)가 호출 → 내부 MEC 버스로 메시지 발행
- *        (Scenario, StartSimulation, LaunchCommand 등 OC 송신 메시지)
- */
 void UIManager::sendMsg(std::shared_ptr<NOM> nomMsg)
 {
 	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
 	mec->sendMsg(nomMsg);
 }
 
-/**
- * @brief 내부 버스에서 수신된 메시지를 funcMap으로 분기
- *        (ATSStatus, RSSStatus 등 OC 수신 메시지)
- */
 void UIManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 {
 	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
@@ -118,6 +132,8 @@ void UIManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 	{
 		iter->second(nomMsg);
 	}
+
+	notifyGui(nomMsg, WM_SEND_DATA);
 }
 
 void UIManager::setUserName(tstring userName)
@@ -132,7 +148,7 @@ tstring UIManager::getUserName()
 
 void UIManager::setData(void* data)
 {
-	// 필요 시 외부 데이터 포인터 저장
+	winHandle = static_cast<HWND>(data);
 }
 
 bool UIManager::start()
@@ -144,6 +160,7 @@ bool UIManager::start()
 bool UIManager::stop()
 {
 	tcout << "[" << __FUNCTIONT__ << "] UIManager stopped." << std::endl;
+	winHandle = nullptr;
 	return true;
 }
 
@@ -154,14 +171,11 @@ void UIManager::setMEBComponent(IMEBComponent* realMEB)
 }
 
 /************************************************************************
-	수신 메시지 처리 핸들러
-	- 여기서 WPF로 이벤트를 전달하는 로직을 추가한다.
-	- 현재는 콘솔 로그만 출력 (WPF 연동은 NOMHandler가 담당)
+	Message handlers
 ************************************************************************/
 void UIManager::onATSStatus(std::shared_ptr<NOM> nomMsg)
 {
 	tcout << "[UIManager] ATSStatus received. name=" << nomMsg->getName() << std::endl;
-	// WPF NOMHandler가 Subscribe로 자동 수신하므로 추가 처리 불필요
 }
 
 void UIManager::onRSSStatus(std::shared_ptr<NOM> nomMsg)

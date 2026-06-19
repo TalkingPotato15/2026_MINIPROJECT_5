@@ -1,48 +1,52 @@
 #pragma once
+
+#include <afxwin.h>
+#include <functional>
+#include <map>
+#include <memory>
+
 #include <nFramework/BaseManager.h>
 #include <nFramework/mec/MECComponent.h>
 #include <nFramework/nom/NOMMain.h>
-#include <map>
-#include <functional>
 
 using namespace nframework;
 using namespace nom;
 
-/**
- * @class  UIManager
- * @brief  WPF GUI ↔ nFramework 브릿지 Manager
- *         - WPF(NOMHandler)에서 송신 요청이 오면 해당 NOM을 내부 버스로 발행
- *         - 내부 버스에서 수신된 NOM을 WPF로 라우팅
- */
+struct NOMInfo
+{
+	TCHAR MsgName[1024];
+	unsigned int MsgID;
+	unsigned int MsgInstanceID;
+	int MsgLen;
+};
+
 class BASEMGRDLL_API UIManager : public BaseManager
 {
 public:
 	UIManager(void);
 	~UIManager(void);
 
-public:
-	// inherited from the BaseManager class
-	virtual std::shared_ptr<NOM> registerMsg(tstring) override;
-	virtual void discoverMsg(std::shared_ptr<NOM>) override;
-	virtual void updateMsg(std::shared_ptr<NOM>) override;
-	virtual void reflectMsg(std::shared_ptr<NOM>) override;
-	virtual void deleteMsg(std::shared_ptr<NOM>) override;
-	virtual void removeMsg(std::shared_ptr<NOM>) override;
-	virtual void sendMsg(std::shared_ptr<NOM>) override;
-	virtual void recvMsg(std::shared_ptr<NOM>) override;
-	virtual void setUserName(tstring) override;
-	virtual tstring getUserName() override;
-	virtual void setData(void*) override;
-	virtual bool start() override;
-	virtual bool stop() override;
-	virtual void setMEBComponent(IMEBComponent*) override;
+	std::shared_ptr<NOM> registerMsg(tstring) override;
+	void discoverMsg(std::shared_ptr<NOM>) override;
+	void updateMsg(std::shared_ptr<NOM>) override;
+	void reflectMsg(std::shared_ptr<NOM>) override;
+	void deleteMsg(std::shared_ptr<NOM>) override;
+	void removeMsg(std::shared_ptr<NOM>) override;
+	void sendMsg(std::shared_ptr<NOM>) override;
+	void recvMsg(std::shared_ptr<NOM>) override;
+	void setUserName(tstring) override;
+	tstring getUserName() override;
+	void setData(void*) override;
+	bool start() override;
+	bool stop() override;
+	void setMEBComponent(IMEBComponent*) override;
 
 private:
 	void initialize();
 	void release();
 	void funcMapInit();
+	void notifyGui(std::shared_ptr<NOM> nomMsg, UINT message);
 
-	// 수신 메시지 처리 핸들러
 	void onATSStatus(std::shared_ptr<NOM> nomMsg);
 	void onRSSStatus(std::shared_ptr<NOM> nomMsg);
 	void onMSSStatus(std::shared_ptr<NOM> nomMsg);
@@ -52,12 +56,11 @@ private:
 
 private:
 	IMEBComponent* meb = nullptr;
-	MECComponent*  mec = nullptr;
-	tstring        name;
+	MECComponent* mec = nullptr;
+	HWND winHandle = nullptr;
+	tstring name;
 
 	std::map<unsigned int, std::shared_ptr<NOM>> registeredMsgMap;
 	std::map<unsigned int, std::shared_ptr<NOM>> discoveredMsgMap;
-
-	// 메시지명 → 처리 함수 바인딩 맵
 	std::map<tstring, std::function<void(std::shared_ptr<NOM>)>> funcMap;
 };
