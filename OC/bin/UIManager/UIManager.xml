@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd"
+	version="0.1" name="UIManager" date="2026-06-18" author="SAMS OC">
+
+	<NOM:interactions>
+
+		<!-- ============================================================ -->
+		<!-- OC Publish : GUI → 내부 Manager로 전달하는 명령 메시지         -->
+		<!-- ============================================================ -->
+
+		<!-- 0x01 Scenario : OC → ATS/RSS/MLS/MSS -->
+		<NOM:interaction name="Scenario" id="0x01" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="시나리오 배포 메시지 (OC 송신)">
+			<NOM:parameter name="Header"         dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="targetCount"    dataType="uintBE"/>
+			<NOM:parameter name="scenarioInfo"   dataType="TargetInfoStruct" size="20"/>
+			<NOM:parameter name="rssPos"         dataType="PosStruct"/>
+			<NOM:parameter name="radius"         dataType="doubleBE"/>
+			<NOM:parameter name="mlsPos"         dataType="PosStruct"/>
+		</NOM:interaction>
+
+		<!-- 0x06 StartSimulation : OC → ATS/RSS/MLS/MSS -->
+		<NOM:interaction name="StartSimulation" id="0x06" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="모의 시작/중지 명령 (OC 송신)">
+			<NOM:parameter name="Header"           dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="simulationStatus" dataType="boolean"/>
+		</NOM:interaction>
+
+		<!-- 0x07 ATSInformationToRSS : OC → RSS (ATS 위치 릴레이) -->
+		<NOM:interaction name="ATSInformationToRSS" id="0x07" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="OC가 RSS로 전달하는 ATS 표적 위치 정보">
+			<NOM:parameter name="Header"      dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="targetCount" dataType="uintBE"/>
+			<NOM:parameter name="targetInfo"  dataType="ATSInformationStruct" size="20"/>
+		</NOM:interaction>
+
+		<!-- 0x09 LaunchCommand : OC → MLS -->
+		<NOM:interaction name="LaunchCommand" id="0x09" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="발사 명령 (OC → MLS)">
+			<NOM:parameter name="Header"   dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<!-- 0x0c MSSInformationDownlinkToRSS : OC → RSS (MSS 유도탄 위치 릴레이) -->
+		<NOM:interaction name="MSSInformationDownlinkToRSS" id="0x0c" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="OC가 RSS로 전달하는 MSS 유도탄 위치 정보">
+			<NOM:parameter name="Header"       dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="missileCount" dataType="uintBE"/>
+			<NOM:parameter name="missileInfo"  dataType="MSSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<!-- 0x0e ATSInterceptionResult : OC → ATS -->
+		<NOM:interaction name="ATSInterceptionResult" id="0x0e" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="OC가 ATS에 전달하는 요격 결과 (ICD명: ATSInformation)">
+			<NOM:parameter name="Header"          dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="targetID"        dataType="uintBE"/>
+			<NOM:parameter name="interceptionFlag" dataType="boolean"/>
+		</NOM:interaction>
+
+		<!-- 0x0f MSSInterceptionResult : OC → MSS -->
+		<NOM:interaction name="MSSInterceptionResult" id="0x0f" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="OC가 MSS에 전달하는 요격 결과 (ICD명: MSSInformation)">
+			<NOM:parameter name="Header"        dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="missileID"     dataType="uintBE"/>
+			<NOM:parameter name="isIntercepted" dataType="boolean"/>
+		</NOM:interaction>
+
+		<!-- 0x10 Stop : OC → ATS/RSS/MLS/MSS -->
+		<NOM:interaction name="Stop" id="0x10" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="모의 중지 명령 (OC 송신)">
+			<NOM:parameter name="Header"   dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="stopFlag" dataType="boolean"/>
+		</NOM:interaction>
+
+		<!-- 0x11 MissionFailed : OC → ATS/MSS -->
+		<NOM:interaction name="MissionFailed" id="0x11" sharing="Publish"
+			orderType="Receive" alignment="false"
+			semantics="임무 실패 통보 (OC → ATS/MSS)">
+			<NOM:parameter name="Header"      dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="missionFlag" dataType="boolean"/>
+		</NOM:interaction>
+
+		<!-- ============================================================ -->
+		<!-- OC Subscribe : 각 CSC → OC 수신 메시지                        -->
+		<!-- ============================================================ -->
+
+		<!-- 0x02 ATSStatus : ATS → OC (주기) -->
+		<NOM:interaction name="ATSStatus" id="0x02" sharing="Subscribe"
+			orderType="Receive" alignment="false"
+			semantics="ATS 상태/위치 주기 수신 (1Hz)">
+			<NOM:parameter name="Header"      dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="status"      dataType="intBE"/>
+			<NOM:parameter name="targetCount" dataType="uintBE"/>
+			<NOM:parameter name="targetInfo"  dataType="ATSInformationStruct" size="20"/>
+		</NOM:interaction>
+
+		<!-- 0x03 RSSStatus : RSS → OC (주기) -->
+		<NOM:interaction name="RSSStatus" id="0x03" sharing="Subscribe"
+			orderType="Receive" alignment="false"
+			semantics="RSS 상태 주기 수신 (1Hz)">
+			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="status" dataType="intBE"/>
+		</NOM:interaction>
+
+		<!-- 0x04 MSSStatus : MSS → OC (주기) -->
+		<NOM:interaction name="MSSStatus" id="0x04" sharing="Subscribe"
+			orderType="Receive" alignment="false"
+			semantics="MSS 유도탄 상태 주기 수신 (1Hz)">
+			<NOM:parameter name="Header"       dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="status"       dataType="intBE"/>
+			<NOM:parameter name="missileCount" dataType="uintBE"/>
+			<NOM:parameter name="missileInfo"  dataType="MSSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<!-- 0x05 MLSStatus : MLS → OC (주기) -->
+		<NOM:interaction name="MLSStatus" id="0x05" sharing="Subscribe"
+			orderType="Receive" alignment="false"
+			semantics="MLS 발사대 상태 주기 수신 (1Hz)">
+			<NOM:parameter name="Header"       dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="status"       dataType="intBE"/>
+			<NOM:parameter name="launcherInfo" dataType="MLSInformationStruct"/>
+		</NOM:interaction>
+
+		<!-- 0x08 TargetDetection : RSS → OC (비주기) -->
+		<NOM:interaction name="TargetDetection" id="0x08" sharing="Subscribe"
+			orderType="Receive" alignment="false"
+			semantics="표적 탐지 결과 수신 (RSS → OC)">
+			<NOM:parameter name="Header"                dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="targetID"              dataType="uintBE"/>
+			<NOM:parameter name="targetDetectionSuccess" dataType="boolean"/>
+		</NOM:interaction>
+
+		<!-- 0x0d TargetDestroyed : RSS → OC (비주기) -->
+		<NOM:interaction name="TargetDestroyed" id="0x0d" sharing="Subscribe"
+			orderType="Receive" alignment="false"
+			semantics="요격 판정 결과 수신 (RSS → OC)">
+			<NOM:parameter name="Header"         dataType="MessageHeaderStruct"/>
+			<NOM:parameter name="missionSuccess" dataType="boolean"/>
+		</NOM:interaction>
+
+	</NOM:interactions>
+
+	<NOM:dataTypes>
+		<NOM:basicTypes/>
+		<NOM:enumerationTypes/>
+		<NOM:complexTypes/>
+	</NOM:dataTypes>
+	<NOM:notes/>
+
+</NOM:Nex1ObjectModel>
