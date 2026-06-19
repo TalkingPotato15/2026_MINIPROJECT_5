@@ -268,6 +268,9 @@ void UDPCommunicationManager::funcMapInit()
 	msgProc = bind(&UDPCommunicationManager::recvInnerSimulatorStateComm, this, placeholders::_1);
 	funcMap.insert({ _T("SimulatorStateToComm"), msgProc });
 
+	msgProc = bind(&UDPCommunicationManager::recvInnerRSSStatusToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerRSSStatusToComm"), msgProc });
+
 	msgProc = bind(&UDPCommunicationManager::recvInnerRouteToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerRouteToComm"), msgProc });
 
@@ -507,6 +510,28 @@ void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg
 
 	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
 	nomMsg_new->setValue(_T("SimulatorID"), &simulatorID);
+
+	commInterface->sendCommMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("RSSStatus"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] RSSStatus NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort msgID = NUShort((ushort)ICD_MessageID::RSSStatus);
+	NInteger status(1);
+	if (auto value = nomMsg->getValue(_T("status")))
+	{
+		status = NInteger(value->toInt());
+	}
+
+	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
+	nomMsg_new->setValue(_T("status"), &status);
 
 	commInterface->sendCommMsg(nomMsg_new);
 }

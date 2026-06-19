@@ -57,6 +57,7 @@ private:
 	void recvInnerStartSimulationAck(shared_ptr<NOM> nomMsg);
 	void recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg);
 	void recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg);
+	void recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg);
 	void recvInnerRouteToComm(shared_ptr<NOM> nomMsg);
 	void recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg);
 	void recvMissileDetonation(shared_ptr<NOM> nomMsg);
