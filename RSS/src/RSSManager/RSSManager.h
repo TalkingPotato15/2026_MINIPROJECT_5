@@ -23,6 +23,15 @@ class BASEMGRDLL_API RSSManager : public BaseManager
 		uint32_t atsStatus = 0;
 	};
 
+	struct CachedMSSInfo
+	{
+		double x = 0.0;
+		double y = 0.0;
+		double z = 0.0;
+		uint32_t targetId = 0;
+		uint32_t missileId = 0;
+	};
+
 public:
 	RSSManager(void);
 	~RSSManager(void);
@@ -51,7 +60,9 @@ private:
 	void recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg);
 	void recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg);
 	bool tryReadATSInfo(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix, CachedATSInfo& atsInfo) const;
+	bool tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, const tstring& missilePrefix, CachedMSSInfo& mssInfo) const;
 	bool isInRSSRange(const CachedATSInfo& atsInfo) const;
+	bool isIntercepted(const CachedATSInfo& atsInfo, const CachedMSSInfo& mssInfo) const;
 	void sendTargetDetection(uint32_t targetID, uint32_t success);
 	void sendTargetDestroyed(uint32_t targetID, uint32_t missionFlag);
 	void sendATSInformationUplink(const CachedATSInfo& atsInfo);
