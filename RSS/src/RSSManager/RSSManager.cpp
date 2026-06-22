@@ -45,9 +45,7 @@ void RSSManager::release()
 	mec = nullptr;
 	meb = nullptr;
 	funcMap.clear();
-	detectedTargetIds.clear();
-	detectedTargetInfoMap.clear();
-	destroyedTargetIds.clear();
+	resetDetectionState();
 }
 
 void RSSManager::funcMapInit()
@@ -62,6 +60,19 @@ void RSSManager::funcMapInit()
 
 	msgProc = std::bind(&RSSManager::recvInnerRSSDetectionAreaToRSS, this, std::placeholders::_1);
 	funcMap.insert({ _T("InnerRSSDetectionAreaToRSS"), msgProc });
+
+	msgProc = std::bind(&RSSManager::recvInnerStartSimulation, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerStartSimulation"), msgProc });
+
+	msgProc = std::bind(&RSSManager::recvInnerStopSimulation, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerStopSimulation"), msgProc });
+}
+
+void RSSManager::resetDetectionState()
+{
+	detectedTargetIds.clear();
+	detectedTargetInfoMap.clear();
+	destroyedTargetIds.clear();
 }
 
 void RSSManager::sendRSSStatus()
@@ -179,6 +190,21 @@ void RSSManager::setMEBComponent(IMEBComponent* realMEB)
 	mec->setMEB(meb);
 }
 
+void RSSManager::recvInnerStartSimulation(std::shared_ptr<NOM> nomMsg)
+{
+	(void)nomMsg;
+	detectionActive = true;
+	ntcout << _T("[RSSManager] Detection started.") << std::endl;
+}
+
+void RSSManager::recvInnerStopSimulation(std::shared_ptr<NOM> nomMsg)
+{
+	(void)nomMsg;
+	detectionActive = false;
+	resetDetectionState();
+	ntcout << _T("[RSSManager] Detection stopped. Detection/interception cache cleared.") << std::endl;
+}
+
 void RSSManager::recvInnerRSSDetectionAreaToRSS(std::shared_ptr<NOM> nomMsg)
 {
 	auto xValue = nomMsg->getValue(_T("rssPos.x"));
@@ -196,12 +222,16 @@ void RSSManager::recvInnerRSSDetectionAreaToRSS(std::shared_ptr<NOM> nomMsg)
 	rssPosZ = zValue->toDouble();
 	rssRadius = static_cast<double>(radiusValue->toUInt());
 	hasRSSDetectionArea = rssRadius > 0.0;
-	detectedTargetIds.clear();
-	detectedTargetInfoMap.clear();
+	resetDetectionState();
 }
 
 void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 {
+	if (!detectionActive)
+	{
+		return;
+	}
+
 	for (int i = 0; i < 4; ++i)
 	{
 		tstring prefix = _T("targetInfo[") + to_tstring(i) + _T("]");
@@ -260,6 +290,11 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 
 void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 {
+	if (!detectionActive)
+	{
+		return;
+	}
+
 	for (int i = 0; i < 4; ++i)
 	{
 		tstring prefix = _T("missileInfo[") + to_tstring(i) + _T("]");
