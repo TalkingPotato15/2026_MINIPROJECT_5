@@ -6,7 +6,7 @@
 namespace
 {
 constexpr double kPositionEpsilon = 1.0e-6;
-constexpr double kMovementSpeedScale = 0.01;
+constexpr double kMovementSpeedScale = 0.05;
 }
 
 void AirThreat::reset(std::uint32_t targetId)
