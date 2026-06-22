@@ -151,7 +151,6 @@
     <ClCompile Include="ScenarioManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MFRSHeader.h" />
     <ClInclude Include="Scenario.h" />
     <ClInclude Include="ScenarioManager.h" />
   </ItemGroup>

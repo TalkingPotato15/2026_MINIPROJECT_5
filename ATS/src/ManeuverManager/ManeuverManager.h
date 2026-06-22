@@ -6,6 +6,8 @@
 #include <nFramework/nLineStream/NLineStreamMain.h>
 #include <nFramework/nTimer/NTimer.h>
 
+#include <array>
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <memory>
@@ -17,7 +19,9 @@ using namespace nframework;
 using namespace nom;
 using namespace nlinestream;
 
-enum class ATSOperationalStatus : int
+constexpr std::size_t kATSMaxAirThreatCount = 4;
+
+enum class ATSOperationalStatus : std::uint32_t
 {
     Idle = 0,
     Ready = 1,
@@ -64,8 +68,9 @@ private:
     std::map<unsigned int, std::shared_ptr<NOM>> discoveredMessages_;
     std::map<tstring, std::function<void(std::shared_ptr<NOM>)>> messageHandlers_;
 
-    AirThreat airThreat_;
+    std::array<AirThreat, kATSMaxAirThreatCount> airThreats_{};
     ATSOperationalStatus operationalStatus_{ ATSOperationalStatus::Idle };
+    bool hasValidScenario_{ false };
     NTimer* timer_{ nullptr };
     int timerHandle_{ -1 };
     std::function<void(void*)> periodicCallback_;

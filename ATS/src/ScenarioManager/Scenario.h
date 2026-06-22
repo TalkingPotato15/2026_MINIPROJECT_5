@@ -1,7 +1,11 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
-#include <vector>
+
+constexpr std::size_t kATSMaxTargetCount = 4;
+constexpr std::size_t kATSRoutePointCount = 4;
 
 struct ScenarioPosition
 {
@@ -10,15 +14,19 @@ struct ScenarioPosition
     double z{ 0.0 };
 };
 
+struct ScenarioTarget
+{
+    std::array<ScenarioPosition, kATSRoutePointCount> route{};
+    std::uint32_t speed{ 0 };
+
+    bool isConfigured() const;
+    bool validate() const;
+};
+
 class Scenario
 {
 public:
-    std::uint32_t targetId{ 0 };
-    std::uint32_t speed{ 0 };
-    std::vector<ScenarioPosition> route;
-    ScenarioPosition radarPosition;
-    double radarRadius{ 0.0 };
-    ScenarioPosition launcherPosition;
+    std::array<ScenarioTarget, kATSMaxTargetCount> targets{};
 
     bool validate() const;
 };

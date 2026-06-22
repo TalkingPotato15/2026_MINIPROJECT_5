@@ -1,35 +1,35 @@
 #include "ManeuverManager.h"
 
-#include <algorithm>
 #include <array>
-#include <cstdint>
-#include <vector>
+#include <sstream>
+#include <utility>
 
 namespace
 {
 constexpr int kStatusPeriodMilliseconds = 1000;
-constexpr std::size_t kMaximumWayPointCount = 8;
+constexpr std::uint32_t kMissionSuccess = 0;
 
-const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointXFields{
-    _T("Scenario.WayPoint0_X"), _T("Scenario.WayPoint1_X"),
-    _T("Scenario.WayPoint2_X"), _T("Scenario.WayPoint3_X"),
-    _T("Scenario.WayPoint4_X"), _T("Scenario.WayPoint5_X"),
-    _T("Scenario.WayPoint6_X"), _T("Scenario.WayPoint7_X")
-};
+tstring makeScenePath(std::size_t targetIndex, std::size_t pointIndex, const TCHAR* field)
+{
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("sceneInfo[") << targetIndex << _T("].ATSPos[")
+         << pointIndex << _T("].") << field;
+    return path.str();
+}
 
-const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointYFields{
-    _T("Scenario.WayPoint0_Y"), _T("Scenario.WayPoint1_Y"),
-    _T("Scenario.WayPoint2_Y"), _T("Scenario.WayPoint3_Y"),
-    _T("Scenario.WayPoint4_Y"), _T("Scenario.WayPoint5_Y"),
-    _T("Scenario.WayPoint6_Y"), _T("Scenario.WayPoint7_Y")
-};
+tstring makeSceneSpeedPath(std::size_t targetIndex)
+{
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("sceneInfo[") << targetIndex << _T("].speed");
+    return path.str();
+}
 
-const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointZFields{
-    _T("Scenario.WayPoint0_Z"), _T("Scenario.WayPoint1_Z"),
-    _T("Scenario.WayPoint2_Z"), _T("Scenario.WayPoint3_Z"),
-    _T("Scenario.WayPoint4_Z"), _T("Scenario.WayPoint5_Z"),
-    _T("Scenario.WayPoint6_Z"), _T("Scenario.WayPoint7_Z")
-};
+tstring makeTargetPath(std::size_t targetIndex, const TCHAR* field)
+{
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("targetInfo[") << targetIndex << _T("].") << field;
+    return path.str();
+}
 }
 
 ManeuverManager::ManeuverManager()
@@ -48,6 +48,11 @@ void ManeuverManager::initialize()
     mec_ = new MECComponent;
     mec_->setUser(this);
     initializeMessageHandlers();
+
+    for (std::size_t index = 0; index < airThreats_.size(); ++index)
+    {
+        airThreats_[index].reset(static_cast<std::uint32_t>(index));
+    }
 }
 
 void ManeuverManager::release()
@@ -147,7 +152,6 @@ bool ManeuverManager::start()
     periodicCallback_ = [this](void*) { periodicUpdate(); };
     timerHandle_ = timer_->addPeriodicTask(kStatusPeriodMilliseconds, periodicCallback_);
 
-    ntcout << _T("[ManeuverManager] READY, ATSStatus period = 1000 ms") << std::endl;
     publishATSStatus();
     return timerHandle_ != -1;
 }
@@ -157,7 +161,10 @@ bool ManeuverManager::stop()
     {
         std::lock_guard<std::mutex> lock(stateMutex_);
         operationalStatus_ = ATSOperationalStatus::Idle;
-        airThreat_.stop();
+        for (auto& airThreat : airThreats_)
+        {
+            airThreat.stop();
+        }
     }
 
     publishATSStatus();
@@ -173,60 +180,55 @@ void ManeuverManager::setMEBComponent(IMEBComponent* realMEB)
 
 void ManeuverManager::receiveScenario(std::shared_ptr<NOM> nomMsg)
 {
-    std::uint32_t targetId = 0;
-    std::uint32_t speed = 0;
-    std::uint32_t pointCount = 0;
+    std::array<std::array<Position, kAirThreatRoutePointCount>, kATSMaxAirThreatCount> routes{};
+    std::array<std::uint32_t, kATSMaxAirThreatCount> speeds{};
 
-    if (const auto value = nomMsg->getValue(_T("Scenario.TargetID")))
+    for (std::size_t targetIndex = 0; targetIndex < kATSMaxAirThreatCount; ++targetIndex)
     {
-        targetId = value->toUInt();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.Speed")))
-    {
-        speed = value->toUInt();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.PointCount")))
-    {
-        pointCount = value->toUInt();
-    }
-
-    pointCount = std::min<std::uint32_t>(pointCount, static_cast<std::uint32_t>(kMaximumWayPointCount));
-    std::vector<Position> route;
-    route.reserve(pointCount);
-
-    for (std::size_t index = 0; index < pointCount; ++index)
-    {
-        Position point;
-        if (const auto value = nomMsg->getValue(kWayPointXFields[index]))
+        if (const auto value = nomMsg->getValue(makeSceneSpeedPath(targetIndex)))
         {
-            point.x = value->toDouble();
+            speeds[targetIndex] = value->toUInt();
         }
-        if (const auto value = nomMsg->getValue(kWayPointYFields[index]))
+
+        for (std::size_t pointIndex = 0; pointIndex < kAirThreatRoutePointCount; ++pointIndex)
         {
-            point.y = value->toDouble();
+            auto& point = routes[targetIndex][pointIndex];
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("x"))))
+            {
+                point.x = value->toDouble();
+            }
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("y"))))
+            {
+                point.y = value->toDouble();
+            }
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("z"))))
+            {
+                point.z = value->toDouble();
+            }
         }
-        if (const auto value = nomMsg->getValue(kWayPointZFields[index]))
-        {
-            point.z = value->toDouble();
-        }
-        route.push_back(point);
     }
 
-    const bool initialized = [&]()
+    bool hasConfiguredTarget = false;
     {
         std::lock_guard<std::mutex> lock(stateMutex_);
+        for (std::size_t targetIndex = 0; targetIndex < airThreats_.size(); ++targetIndex)
+        {
+            if (speeds[targetIndex] > 0)
+            {
+                hasConfiguredTarget = airThreats_[targetIndex].initialize(
+                    static_cast<std::uint32_t>(targetIndex),
+                    speeds[targetIndex],
+                    routes[targetIndex]) || hasConfiguredTarget;
+            }
+            else
+            {
+                airThreats_[targetIndex].reset(static_cast<std::uint32_t>(targetIndex));
+            }
+        }
+        hasValidScenario_ = hasConfiguredTarget;
         operationalStatus_ = ATSOperationalStatus::Ready;
-        return airThreat_.initialize(targetId, static_cast<double>(speed), route);
-    }();
-
-    if (!initialized)
-    {
-        ntcout << _T("[ManeuverManager] Invalid scenario: at least 2 points and speed > 0 are required.") << std::endl;
-        return;
     }
 
-    ntcout << _T("[ManeuverManager] Air threat initialized. targetID=")
-           << targetId << _T(", points=") << pointCount << std::endl;
     publishATSStatus();
 }
 
@@ -235,20 +237,25 @@ void ManeuverManager::receiveStart(std::shared_ptr<NOM>)
     bool started = false;
     {
         std::lock_guard<std::mutex> lock(stateMutex_);
-        if (airThreat_.isInitialized())
+        if (hasValidScenario_)
         {
-            airThreat_.start();
+            for (auto& airThreat : airThreats_)
+            {
+                airThreat.start();
+                started = airThreat.isFlying() || started;
+            }
+        }
+        if (started)
+        {
             operationalStatus_ = ATSOperationalStatus::Running;
-            started = true;
         }
     }
 
     if (!started)
     {
-        ntcout << _T("[ManeuverManager] Start ignored because no valid scenario is loaded.") << std::endl;
+        ntcout << _T("[ManeuverManager] Start ignored: no configured air threat.") << std::endl;
         return;
     }
-
     publishATSStatus();
 }
 
@@ -256,17 +263,34 @@ void ManeuverManager::receiveStop(std::shared_ptr<NOM>)
 {
     {
         std::lock_guard<std::mutex> lock(stateMutex_);
-        airThreat_.stop();
+        for (auto& airThreat : airThreats_)
+        {
+            airThreat.stop();
+        }
         operationalStatus_ = ATSOperationalStatus::Ready;
     }
     publishATSStatus();
 }
 
-void ManeuverManager::receiveInterception(std::shared_ptr<NOM>)
+void ManeuverManager::receiveInterception(std::shared_ptr<NOM> nomMsg)
 {
+    const auto targetValue = nomMsg->getValue(_T("targetID"));
+    const auto missionValue = nomMsg->getValue(_T("missionFlag"));
+    if (!targetValue || !missionValue)
+    {
+        return;
+    }
+
+    const std::uint32_t targetId = targetValue->toUInt();
+    const std::uint32_t missionFlag = missionValue->toUInt();
+    if (missionFlag != kMissionSuccess || targetId >= airThreats_.size())
+    {
+        return;
+    }
+
     {
         std::lock_guard<std::mutex> lock(stateMutex_);
-        airThreat_.markIntercepted();
+        airThreats_[targetId].destroy();
     }
     publishATSStatus();
 }
@@ -277,7 +301,10 @@ void ManeuverManager::periodicUpdate()
         std::lock_guard<std::mutex> lock(stateMutex_);
         if (operationalStatus_ == ATSOperationalStatus::Running)
         {
-            airThreat_.advance(1.0);
+            for (auto& airThreat : airThreats_)
+            {
+                airThreat.advance(1.0);
+            }
         }
     }
     publishATSStatus();
@@ -297,48 +324,43 @@ void ManeuverManager::publishATSStatus()
         return;
     }
 
-    ATSOperationalStatus status;
-    bool hasTarget;
-    std::uint32_t targetId;
-    double speed;
-    Position position;
-    Position velocity;
-    bool intercepted;
+    ATSOperationalStatus systemStatus;
+    std::array<std::uint32_t, kATSMaxAirThreatCount> ids{};
+    std::array<std::uint32_t, kATSMaxAirThreatCount> speeds{};
+    std::array<std::uint32_t, kATSMaxAirThreatCount> statuses{};
+    std::array<Position, kATSMaxAirThreatCount> positions{};
 
     {
         std::lock_guard<std::mutex> lock(stateMutex_);
-        status = operationalStatus_;
-        hasTarget = airThreat_.isInitialized();
-        targetId = hasTarget ? airThreat_.targetId() : 0;
-        speed = hasTarget ? airThreat_.speed() : 0.0;
-        position = hasTarget ? airThreat_.position() : Position{};
-        velocity = hasTarget ? airThreat_.velocity() : Position{};
-        intercepted = hasTarget && airThreat_.isIntercepted();
+        systemStatus = operationalStatus_;
+        for (std::size_t index = 0; index < airThreats_.size(); ++index)
+        {
+            ids[index] = airThreats_[index].targetId();
+            speeds[index] = airThreats_[index].speed();
+            statuses[index] = static_cast<std::uint32_t>(airThreats_[index].status());
+            positions[index] = airThreats_[index].position();
+        }
     }
 
-    NInteger systemStatus(static_cast<int>(status));
-    NUInteger targetCount(hasTarget ? 1U : 0U);
-    NUInteger objectId(targetId);
-    NUShort objectState(intercepted ? 1U : 0U);
-    NDouble positionX(position.x);
-    NDouble positionY(position.y);
-    NDouble positionZ(position.z);
-    NDouble velocityX(velocity.x);
-    NDouble velocityY(velocity.y);
-    NUInteger targetSpeed(static_cast<std::uint32_t>(speed));
-    NBool interceptionFlag(intercepted);
+    NUInteger status(static_cast<std::uint32_t>(systemStatus));
+    statusMessage->setValue(_T("status"), &status);
 
-    statusMessage->setValue(_T("AirThreatInfo.SystemStatus"), &systemStatus);
-    statusMessage->setValue(_T("AirThreatInfo.TargetCount"), &targetCount);
-    statusMessage->setValue(_T("AirThreatInfo.ObjectID"), &objectId);
-    statusMessage->setValue(_T("AirThreatInfo.ObjectState"), &objectState);
-    statusMessage->setValue(_T("AirThreatInfo.PositionX"), &positionX);
-    statusMessage->setValue(_T("AirThreatInfo.PositionY"), &positionY);
-    statusMessage->setValue(_T("AirThreatInfo.PositionZ"), &positionZ);
-    statusMessage->setValue(_T("AirThreatInfo.VelocityX"), &velocityX);
-    statusMessage->setValue(_T("AirThreatInfo.VelocityY"), &velocityY);
-    statusMessage->setValue(_T("AirThreatInfo.Speed"), &targetSpeed);
-    statusMessage->setValue(_T("AirThreatInfo.InterceptionFlag"), &interceptionFlag);
+    for (std::size_t index = 0; index < kATSMaxAirThreatCount; ++index)
+    {
+        NDouble x(positions[index].x);
+        NDouble y(positions[index].y);
+        NDouble z(positions[index].z);
+        NUInteger speed(speeds[index]);
+        NUInteger targetId(ids[index]);
+        NUInteger atsStatus(statuses[index]);
+
+        statusMessage->setValue(makeTargetPath(index, _T("ATSPos.x")), &x);
+        statusMessage->setValue(makeTargetPath(index, _T("ATSPos.y")), &y);
+        statusMessage->setValue(makeTargetPath(index, _T("ATSPos.z")), &z);
+        statusMessage->setValue(makeTargetPath(index, _T("speed")), &speed);
+        statusMessage->setValue(makeTargetPath(index, _T("targetId")), &targetId);
+        statusMessage->setValue(makeTargetPath(index, _T("atsStatus")), &atsStatus);
+    }
     mec_->sendMsg(statusMessage);
 }
 

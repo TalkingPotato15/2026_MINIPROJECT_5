@@ -1,705 +1,503 @@
 #include "UDPCommunicationManager.h"
-#include <algorithm>
+
 #include <array>
+#include <cstring>
+#include <exception>
 #include <filesystem>
-#include <cmath>
+#include <iomanip>
+#include <sstream>
+#include <utility>
+
 using namespace std::filesystem;
 
-/************************************************************************
-	Constructor / Destructor
-************************************************************************/
-UDPCommunicationManager::UDPCommunicationManager(void)
+namespace
 {
-	init();
+constexpr std::size_t kTargetCount = 4;
+constexpr std::size_t kRoutePointCount = 4;
+
+tstring makeScenePath(std::size_t targetIndex, std::size_t pointIndex, const TCHAR* field)
+{
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("sceneInfo[") << targetIndex << _T("].ATSPos[")
+         << pointIndex << _T("].") << field;
+    return path.str();
 }
 
-UDPCommunicationManager::~UDPCommunicationManager(void)
+tstring makeSceneSpeedPath(std::size_t targetIndex)
 {
-	release();
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("sceneInfo[") << targetIndex << _T("].speed");
+    return path.str();
 }
 
-/************************************************************************
-	initialize / release
-************************************************************************/
-void
-UDPCommunicationManager::init()
+tstring makeTargetPath(std::size_t targetIndex, const TCHAR* field)
 {
-	tcout << "[" << __FUNCTIONT__ << "] " << std::endl;
-	setUserName(_T("UDPCommunicationManager"));
-
-	// by contract
-	mec = new MECComponent;
-	mec->setUser(this);
-
-	commConfig = new CommunicationConfig;
-	commConfig->setIni(_T("CommLinkInfo.ini"));
-
-	//socket issue
-	//commInterface = new NCommInterface(this);
-
-	//NOM 메시지 등록
-	tstring schRegFilePath = current_path().c_str();
-	schRegFilePath += _T("\\..\\SchemaRegistryData.xml");
-	nomParser = std::make_unique<NOMParser>();
-	nomParser->setNOMFile(schRegFilePath);
-
-	nomParser->parseNote();
-	auto noteMap = nomParser->getNoteMap();
-	nomParser->parseDataType();
-	auto dataTypeMap = nomParser->getDataTypeMap();
-
-	//NOM 파싱 
-	tstring nomFilePath = current_path().c_str();
-	nomFilePath += _T("\\");
-	nomFilePath += getUserName();
-	nomFilePath += _T(".xml");
-	nomParser->setNOMFile(nomFilePath);
-
-	if (nomParser->parse(dataTypeMap, noteMap))
-		//if (nomParser->parse())
-	{
-		list<NMessage*> msgList = nomParser->getMessageList();
-		list<NMessage*>::iterator itr;
-		for (itr = msgList.begin(); itr != msgList.end(); itr++)
-		{
-			NMessage* nMsg = *itr;
-			commMsgHandler.setIDNameTable(nMsg->getMessageID(), nMsg->getName());
-		}
-	}
-
-	funcMapInit();
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("targetInfo[") << targetIndex << _T("].") << field;
+    return path.str();
+}
 }
 
-void
-UDPCommunicationManager::release()
+UDPCommunicationManager::UDPCommunicationManager()
 {
-	delete commConfig;
-
-	//socket issue
-	//delete commInterface;
-
-	meb = nullptr;
-	delete mec;
-	mec = nullptr;
-
-	funcMap.clear();
+    init();
 }
 
-/************************************************************************
-	Inherit Function
-************************************************************************/
-shared_ptr<NOM>
-UDPCommunicationManager::registerMsg(tstring msgName)
+UDPCommunicationManager::~UDPCommunicationManager()
 {
-	shared_ptr<NOM> nomMsg = mec->registerMsg(msgName);
-	registeredMsg.insert(pair<unsigned int, shared_ptr<NOM>>(nomMsg->getInstanceID(), nomMsg));
-
-	return nomMsg;
+    release();
 }
 
-void
-UDPCommunicationManager::discoverMsg(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::init()
 {
-	discoveredMsg.insert(pair<unsigned int, shared_ptr<NOM>>(nomMsg->getInstanceID(), nomMsg));
-	commInterface->registerCommMsg(nomMsg);
+    setUserName(_T("UDPCommunicationManager"));
+
+    mec = new MECComponent;
+    mec->setUser(this);
+
+    commConfig = new CommunicationConfig;
+    commConfig->setIni(_T("CommLinkInfo.ini"));
+
+    tstring schemaPath = current_path().c_str();
+    schemaPath += _T("\\..\\SchemaRegistryData.xml");
+    nomParser = make_unique<NOMParser>();
+    nomParser->setNOMFile(schemaPath);
+    nomParser->parseNote();
+    const auto noteMap = nomParser->getNoteMap();
+    nomParser->parseDataType();
+    const auto dataTypeMap = nomParser->getDataTypeMap();
+
+    tstring nomPath = current_path().c_str();
+    nomPath += _T("\\");
+    nomPath += getUserName();
+    nomPath += _T(".xml");
+    nomParser->setNOMFile(nomPath);
+
+    if (nomParser->parse(dataTypeMap, noteMap))
+    {
+        for (auto* message : nomParser->getMessageList())
+        {
+            commMsgHandler.setIDNameTable(message->getMessageID(), message->getName());
+        }
+    }
+
+    funcMapInit();
 }
 
-void
-UDPCommunicationManager::updateMsg(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::release()
 {
-	unsigned int oid = getObjectInstanceID(nomMsg);
+    if (commInterface != nullptr)
+    {
+        commInterface->releaseNetEnv(commConfig);
+        delete commInterface;
+        commInterface = nullptr;
+    }
 
-	if (oid > 0)
-	{
-		nomMsg->setInstanceID(oid);
-		mec->updateMsg(nomMsg);
-	}
-	else
-	{
-		printf("oid error:%u\n", oid);
-	}
+    delete commConfig;
+    commConfig = nullptr;
+    delete mec;
+    mec = nullptr;
+    meb = nullptr;
+    funcMap.clear();
 }
 
-void
-UDPCommunicationManager::reflectMsg(shared_ptr<NOM> nomMsg)
+shared_ptr<NOM> UDPCommunicationManager::registerMsg(tstring msgName)
 {
-	tcout << _T("UDPCommunicationManager::Message is reflected.") << endl;
-	commInterface->updateCommMsg(nomMsg);
+    auto nomMsg = mec->registerMsg(msgName);
+    registeredMsg.emplace(nomMsg->getInstanceID(), nomMsg);
+    return nomMsg;
 }
 
-void
-UDPCommunicationManager::deleteMsg(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::discoverMsg(shared_ptr<NOM> nomMsg)
 {
-	mec->deleteMsg(nomMsg);
-	registeredMsg.erase(nomMsg->getInstanceID());
+    discoveredMsg.emplace(nomMsg->getInstanceID(), nomMsg);
+    if (commInterface != nullptr)
+    {
+        commInterface->registerCommMsg(nomMsg);
+    }
 }
 
-void
-UDPCommunicationManager::removeMsg(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::updateMsg(shared_ptr<NOM> nomMsg)
 {
-	map<unsigned int, shared_ptr<NOM>>::iterator itr;
-	itr = discoveredMsg.find(nomMsg->getInstanceID());
-
-	if(itr != discoveredMsg.end())
-	{
-		discoveredMsg.erase(nomMsg->getInstanceID());
-	}
-	else
-	{
-		tcerr << _T("UDPCommunicationManager::Message was removed.") << endl;
-	}
+    const unsigned int objectId = getObjectInstanceID(nomMsg);
+    if (objectId > 0)
+    {
+        nomMsg->setInstanceID(objectId);
+        mec->updateMsg(nomMsg);
+    }
 }
 
-void
-UDPCommunicationManager::sendMsg(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::reflectMsg(shared_ptr<NOM> nomMsg)
 {
-	//tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
-
-	mec->sendMsg(nomMsg);
+    if (commInterface != nullptr)
+    {
+        commInterface->updateCommMsg(nomMsg);
+    }
 }
 
-void
-UDPCommunicationManager::recvMsg(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::deleteMsg(shared_ptr<NOM> nomMsg)
 {
-	if (auto iter = funcMap.find(nomMsg->getName()); iter != funcMap.end())
-	{
-		iter->second(nomMsg);
-	}
-
-	//commInterface->sendCommMsg(nomMsg);
+    mec->deleteMsg(nomMsg);
+    registeredMsg.erase(nomMsg->getInstanceID());
 }
 
-void
-UDPCommunicationManager::setUserName(tstring userName)
+void UDPCommunicationManager::removeMsg(shared_ptr<NOM> nomMsg)
 {
-	name = userName; 
+    discoveredMsg.erase(nomMsg->getInstanceID());
 }
 
-tstring
-UDPCommunicationManager::getUserName()
+void UDPCommunicationManager::sendMsg(shared_ptr<NOM> nomMsg)
 {
-	return name;
+    mec->sendMsg(nomMsg);
 }
 
-void
-UDPCommunicationManager::setData(void* data)
+void UDPCommunicationManager::recvMsg(shared_ptr<NOM> nomMsg)
 {
-	// if need be
+    const auto handler = funcMap.find(nomMsg->getName());
+    if (handler != funcMap.end())
+    {
+        handler->second(nomMsg);
+    }
 }
 
-bool
-UDPCommunicationManager::start()
+void UDPCommunicationManager::setUserName(tstring userName)
 {
-	tcout << "[" << __FUNCTIONT__ << "] " << std::endl;
-
-	//socket issue
-	commInterface = new NCommInterface(this);
-	
-	commInterface->setMEBComponent(meb);
-	MessageProcessor msgProcessor = bind(&UDPCommunicationManager::processRecvMessage, this, placeholders::_1, placeholders::_2);
-	commConfig->setMsgProcessor(msgProcessor);
-	commInterface->initNetEnv(commConfig);
-
-	//메시지 등록
-	list<NMessage*> msgList = nomParser->getObjectList();
-	list<NMessage*>::iterator itr;
-	for (itr = msgList.begin(); itr != msgList.end(); itr++)
-	{
-		NMessage* nMsg = *itr;
-		if (nMsg->getSharing() == ESharing::ENUM_SHARING_PUBLISHSUBSCRIBE || nMsg->getSharing() == ESharing::ENUM_SHARING_PUBLISH)
-		{
-			this->registerMsg(nMsg->getName());
-		}
-	}
-
-	return true;
+    name = std::move(userName);
 }
 
-bool
-UDPCommunicationManager::stop()
+tstring UDPCommunicationManager::getUserName()
 {
-	commInterface->releaseNetEnv(commConfig);
-
-	//socket issue
-	delete commInterface;
-	return true;
+    return name;
 }
 
-void
-UDPCommunicationManager::setMEBComponent(IMEBComponent* realMEB)
+void UDPCommunicationManager::setData(void*)
 {
-	meb = realMEB;
-	mec->setMEB(meb);
+}
+
+bool UDPCommunicationManager::start()
+{
+    if (commInterface != nullptr)
+    {
+        return true;
+    }
+
+    commInterface = new NCommInterface(this);
+    commInterface->setMEBComponent(meb);
+    MessageProcessor processor = bind(
+        &UDPCommunicationManager::processRecvMessage,
+        this,
+        placeholders::_1,
+        placeholders::_2);
+    commConfig->setMsgProcessor(processor);
+    commInterface->initNetEnv(commConfig);
+
+    for (const auto& [instanceId, nomMsg] : discoveredMsg)
+    {
+        commInterface->registerCommMsg(nomMsg);
+    }
+
+    for (auto* message : nomParser->getObjectList())
+    {
+        if (message->getSharing() == ESharing::ENUM_SHARING_PUBLISHSUBSCRIBE ||
+            message->getSharing() == ESharing::ENUM_SHARING_PUBLISH)
+        {
+            registerMsg(message->getName());
+        }
+    }
+    return true;
+}
+
+bool UDPCommunicationManager::stop()
+{
+    if (commInterface != nullptr)
+    {
+        commInterface->releaseNetEnv(commConfig);
+        delete commInterface;
+        commInterface = nullptr;
+    }
+    return true;
+}
+
+void UDPCommunicationManager::setMEBComponent(IMEBComponent* realMEB)
+{
+    meb = realMEB;
+    mec->setMEB(meb);
 }
 
 void UDPCommunicationManager::funcMapInit()
 {
-	function<void(shared_ptr<NOM>)> msgProc;
-
-	msgProc = bind(&UDPCommunicationManager::recvScenario, this, placeholders::_1);
-	funcMap.insert({ _T("Scenario"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvInnerSendScenarioAck, this, placeholders::_1);
-	funcMap.insert({ _T("InnerSendScenarioAck"), msgProc });
-
-
-	msgProc = bind(&UDPCommunicationManager::recvSendScenario, this, placeholders::_1);
-	funcMap.insert({ _T("SendScenario"), msgProc});
-
-	msgProc = bind(&UDPCommunicationManager::recvStartSimulation, this, placeholders::_1);
-	funcMap.insert({ _T("StartSimulation"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvStopSimulation, this, placeholders::_1);
-	funcMap.insert({ _T("StopSimulation"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvStop, this, placeholders::_1);
-	funcMap.insert({ _T("Stop"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvATSInterceptionResult, this, placeholders::_1);
-	funcMap.insert({ _T("ATSInterceptionResult"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvMissionFailed, this, placeholders::_1);
-	funcMap.insert({ _T("MissionFailed"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvInnerStartSimulationAck, this, placeholders::_1);
-	funcMap.insert({ _T("InnerStartSimulationAck"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvInnerStopSimulationAck, this, placeholders::_1);
-	funcMap.insert({ _T("InnerStopSimulationAck"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvInnerSimulatorStateComm, this, placeholders::_1);
-	funcMap.insert({ _T("SimulatorStateToComm"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvInnerRouteToComm, this, placeholders::_1);
-	funcMap.insert({ _T("InnerRouteToComm"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvInnerAirThreatInfo, this, placeholders::_1);
-	funcMap.insert({ _T("InnerAirThreatInfoToComm"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvMissileDetonation, this, placeholders::_1);
-	funcMap.insert({ _T("MissileDetonation"), msgProc });
+    funcMap.emplace(
+        _T("Scenario"),
+        bind(&UDPCommunicationManager::recvScenario, this, placeholders::_1));
+    funcMap.emplace(
+        _T("StartSimulation"),
+        bind(&UDPCommunicationManager::recvStartSimulation, this, placeholders::_1));
+    funcMap.emplace(
+        _T("Stop"),
+        bind(&UDPCommunicationManager::recvStop, this, placeholders::_1));
+    funcMap.emplace(
+        _T("ATSInterceptionResult"),
+        bind(&UDPCommunicationManager::recvATSInterceptionResult, this, placeholders::_1));
+    funcMap.emplace(
+        _T("InnerAirThreatInfoToComm"),
+        bind(&UDPCommunicationManager::recvInnerAirThreatInfo, this, placeholders::_1));
 }
 
 void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 {
-	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerSendScenario"));
-	if (!nomMsg_new.get())
-	{
-		tcerr << _T("[UDPCommunicationManager] InnerSendScenario NOM is undefined.") << endl;
-		return;
-	}
+    auto innerMessage = meb->getNOMInstance(name, _T("InnerSendScenario"));
+    if (!innerMessage)
+    {
+        return;
+    }
 
-	constexpr size_t maxPointCount = 8;
-	const std::array<const TCHAR*, maxPointCount> internalXFields{
-		_T("Scenario.WayPoint0_X"), _T("Scenario.WayPoint1_X"),
-		_T("Scenario.WayPoint2_X"), _T("Scenario.WayPoint3_X"),
-		_T("Scenario.WayPoint4_X"), _T("Scenario.WayPoint5_X"),
-		_T("Scenario.WayPoint6_X"), _T("Scenario.WayPoint7_X")
-	};
-	const std::array<const TCHAR*, maxPointCount> internalYFields{
-		_T("Scenario.WayPoint0_Y"), _T("Scenario.WayPoint1_Y"),
-		_T("Scenario.WayPoint2_Y"), _T("Scenario.WayPoint3_Y"),
-		_T("Scenario.WayPoint4_Y"), _T("Scenario.WayPoint5_Y"),
-		_T("Scenario.WayPoint6_Y"), _T("Scenario.WayPoint7_Y")
-	};
-	const std::array<const TCHAR*, maxPointCount> internalZFields{
-		_T("Scenario.WayPoint0_Z"), _T("Scenario.WayPoint1_Z"),
-		_T("Scenario.WayPoint2_Z"), _T("Scenario.WayPoint3_Z"),
-		_T("Scenario.WayPoint4_Z"), _T("Scenario.WayPoint5_Z"),
-		_T("Scenario.WayPoint6_Z"), _T("Scenario.WayPoint7_Z")
-	};
-	const std::array<const TCHAR*, maxPointCount> externalXFields{
-		_T("scenarioInfo.point[0].x"), _T("scenarioInfo.point[1].x"),
-		_T("scenarioInfo.point[2].x"), _T("scenarioInfo.point[3].x"),
-		_T("scenarioInfo.point[4].x"), _T("scenarioInfo.point[5].x"),
-		_T("scenarioInfo.point[6].x"), _T("scenarioInfo.point[7].x")
-	};
-	const std::array<const TCHAR*, maxPointCount> externalYFields{
-		_T("scenarioInfo.point[0].y"), _T("scenarioInfo.point[1].y"),
-		_T("scenarioInfo.point[2].y"), _T("scenarioInfo.point[3].y"),
-		_T("scenarioInfo.point[4].y"), _T("scenarioInfo.point[5].y"),
-		_T("scenarioInfo.point[6].y"), _T("scenarioInfo.point[7].y")
-	};
-	const std::array<const TCHAR*, maxPointCount> externalZFields{
-		_T("scenarioInfo.point[0].z"), _T("scenarioInfo.point[1].z"),
-		_T("scenarioInfo.point[2].z"), _T("scenarioInfo.point[3].z"),
-		_T("scenarioInfo.point[4].z"), _T("scenarioInfo.point[5].z"),
-		_T("scenarioInfo.point[6].z"), _T("scenarioInfo.point[7].z")
-	};
+    for (std::size_t targetIndex = 0; targetIndex < kTargetCount; ++targetIndex)
+    {
+        std::uint32_t speedValue = 0;
+        if (const auto value = nomMsg->getValue(makeSceneSpeedPath(targetIndex)))
+        {
+            speedValue = value->toUInt();
+        }
+        NUInteger speed(speedValue);
+        innerMessage->setValue(makeSceneSpeedPath(targetIndex), &speed);
 
-	uint32_t targetCount = 0;
-	uint32_t pointCount = 0;
-	uint32_t targetID = 0;
-	uint32_t speed = 0;
-	if (auto value = nomMsg->getValue(_T("targetCount"))) targetCount = value->toUInt();
-	if (targetCount > 0)
-	{
-		if (auto value = nomMsg->getValue(_T("scenarioInfo.targetID"))) targetID = value->toUInt();
-		if (auto value = nomMsg->getValue(_T("scenarioInfo.speed"))) speed = value->toUInt();
-		if (auto value = nomMsg->getValue(_T("scenarioInfo.pointCount"))) pointCount = value->toUInt();
-	}
-	pointCount = std::min<uint32_t>(pointCount, static_cast<uint32_t>(maxPointCount));
+        for (std::size_t pointIndex = 0; pointIndex < kRoutePointCount; ++pointIndex)
+        {
+            double xValue = 0.0;
+            double yValue = 0.0;
+            double zValue = 0.0;
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("x")))) xValue = value->toDouble();
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("y")))) yValue = value->toDouble();
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("z")))) zValue = value->toDouble();
 
-	NUInteger internalTargetID(targetID);
-	NUInteger internalSpeed(speed);
-	NUInteger internalPointCount(pointCount);
-	nomMsg_new->setValue(_T("Scenario.TargetID"), &internalTargetID);
-	nomMsg_new->setValue(_T("Scenario.Speed"), &internalSpeed);
-	nomMsg_new->setValue(_T("Scenario.PointCount"), &internalPointCount);
-
-	NDouble zero(0.0);
-	nomMsg_new->setValue(_T("Scenario.OriginLat"), &zero);
-	nomMsg_new->setValue(_T("Scenario.OriginLng"), &zero);
-	for (size_t index = 0; index < maxPointCount; ++index)
-	{
-		NDouble x(0.0);
-		NDouble y(0.0);
-		NDouble z(0.0);
-		if (index < pointCount)
-		{
-			if (auto value = nomMsg->getValue(externalXFields[index])) x = NDouble(value->toDouble());
-			if (auto value = nomMsg->getValue(externalYFields[index])) y = NDouble(value->toDouble());
-			if (auto value = nomMsg->getValue(externalZFields[index])) z = NDouble(value->toDouble());
-		}
-		nomMsg_new->setValue(internalXFields[index], &x);
-		nomMsg_new->setValue(internalYFields[index], &y);
-		nomMsg_new->setValue(internalZFields[index], &z);
-	}
-
-	const std::array<const TCHAR*, 8> legacyLatLngFields{
-		_T("Scenario.WayPoint0_Lat"), _T("Scenario.WayPoint0_Lng"),
-		_T("Scenario.WayPoint1_Lat"), _T("Scenario.WayPoint1_Lng"),
-		_T("Scenario.WayPoint2_Lat"), _T("Scenario.WayPoint2_Lng"),
-		_T("Scenario.WayPoint3_Lat"), _T("Scenario.WayPoint3_Lng")
-	};
-	for (const auto field : legacyLatLngFields)
-	{
-		nomMsg_new->setValue(field, &zero);
-	}
-
-	if (auto value = nomMsg->getValue(_T("rssPos.x")))
-	{
-		NDouble v(value->toDouble());
-		nomMsg_new->setValue(_T("Scenario.RadarPositionX"), &v);
-	}
-	if (auto value = nomMsg->getValue(_T("rssPos.y")))
-	{
-		NDouble v(value->toDouble());
-		nomMsg_new->setValue(_T("Scenario.RadarPositionY"), &v);
-	}
-	if (auto value = nomMsg->getValue(_T("radius")))
-	{
-		NDouble v(value->toDouble());
-		nomMsg_new->setValue(_T("Scenario.RadarRadius"), &v);
-	}
-	if (auto value = nomMsg->getValue(_T("mlsPos.x")))
-	{
-		NDouble v(value->toDouble());
-		nomMsg_new->setValue(_T("Scenario.LauncherPositionX"), &v);
-	}
-	if (auto value = nomMsg->getValue(_T("mlsPos.y")))
-	{
-		NDouble v(value->toDouble());
-		nomMsg_new->setValue(_T("Scenario.LauncherPositionY"), &v);
-	}
-
-	this->sendMsg(nomMsg_new);
-}
-
-void UDPCommunicationManager::recvMissileDetonation(shared_ptr<NOM> nomMsg)
-{
-	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerAirThreatDetonationToATM"));
-	mec->sendMsg(nomMsg_new);
-	//std::cout << "\n\n\n\nUDP에서 미사일 폭파 이벤트 수신\n\n\n" << std::endl;
-}
-
-void UDPCommunicationManager::recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg)
-{
-	auto nomMsg_new = meb->getNOMInstance(name, _T("ATSStatus"));
-	if (!nomMsg_new.get())
-	{
-		tcerr << _T("[UDPCommunicationManager] ATSStatus NOM is undefined.") << endl;
-		return;
-	}
-
-	NUShort msgID((ushort)ICD_MessageID::ATSStatus);
-	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
-
-	int statusValue = 1;
-	uint32_t targetCountValue = 0;
-	if (auto value = nomMsg->getValue(_T("AirThreatInfo.SystemStatus"))) statusValue = value->toInt();
-	if (auto value = nomMsg->getValue(_T("AirThreatInfo.TargetCount"))) targetCountValue = value->toUInt();
-
-	NInteger status(statusValue);
-	NUInteger targetCount(targetCountValue);
-	nomMsg_new->setValue(_T("status"), &status);
-	nomMsg_new->setValue(_T("targetCount"), &targetCount);
-
-	if (targetCountValue > 0)
-	{
-		NUInteger targetID(nomMsg->getValue(_T("AirThreatInfo.ObjectID"))->toUInt());
-		nomMsg_new->setValue(_T("targetInfo[0].targetID"), &targetID);
-
-		NDouble posX(nomMsg->getValue(_T("AirThreatInfo.PositionX"))->toDouble());
-		nomMsg_new->setValue(_T("targetInfo[0].pos.x"), &posX);
-
-		NDouble posY(nomMsg->getValue(_T("AirThreatInfo.PositionY"))->toDouble());
-		nomMsg_new->setValue(_T("targetInfo[0].pos.y"), &posY);
-
-		double positionZ = 0.0;
-		if (auto value = nomMsg->getValue(_T("AirThreatInfo.PositionZ"))) positionZ = value->toDouble();
-		NDouble posZ(positionZ);
-		nomMsg_new->setValue(_T("targetInfo[0].pos.z"), &posZ);
-
-		uint32_t speedValue = 0;
-		if (auto value = nomMsg->getValue(_T("AirThreatInfo.Speed")))
-		{
-			speedValue = value->toUInt();
-		}
-		else
-		{
-			double velX = nomMsg->getValue(_T("AirThreatInfo.VelocityX"))->toDouble();
-			double velY = nomMsg->getValue(_T("AirThreatInfo.VelocityY"))->toDouble();
-			speedValue = static_cast<uint32_t>(std::sqrt((velX * velX) + (velY * velY)));
-		}
-		NUInteger speed(speedValue);
-		nomMsg_new->setValue(_T("targetInfo[0].speed"), &speed);
-
-		bool intercepted = false;
-		if (auto value = nomMsg->getValue(_T("AirThreatInfo.InterceptionFlag")))
-		{
-			intercepted = value->toByte() != 0;
-		}
-		else if (auto value = nomMsg->getValue(_T("AirThreatInfo.ObjectState")))
-		{
-			intercepted = value->toUShort() == (ushort)TrackState::ATS_Detonation;
-		}
-		NBool interceptionFlag(intercepted);
-		nomMsg_new->setValue(_T("targetInfo[0].interceptionFlag"), &interceptionFlag);
-	}
-
-	commInterface->sendCommMsg(nomMsg_new);
-}
-
-void UDPCommunicationManager::recvInnerRouteToComm(shared_ptr<NOM> nomMsg)
-{
-	auto nomMsg_new = meb->getNOMInstance(name, _T("sendRouteAT"));
-	routeString = nomMsg->getValue(_T("RouteAT"))->toString();
-	NUShort msgID(0x43);;
-	NString route(routeString);
-
-	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
-	nomMsg_new->setValue(_T("RouteAT"), &route);
-
-	commInterface->sendCommMsg(nomMsg_new);
-}
-
-void UDPCommunicationManager::recvSendScenario(shared_ptr<NOM> nomMsg)
-{
-	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerSendScenario"));
-
-	nomMsg_new->setValue(_T("Scenario.OriginLat"), &(NDouble)(nomMsg->getValue(_T("Scenario.OriginLat"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.OriginLng"), &(NDouble)(nomMsg->getValue(_T("Scenario.OriginLng"))->toDouble()));
-
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_X"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_Y"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_X"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_Y"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_X"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_Y"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_X"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_Y"))->toDouble()));
-
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_Lat"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_Lng"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_Lat"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_Lng"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_Lat"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_Lng"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_Lat"))->toDouble()));
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_Lng"))->toDouble()));
-
-	this->sendMsg(nomMsg_new);
+            NDouble x(xValue);
+            NDouble y(yValue);
+            NDouble z(zValue);
+            innerMessage->setValue(makeScenePath(targetIndex, pointIndex, _T("x")), &x);
+            innerMessage->setValue(makeScenePath(targetIndex, pointIndex, _T("y")), &y);
+            innerMessage->setValue(makeScenePath(targetIndex, pointIndex, _T("z")), &z);
+        }
+    }
+    mec->sendMsg(innerMessage);
 }
 
 void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
 {
-	if (auto value = nomMsg->getValue(_T("simulationStatus")))
-	{
-		if (!value->toByte())
-		{
-			recvStopSimulation(nomMsg);
-			return;
-		}
-	}
+    const auto startFlag = nomMsg->getValue(_T("startFlag"));
+    if (!startFlag || startFlag->toUInt() != 1)
+    {
+        return;
+    }
 
-	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStartSimulation"));
-
-	this->sendMsg(nomMsg_new);
+    if (auto innerMessage = meb->getNOMInstance(name, _T("InnerStartSimulation")))
+    {
+        mec->sendMsg(innerMessage);
+    }
 }
 
 void UDPCommunicationManager::recvStop(shared_ptr<NOM> nomMsg)
 {
-	recvStopSimulation(nomMsg);
+    const auto stopFlag = nomMsg->getValue(_T("stopFlag"));
+    if (!stopFlag || stopFlag->toUInt() != 1)
+    {
+        return;
+    }
+
+    if (auto innerMessage = meb->getNOMInstance(name, _T("InnerStopSimulation")))
+    {
+        mec->sendMsg(innerMessage);
+    }
 }
 
 void UDPCommunicationManager::recvATSInterceptionResult(shared_ptr<NOM> nomMsg)
 {
-	if (auto value = nomMsg->getValue(_T("interceptionFlag")))
-	{
-		if (!value->toByte())
-		{
-			return;
-		}
-	}
+    auto innerMessage = meb->getNOMInstance(name, _T("InnerAirThreatDetonationToATM"));
+    if (!innerMessage)
+    {
+        return;
+    }
 
-	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerAirThreatDetonationToATM"));
-	if (!nomMsg_new.get())
-	{
-		tcerr << _T("[UDPCommunicationManager] InnerAirThreatDetonationToATM NOM is undefined.") << endl;
-		return;
-	}
-
-	mec->sendMsg(nomMsg_new);
+    std::uint32_t targetIdValue = 0;
+    std::uint32_t missionFlagValue = 1;
+    if (const auto value = nomMsg->getValue(_T("targetID"))) targetIdValue = value->toUInt();
+    if (const auto value = nomMsg->getValue(_T("missionFlag"))) missionFlagValue = value->toUInt();
+    NUInteger targetId(targetIdValue);
+    NUInteger missionFlag(missionFlagValue);
+    innerMessage->setValue(_T("targetID"), &targetId);
+    innerMessage->setValue(_T("missionFlag"), &missionFlag);
+    mec->sendMsg(innerMessage);
 }
 
-void UDPCommunicationManager::recvMissionFailed(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg)
 {
-	if (auto value = nomMsg->getValue(_T("missionFlag")))
-	{
-		if (!value->toByte())
-		{
-			return;
-		}
-	}
+    if (commInterface == nullptr)
+    {
+        return;
+    }
 
-	recvStopSimulation(nomMsg);
-}
+    auto externalMessage = meb->getNOMInstance(name, _T("ATSStatus"));
+    if (!externalMessage)
+    {
+        return;
+    }
 
-void UDPCommunicationManager::recvStopSimulation(shared_ptr<NOM> nomMsg)
-{
-	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStopSimulation"));
+    NUShort messageId(static_cast<ushort>(ICD_MessageID::ATSStatus));
+    externalMessage->setValue(_T("Header.MessageID"), &messageId);
 
-	this->sendMsg(nomMsg_new);
-}
+    std::uint32_t statusValue = 0;
+    if (const auto value = nomMsg->getValue(_T("status"))) statusValue = value->toUInt();
+    NUInteger status(statusValue);
+    externalMessage->setValue(_T("status"), &status);
 
-void UDPCommunicationManager::recvInnerSendScenarioAck(shared_ptr<NOM> nomMsg)
-{
-	tcout << _T("[UDPCommunicationManager] OC ICD has no SendScenarioAck message. Skip external send.") << endl;
-}
+    for (std::size_t index = 0; index < kTargetCount; ++index)
+    {
+        double xValue = 0.0;
+        double yValue = 0.0;
+        double zValue = 0.0;
+        std::uint32_t speedValue = 0;
+        std::uint32_t targetIdValue = static_cast<std::uint32_t>(index);
+        std::uint32_t atsStatusValue = 0;
 
-void UDPCommunicationManager::recvInnerStartSimulationAck(shared_ptr<NOM> nomMsg)
-{
-	tcout << _T("[UDPCommunicationManager] OC ICD has no StartSimulationAck message. Skip external send.") << endl;
-}
+        if (const auto value = nomMsg->getValue(makeTargetPath(index, _T("ATSPos.x")))) xValue = value->toDouble();
+        if (const auto value = nomMsg->getValue(makeTargetPath(index, _T("ATSPos.y")))) yValue = value->toDouble();
+        if (const auto value = nomMsg->getValue(makeTargetPath(index, _T("ATSPos.z")))) zValue = value->toDouble();
+        if (const auto value = nomMsg->getValue(makeTargetPath(index, _T("speed")))) speedValue = value->toUInt();
+        if (const auto value = nomMsg->getValue(makeTargetPath(index, _T("targetId")))) targetIdValue = value->toUInt();
+        if (const auto value = nomMsg->getValue(makeTargetPath(index, _T("atsStatus")))) atsStatusValue = value->toUInt();
 
-void UDPCommunicationManager::recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg)
-{
-	tcout << _T("[UDPCommunicationManager] OC ICD has no StopSimulationAck message. Skip external send.") << endl;
-}
-
-void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
-{
-	auto nomMsg_new = meb->getNOMInstance(name, _T("SimulatorState"));
-	NUShort msgID = NUShort((ushort)ICD_MessageID::SimulatorState);
-	NUShort simulatorID = nomMsg->getValue(_T("SimulatorID"))->toUShort();
-
-	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
-	nomMsg_new->setValue(_T("SimulatorID"), &simulatorID);
-
-	commInterface->sendCommMsg(nomMsg_new);
+        NDouble x(xValue);
+        NDouble y(yValue);
+        NDouble z(zValue);
+        NUInteger speed(speedValue);
+        NUInteger targetId(targetIdValue);
+        NUInteger atsStatus(atsStatusValue);
+        externalMessage->setValue(makeTargetPath(index, _T("ATSPos.x")), &x);
+        externalMessage->setValue(makeTargetPath(index, _T("ATSPos.y")), &y);
+        externalMessage->setValue(makeTargetPath(index, _T("ATSPos.z")), &z);
+        externalMessage->setValue(makeTargetPath(index, _T("speed")), &speed);
+        externalMessage->setValue(makeTargetPath(index, _T("targetId")), &targetId);
+        externalMessage->setValue(makeTargetPath(index, _T("atsStatus")), &atsStatus);
+    }
+    commInterface->sendCommMsg(externalMessage);
 }
 
 void UDPCommunicationManager::sendInnerMsg(shared_ptr<NOM> nomMsg)
 {
-	if (auto iter = funcMap.find(nomMsg->getName()); iter != funcMap.end())
-	{
-		iter->second(nomMsg);
-	}
+    const auto handler = funcMap.find(nomMsg->getName());
+    if (handler != funcMap.end())
+    {
+        handler->second(nomMsg);
+        tcout << _T("[UDP RX] ATS handler executed. name=")
+              << nomMsg->getName() << std::endl;
+    }
+    else
+    {
+        tcout << _T("[UDP RX] No ATS handler; message ignored. name=")
+              << nomMsg->getName() << std::endl;
+    }
 }
 
-void
-UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
+void UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 {
-	//auto HeaderSize = commConfig->getHeaderSize();
-	auto IDPos = commConfig->getHeaderIDPos();
-	auto IDSize = commConfig->getHeaderIDSize();
+    const auto idPosition = commConfig->getHeaderIDPos();
+    const auto idSize = commConfig->getHeaderIDSize();
 
-	auto msgID = 0;
+    if (data == nullptr || idSize != 2 || size < static_cast<int>(idPosition + idSize))
+    {
+        tcerr << _T("[UDP RX] Invalid header. idPosition=") << idPosition
+              << _T(", idSize=") << idSize
+              << _T(", packetSize=") << size << std::endl;
+        return;
+    }
 
-	//ID 형식이 short 또는 int인 경우만 처리
-	if (IDSize == 2)
-	{
-		unsigned short tmpMsgID = 0;
-		memcpy(&tmpMsgID, data + IDPos, IDSize);
-		msgID = ntohs(tmpMsgID);
-	}
-	else
-	{
-		return;
-	}
+    unsigned short networkMessageId = 0;
+    memcpy(&networkMessageId, data + idPosition, idSize);
+    const unsigned short messageId = ntohs(networkMessageId);
+    const tstring messageName = commMsgHandler.getMsgName(messageId);
 
-	//unsigned short tmpMsgID = 0;
-	//memcpy(&tmpMsgID, data + IDPos, IDPos);
-	//auto msgID = ntohs(tmpMsgID);
+    if (messageName.empty())
+    {
+        tcerr << _T("[UDP RX] Message ID is not defined in UDPCommunicationManager.xml.")
+              << std::endl;
+        return;
+    }
 
-	auto nomMsg = meb->getNOMInstance(name, commMsgHandler.getMsgName(msgID));
+    const bool isOcToAtsMessage =
+        messageName == _T("Scenario") ||
+        messageName == _T("StartSimulation") ||
+        messageName == _T("ATSInterceptionResult") ||
+        messageName == _T("Stop");
 
-	if (nomMsg.get())
-	{
-		if (nomMsg->getType() == nframework::nom::ENOMType::NOM_TYPE_OBJECT)
-		{
-			nomMsg->deserialize(data, size);
-			this->updateMsg(nomMsg);
-		}
-		else
-		{
-			auto nomMsgCP = nomMsg->clone();
-			nomMsgCP->deserialize(data, size);
-			nomMsgCP->setOwner(name);
-			sendInnerMsg(nomMsgCP);
-			//this->sendMsg(nomMsgCP);
-		}
-	}
-	else
-	{
-		tcerr << _T("undefined message") << endl;
-	}
+    // Multicast packets sent by RSS/MLS/MSS are received by ATS as well.
+    // Ignore those known messages silently because ATS only processes OC commands.
+    if (!isOcToAtsMessage)
+    {
+        return;
+    }
+
+    tcout << _T("[UDP RX] Datagram received. size=") << size << std::endl;
+    tcout << _T("[UDP RX] Message ID=0x")
+          << std::hex << std::uppercase << messageId
+          << std::dec << std::nouppercase
+          << _T(", name=") << messageName << std::endl;
+
+    auto nomMsg = meb->getNOMInstance(name, messageName);
+    if (!nomMsg)
+    {
+        tcerr << _T("[UDP RX] NOM instance is unavailable. name=")
+              << messageName << std::endl;
+        return;
+    }
+
+    try
+    {
+        if (nomMsg->getType() == ENOMType::NOM_TYPE_OBJECT)
+        {
+            nomMsg->deserialize(data, size);
+            updateMsg(nomMsg);
+            tcout << _T("[UDP RX] Object updated. name=")
+                  << messageName << std::endl;
+        }
+        else
+        {
+            auto receivedMessage = nomMsg->clone();
+            receivedMessage->deserialize(data, size);
+            receivedMessage->setOwner(name);
+            sendInnerMsg(receivedMessage);
+            tcout << _T("[UDP RX] Interaction deserialized. name=")
+                  << messageName << std::endl;
+        }
+    }
+    catch (const std::exception&)
+    {
+        tcerr << _T("[UDP RX] Deserialization failed. name=")
+              << messageName << std::endl;
+    }
+    catch (...)
+    {
+        tcerr << _T("[UDP RX] Deserialization failed with an unknown exception. name=")
+              << messageName << std::endl;
+    }
 }
 
-unsigned int
-UDPCommunicationManager::getObjectInstanceID(shared_ptr<NOM> nomMsg)
+unsigned int UDPCommunicationManager::getObjectInstanceID(shared_ptr<NOM> nomMsg)
 {
-	unsigned int oid = 0;
-	map<unsigned int, shared_ptr<NOM>>::iterator itr;
-	for (itr = registeredMsg.begin(); itr != registeredMsg.end(); itr++)
-	{
-		unsigned int key = itr->first;
-		shared_ptr<NOM> nom = itr->second;
-
-		if (nom->getMessageID() == nomMsg->getMessageID())
-		{
-			printf("[TCPCommunicationManager]Found object instance id : %u\n", key);
-			oid = key;
-			break;
-		}
-	}
-
-	return oid;
+    for (const auto& [instanceId, registered] : registeredMsg)
+    {
+        if (registered->getMessageID() == nomMsg->getMessageID())
+        {
+            return instanceId;
+        }
+    }
+    return 0;
 }
 
-/************************************************************************
-	Export Function
-************************************************************************/
-extern "C" BASEMGRDLL_API
-BaseManager* createObject()
+extern "C" BASEMGRDLL_API BaseManager* createObject()
 {
-	return new UDPCommunicationManager;
+    return new UDPCommunicationManager;
 }
 
-extern "C" BASEMGRDLL_API
-void deleteObject(BaseManager* userManager)
+extern "C" BASEMGRDLL_API void deleteObject(BaseManager* userManager)
 {
-	delete userManager;
+    delete userManager;
 }
-

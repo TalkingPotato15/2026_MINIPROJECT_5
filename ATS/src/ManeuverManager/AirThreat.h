@@ -1,8 +1,10 @@
 #pragma once
 
-#include <cstdint>
+#include <array>
 #include <cstddef>
-#include <vector>
+#include <cstdint>
+
+constexpr std::size_t kAirThreatRoutePointCount = 4;
 
 struct Position
 {
@@ -11,40 +13,40 @@ struct Position
     double z{ 0.0 };
 };
 
-enum class AirThreatState : std::uint16_t
+enum class AirThreatStatus : std::uint32_t
 {
     Ready = 0,
-    Flying,
-    Intercepted,
-    Completed
+    Flying = 1,
+    Destroyed = 2
 };
 
 class AirThreat
 {
 public:
-    bool initialize(std::uint32_t targetId, double speed, const std::vector<Position>& route);
+    void reset(std::uint32_t targetId);
+    bool initialize(
+        std::uint32_t targetId,
+        std::uint32_t speed,
+        const std::array<Position, kAirThreatRoutePointCount>& route);
     void start();
     void stop();
     void advance(double deltaSeconds);
-    void markIntercepted();
+    void destroy();
 
-    bool isInitialized() const;
-    bool isActive() const;
-    bool isIntercepted() const;
+    bool isConfigured() const;
+    bool isFlying() const;
     std::uint32_t targetId() const;
-    double speed() const;
+    std::uint32_t speed() const;
     const Position& position() const;
-    const Position& velocity() const;
-    AirThreatState state() const;
+    AirThreatStatus status() const;
 
 private:
     std::uint32_t targetId_{ 0 };
-    double speed_{ 0.0 };
-    std::vector<Position> route_;
-    std::size_t nextPointIndex_{ 0 };
+    std::uint32_t speed_{ 0 };
+    std::array<Position, kAirThreatRoutePointCount> route_{};
+    std::size_t nextPointIndex_{ 1 };
     Position position_{};
     Position velocity_{};
-    AirThreatState state_{ AirThreatState::Ready };
-    bool initialized_{ false };
-    bool active_{ false };
+    AirThreatStatus status_{ AirThreatStatus::Ready };
+    bool configured_{ false };
 };

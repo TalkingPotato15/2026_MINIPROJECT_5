@@ -1,34 +1,24 @@
 #include "ScenarioManager.h"
 
-#include <algorithm>
-#include <array>
-#include <cstdint>
+#include <sstream>
 #include <utility>
 
 namespace
 {
-constexpr std::size_t kMaximumWayPointCount = 8;
+tstring makeScenePath(std::size_t targetIndex, std::size_t pointIndex, const TCHAR* field)
+{
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("sceneInfo[") << targetIndex << _T("].ATSPos[")
+         << pointIndex << _T("].") << field;
+    return path.str();
+}
 
-const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointXFields{
-    _T("Scenario.WayPoint0_X"), _T("Scenario.WayPoint1_X"),
-    _T("Scenario.WayPoint2_X"), _T("Scenario.WayPoint3_X"),
-    _T("Scenario.WayPoint4_X"), _T("Scenario.WayPoint5_X"),
-    _T("Scenario.WayPoint6_X"), _T("Scenario.WayPoint7_X")
-};
-
-const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointYFields{
-    _T("Scenario.WayPoint0_Y"), _T("Scenario.WayPoint1_Y"),
-    _T("Scenario.WayPoint2_Y"), _T("Scenario.WayPoint3_Y"),
-    _T("Scenario.WayPoint4_Y"), _T("Scenario.WayPoint5_Y"),
-    _T("Scenario.WayPoint6_Y"), _T("Scenario.WayPoint7_Y")
-};
-
-const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointZFields{
-    _T("Scenario.WayPoint0_Z"), _T("Scenario.WayPoint1_Z"),
-    _T("Scenario.WayPoint2_Z"), _T("Scenario.WayPoint3_Z"),
-    _T("Scenario.WayPoint4_Z"), _T("Scenario.WayPoint5_Z"),
-    _T("Scenario.WayPoint6_Z"), _T("Scenario.WayPoint7_Z")
-};
+tstring makeSpeedPath(std::size_t targetIndex)
+{
+    std::basic_ostringstream<TCHAR> path;
+    path << _T("sceneInfo[") << targetIndex << _T("].speed");
+    return path.str();
+}
 }
 
 ScenarioManager::ScenarioManager()
@@ -159,85 +149,51 @@ void ScenarioManager::receiveScenario(std::shared_ptr<NOM> nomMsg)
     }
 
     publishScenarioToManeuver();
-    publishAck(_T("InnerSendScenarioAck"));
 }
 
 void ScenarioManager::receiveStart(std::shared_ptr<NOM>)
 {
     if (!hasValidScenario_)
     {
-        ntcout << _T("[ScenarioManager] Start ignored because no valid scenario is loaded.") << std::endl;
+        ntcout << _T("[ScenarioManager] Start ignored: no valid scenario.") << std::endl;
         return;
     }
-
     publishControlMessage(_T("InnerStartSimulationToModel"));
-    publishAck(_T("InnerStartSimulationAck"));
 }
 
 void ScenarioManager::receiveStop(std::shared_ptr<NOM>)
 {
     publishControlMessage(_T("InnerStopSimulationToModel"));
-    publishAck(_T("InnerStopSimulationAck"));
 }
 
 bool ScenarioManager::loadScenario(const std::shared_ptr<NOM>& nomMsg)
 {
     Scenario parsed;
-    std::uint32_t pointCount = 0;
 
-    if (const auto value = nomMsg->getValue(_T("Scenario.TargetID")))
+    for (std::size_t targetIndex = 0; targetIndex < kATSMaxTargetCount; ++targetIndex)
     {
-        parsed.targetId = value->toUInt();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.Speed")))
-    {
-        parsed.speed = value->toUInt();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.PointCount")))
-    {
-        pointCount = value->toUInt();
-    }
-
-    pointCount = std::min<std::uint32_t>(pointCount, static_cast<std::uint32_t>(kMaximumWayPointCount));
-    parsed.route.reserve(pointCount);
-
-    for (std::size_t index = 0; index < pointCount; ++index)
-    {
-        ScenarioPosition point;
-        if (const auto value = nomMsg->getValue(kWayPointXFields[index]))
+        auto& target = parsed.targets[targetIndex];
+        if (const auto value = nomMsg->getValue(makeSpeedPath(targetIndex)))
         {
-            point.x = value->toDouble();
+            target.speed = value->toUInt();
         }
-        if (const auto value = nomMsg->getValue(kWayPointYFields[index]))
-        {
-            point.y = value->toDouble();
-        }
-        if (const auto value = nomMsg->getValue(kWayPointZFields[index]))
-        {
-            point.z = value->toDouble();
-        }
-        parsed.route.push_back(point);
-    }
 
-    if (const auto value = nomMsg->getValue(_T("Scenario.RadarPositionX")))
-    {
-        parsed.radarPosition.x = value->toDouble();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.RadarPositionY")))
-    {
-        parsed.radarPosition.y = value->toDouble();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.RadarRadius")))
-    {
-        parsed.radarRadius = value->toDouble();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.LauncherPositionX")))
-    {
-        parsed.launcherPosition.x = value->toDouble();
-    }
-    if (const auto value = nomMsg->getValue(_T("Scenario.LauncherPositionY")))
-    {
-        parsed.launcherPosition.y = value->toDouble();
+        for (std::size_t pointIndex = 0; pointIndex < kATSRoutePointCount; ++pointIndex)
+        {
+            auto& point = target.route[pointIndex];
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("x"))))
+            {
+                point.x = value->toDouble();
+            }
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("y"))))
+            {
+                point.y = value->toDouble();
+            }
+            if (const auto value = nomMsg->getValue(makeScenePath(targetIndex, pointIndex, _T("z"))))
+            {
+                point.z = value->toDouble();
+            }
+        }
     }
 
     hasValidScenario_ = parsed.validate();
@@ -257,36 +213,24 @@ void ScenarioManager::publishScenarioToManeuver()
         return;
     }
 
-    NUInteger targetId(currentScenario_.targetId);
-    NUInteger speed(currentScenario_.speed);
-    NUInteger pointCount(static_cast<std::uint32_t>(currentScenario_.route.size()));
-    scenarioMessage->setValue(_T("Scenario.TargetID"), &targetId);
-    scenarioMessage->setValue(_T("Scenario.Speed"), &speed);
-    scenarioMessage->setValue(_T("Scenario.PointCount"), &pointCount);
-
-    for (std::size_t index = 0; index < kMaximumWayPointCount; ++index)
+    for (std::size_t targetIndex = 0; targetIndex < kATSMaxTargetCount; ++targetIndex)
     {
-        const ScenarioPosition point = index < currentScenario_.route.size()
-            ? currentScenario_.route[index]
-            : ScenarioPosition{};
-        NDouble x(point.x);
-        NDouble y(point.y);
-        NDouble z(point.z);
-        scenarioMessage->setValue(kWayPointXFields[index], &x);
-        scenarioMessage->setValue(kWayPointYFields[index], &y);
-        scenarioMessage->setValue(kWayPointZFields[index], &z);
+        const auto& target = currentScenario_.targets[targetIndex];
+        NUInteger speed(target.speed);
+        scenarioMessage->setValue(makeSpeedPath(targetIndex), &speed);
+
+        for (std::size_t pointIndex = 0; pointIndex < kATSRoutePointCount; ++pointIndex)
+        {
+            const auto& point = target.route[pointIndex];
+            NDouble x(point.x);
+            NDouble y(point.y);
+            NDouble z(point.z);
+            scenarioMessage->setValue(makeScenePath(targetIndex, pointIndex, _T("x")), &x);
+            scenarioMessage->setValue(makeScenePath(targetIndex, pointIndex, _T("y")), &y);
+            scenarioMessage->setValue(makeScenePath(targetIndex, pointIndex, _T("z")), &z);
+        }
     }
 
-    NDouble radarX(currentScenario_.radarPosition.x);
-    NDouble radarY(currentScenario_.radarPosition.y);
-    NDouble radarRadius(currentScenario_.radarRadius);
-    NDouble launcherX(currentScenario_.launcherPosition.x);
-    NDouble launcherY(currentScenario_.launcherPosition.y);
-    scenarioMessage->setValue(_T("Scenario.RadarPositionX"), &radarX);
-    scenarioMessage->setValue(_T("Scenario.RadarPositionY"), &radarY);
-    scenarioMessage->setValue(_T("Scenario.RadarRadius"), &radarRadius);
-    scenarioMessage->setValue(_T("Scenario.LauncherPositionX"), &launcherX);
-    scenarioMessage->setValue(_T("Scenario.LauncherPositionY"), &launcherY);
     mec_->sendMsg(scenarioMessage);
 }
 
@@ -296,19 +240,6 @@ void ScenarioManager::publishControlMessage(const tstring& messageName)
     {
         mec_->sendMsg(controlMessage);
     }
-}
-
-void ScenarioManager::publishAck(const tstring& messageName)
-{
-    auto ackMessage = meb_->getNOMInstance(name_, messageName);
-    if (!ackMessage)
-    {
-        return;
-    }
-
-    NUShort simulatorId(static_cast<ushort>(SimulatorID::ATS));
-    ackMessage->setValue(_T("SimulatorID"), &simulatorId);
-    mec_->sendMsg(ackMessage);
 }
 
 extern "C" BASEMGRDLL_API BaseManager* createObject()

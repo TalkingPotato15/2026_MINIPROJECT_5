@@ -9,7 +9,6 @@
 #include <map>
 #include <memory>
 
-#include "MFRSHeader.h"
 #include "Scenario.h"
 
 using namespace nframework;
@@ -47,7 +46,6 @@ private:
     bool loadScenario(const std::shared_ptr<NOM>& nomMsg);
     void publishScenarioToManeuver();
     void publishControlMessage(const tstring& messageName);
-    void publishAck(const tstring& messageName);
 
     IMEBComponent* meb_{ nullptr };
     MECComponent* mec_{ nullptr };

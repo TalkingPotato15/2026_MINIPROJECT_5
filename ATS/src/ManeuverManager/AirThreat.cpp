@@ -8,13 +8,26 @@ namespace
 constexpr double kPositionEpsilon = 1.0e-6;
 }
 
+void AirThreat::reset(std::uint32_t targetId)
+{
+    targetId_ = targetId;
+    speed_ = 0;
+    route_ = {};
+    nextPointIndex_ = 1;
+    position_ = {};
+    velocity_ = {};
+    status_ = AirThreatStatus::Ready;
+    configured_ = false;
+}
+
 bool AirThreat::initialize(
     std::uint32_t targetId,
-    double speed,
-    const std::vector<Position>& route)
+    std::uint32_t speed,
+    const std::array<Position, kAirThreatRoutePointCount>& route)
 {
-    if (speed <= 0.0 || route.size() < 2)
+    if (speed == 0)
     {
+        reset(targetId);
         return false;
     }
 
@@ -24,46 +37,41 @@ bool AirThreat::initialize(
     nextPointIndex_ = 1;
     position_ = route_.front();
     velocity_ = {};
-    state_ = AirThreatState::Ready;
-    initialized_ = true;
-    active_ = false;
+    status_ = AirThreatStatus::Ready;
+    configured_ = true;
     return true;
 }
 
 void AirThreat::start()
 {
-    if (!initialized_ || state_ == AirThreatState::Intercepted || state_ == AirThreatState::Completed)
+    if (!configured_ || status_ == AirThreatStatus::Destroyed)
     {
         return;
     }
-
-    state_ = AirThreatState::Flying;
-    active_ = true;
+    status_ = AirThreatStatus::Flying;
 }
 
 void AirThreat::stop()
 {
-    active_ = false;
     velocity_ = {};
-
-    if (initialized_ && state_ == AirThreatState::Flying)
+    if (configured_ && status_ != AirThreatStatus::Destroyed)
     {
-        state_ = AirThreatState::Ready;
+        status_ = AirThreatStatus::Ready;
     }
 }
 
 void AirThreat::advance(double deltaSeconds)
 {
-    if (!active_ || deltaSeconds <= 0.0)
+    if (!configured_ || status_ != AirThreatStatus::Flying || deltaSeconds <= 0.0)
     {
         return;
     }
 
-    double remainingDistance = speed_ * deltaSeconds;
+    double remainingDistance = static_cast<double>(speed_) * deltaSeconds;
 
     while (remainingDistance > kPositionEpsilon && nextPointIndex_ < route_.size())
     {
-        const Position& destination = route_[nextPointIndex_];
+        const auto& destination = route_[nextPointIndex_];
         const double dx = destination.x - position_.x;
         const double dy = destination.y - position_.y;
         const double dz = destination.z - position_.z;
@@ -79,15 +87,19 @@ void AirThreat::advance(double deltaSeconds)
         const double ux = dx / distance;
         const double uy = dy / distance;
         const double uz = dz / distance;
-        velocity_ = { ux * speed_, uy * speed_, uz * speed_ };
+        velocity_ = {
+            ux * static_cast<double>(speed_),
+            uy * static_cast<double>(speed_),
+            uz * static_cast<double>(speed_)
+        };
 
-        const double travel = std::min(remainingDistance, distance);
-        position_.x += ux * travel;
-        position_.y += uy * travel;
-        position_.z += uz * travel;
-        remainingDistance -= travel;
+        const double travelDistance = std::min(remainingDistance, distance);
+        position_.x += ux * travelDistance;
+        position_.y += uy * travelDistance;
+        position_.z += uz * travelDistance;
+        remainingDistance -= travelDistance;
 
-        if (travel + kPositionEpsilon >= distance)
+        if (travelDistance + kPositionEpsilon >= distance)
         {
             position_ = destination;
             ++nextPointIndex_;
@@ -96,29 +108,24 @@ void AirThreat::advance(double deltaSeconds)
 
     if (nextPointIndex_ >= route_.size())
     {
-        active_ = false;
         velocity_ = {};
-        state_ = AirThreatState::Completed;
+        status_ = AirThreatStatus::Ready;
     }
 }
 
-void AirThreat::markIntercepted()
+void AirThreat::destroy()
 {
-    if (!initialized_)
+    if (!configured_)
     {
         return;
     }
-
-    active_ = false;
     velocity_ = {};
-    state_ = AirThreatState::Intercepted;
+    status_ = AirThreatStatus::Destroyed;
 }
 
-bool AirThreat::isInitialized() const { return initialized_; }
-bool AirThreat::isActive() const { return active_; }
-bool AirThreat::isIntercepted() const { return state_ == AirThreatState::Intercepted; }
+bool AirThreat::isConfigured() const { return configured_; }
+bool AirThreat::isFlying() const { return status_ == AirThreatStatus::Flying; }
 std::uint32_t AirThreat::targetId() const { return targetId_; }
-double AirThreat::speed() const { return speed_; }
+std::uint32_t AirThreat::speed() const { return speed_; }
 const Position& AirThreat::position() const { return position_; }
-const Position& AirThreat::velocity() const { return velocity_; }
-AirThreatState AirThreat::state() const { return state_; }
+AirThreatStatus AirThreat::status() const { return status_; }
