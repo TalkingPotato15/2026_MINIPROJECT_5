@@ -145,6 +145,10 @@
 			<NOM:parameter name="missionFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
+		<NOM:interaction name="InnerATSInformationUplinkToComm" id="0x35" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
+		</NOM:interaction>
+
 		<NOM:interaction name="InnerSendScenario" id="0x21" sharing="Publish" orderType="Receive" alignment="false">
 			<NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
 		</NOM:interaction>
