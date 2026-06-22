@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="ManeuverManager" date="2026-06-22" author="ATS Team">
+  <NOM:objects/>
+  <NOM:interactions>
+    <NOM:interaction name="InnerSendScenarioToModel" id="0x23" sharing="Subscribe" orderType="Receive" alignment="false">
+      <NOM:parameter name="sceneInfo" dataType="TargetScenarioStruct" size="4"/>
+    </NOM:interaction>
+    <NOM:interaction name="InnerStartSimulationToModel" id="0x26" sharing="Subscribe" orderType="Receive" alignment="false"/>
+    <NOM:interaction name="InnerStopSimulationToModel" id="0x29" sharing="Subscribe" orderType="Receive" alignment="false"/>
+    <NOM:interaction name="InnerAirThreatDetonationToATM" id="0x40" sharing="Subscribe" orderType="Receive" alignment="false">
+      <NOM:parameter name="targetID" dataType="uintBE"/>
+      <NOM:parameter name="missionFlag" dataType="uintBE"/>
+    </NOM:interaction>
+    <NOM:interaction name="InnerAirThreatInfoToComm" id="0x41" sharing="Publish" orderType="Receive" alignment="false">
+      <NOM:parameter name="status" dataType="uintBE"/>
+      <NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="4"/>
+    </NOM:interaction>
+  </NOM:interactions>
+  <NOM:dataTypes>
+    <NOM:basicTypes/>
+    <NOM:enumerationTypes/>
+    <NOM:complexTypes/>
+  </NOM:dataTypes>
+  <NOM:notes/>
+</NOM:Nex1ObjectModel>
