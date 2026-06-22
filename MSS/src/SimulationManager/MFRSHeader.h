@@ -49,11 +49,11 @@ enum class InnerICD_MessageID
 	// MSS ICD 내부 메시지
 	InnerMSSStatusToComm = 0x60,
 	InnerMissileInfoToDeto,
-	InnerUplinkInfoToMiss,
+	InnerATSInformationToMSS,
 	InnerUplinkInfoToDeto,
 	InnerMissileDetonationToMiss,
-	InnerMissileDetonationToComm,
-	InnerFireMissileToMiss,
+	InnerMSSInterceptionResultToComm,
+	InnerIgnitionCommandToMSS,
 	
 	// MFRS ICD 내부 메시지
 	InnerAirThreatInfo = 0x70,

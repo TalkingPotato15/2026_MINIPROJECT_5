@@ -345,8 +345,8 @@ void UDPCommunicationManager::funcMapInit()
 	msgProc = bind(&UDPCommunicationManager::recvInnerMSSStatusToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerMSSStatusToComm"), msgProc });
 
-	msgProc = bind(&UDPCommunicationManager::recvInnerMissileDetonationToComm, this, placeholders::_1);
-	funcMap.insert({ _T("InnerMissileDetonationToComm"), msgProc });
+	msgProc = bind(&UDPCommunicationManager::recvInnerMSSInterceptionResultToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerMSSInterceptionResultToComm"), msgProc });
 
 	msgProc = bind(&UDPCommunicationManager::recvInnerRouteToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerRouteToComm"), msgProc });
@@ -416,14 +416,14 @@ void UDPCommunicationManager::recvATSInformationUplink(shared_ptr<NOM> nomMsg)
 {
 	auto targetId = nomMsg->getValue(_T("matchedTarget.targetId"));
 	auto atsStatus = nomMsg->getValue(_T("matchedTarget.atsStatus"));
-	tcout << _T("[COMM][BRIDGE] ATSInformationUplink -> InnerUplinkInfoToMiss targetId=")
+	tcout << _T("[COMM][BRIDGE] ATSInformationUplink -> InnerATSInformationToMSS targetId=")
 		<< (targetId ? targetId->toUInt() : 0)
 		<< _T(" atsStatus=") << (atsStatus ? atsStatus->toUInt() : 0) << endl;
 
-	auto innerMsg = meb->getNOMInstance(name, _T("InnerUplinkInfoToMiss"));
+	auto innerMsg = meb->getNOMInstance(name, _T("InnerATSInformationToMSS"));
 	if (!innerMsg.get())
 	{
-		tcerr << _T("[UDPCommunicationManager] InnerUplinkInfoToMiss NOM is undefined.") << endl;
+		tcerr << _T("[UDPCommunicationManager] InnerATSInformationToMSS NOM is undefined.") << endl;
 		return;
 	}
 
@@ -444,14 +444,14 @@ void UDPCommunicationManager::recvIgnitionCommand(shared_ptr<NOM> nomMsg)
 {
 	auto missileId = nomMsg->getValue(_T("missileID"));
 	auto targetId = nomMsg->getValue(_T("targetID"));
-	tcout << _T("[COMM][BRIDGE] IgnitionCommand -> InnerFireMissileToMiss missileID=")
+	tcout << _T("[COMM][BRIDGE] IgnitionCommand -> InnerIgnitionCommandToMSS missileID=")
 		<< (missileId ? missileId->toUInt() : 0)
 		<< _T(" targetID=") << (targetId ? targetId->toUInt() : 0) << endl;
 
-	auto innerMsg = meb->getNOMInstance(name, _T("InnerFireMissileToMiss"));
+	auto innerMsg = meb->getNOMInstance(name, _T("InnerIgnitionCommandToMSS"));
 	if (!innerMsg.get())
 	{
-		tcerr << _T("[UDPCommunicationManager] InnerFireMissileToMiss NOM is undefined.") << endl;
+		tcerr << _T("[UDPCommunicationManager] InnerIgnitionCommandToMSS NOM is undefined.") << endl;
 		return;
 	}
 
@@ -660,9 +660,9 @@ void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg
 
 void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 {
-	auto mssStatusMsg = meb->getNOMInstance(name, _T("MSSStatus"));
+	auto statusMsg = meb->getNOMInstance(name, _T("MSSStatus"));
 	auto downlinkMsg = meb->getNOMInstance(name, _T("MSSInformationDownlinkToRSS"));
-	if (!mssStatusMsg.get() || !downlinkMsg.get())
+	if (!statusMsg.get() || !downlinkMsg.get())
 	{
 		tcerr << _T("[UDPCommunicationManager] MSS output NOM is undefined.") << endl;
 		return;
@@ -670,8 +670,8 @@ void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 
 	NUShort statusMsgID((ushort)ICD_MessageID::MSSStatus);
 	NUShort statusMsgLength(148);
-	mssStatusMsg->setValue(_T("Header.MessageID"), &statusMsgID);
-	mssStatusMsg->setValue(_T("Header.MessageLength"), &statusMsgLength);
+	statusMsg->setValue(_T("Header.MessageID"), &statusMsgID);
+	statusMsg->setValue(_T("Header.MessageLength"), &statusMsgLength);
 
 	NUInteger status(1);
 	if (auto value = nomMsg->getValue(_T("status")))
@@ -692,7 +692,7 @@ void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 			<< _T("]");
 	}
 	tcout << endl;
-	mssStatusMsg->setValue(_T("status"), &status);
+	statusMsg->setValue(_T("status"), &status);
 
 	auto copyMissileInfo = [&](shared_ptr<NOM> destination)
 	{
@@ -711,8 +711,8 @@ void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 		}
 	};
 
-	copyMissileInfo(mssStatusMsg);
-	sendExternalMsg(mssStatusMsg, _T("periodic MSS status"));
+	copyMissileInfo(statusMsg);
+	sendExternalMsg(statusMsg, _T("periodic MSS status"));
 
 	NUShort downlinkMsgID((ushort)ICD_MessageID::MSSInformationDownlinkToRSS);
 	NUShort downlinkMsgLength(144);
@@ -722,7 +722,7 @@ void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 	sendExternalMsg(downlinkMsg, _T("periodic MSS downlink"));
 }
 
-void UDPCommunicationManager::recvInnerMissileDetonationToComm(shared_ptr<NOM> nomMsg)
+void UDPCommunicationManager::recvInnerMSSInterceptionResultToComm(shared_ptr<NOM> nomMsg)
 {
 	auto resultMsg = meb->getNOMInstance(name, _T("MSSInterceptionResult"));
 	if (!resultMsg.get())

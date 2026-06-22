@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="MSSManager" date="2026-06-22" author="MSS">
+	<NOM:objects/>
+	<NOM:interactions>
+		<NOM:interaction name="InnerMSSStatusToComm" id="0x60" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="status" dataType="uintBE"/>
+			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerATSInformationToMSS" id="0x62" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerMSSInterceptionResultToComm" id="0x65" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerIgnitionCommandToMSS" id="0x66" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="missileID" dataType="uintBE"/>
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="launchPos" dataType="PosStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStartSimulationToModel" id="0x26" sharing="Subscribe" orderType="Receive" alignment="false"/>
+		<NOM:interaction name="InnerStopSimulationToModel" id="0x29" sharing="Subscribe" orderType="Receive" alignment="false"/>
+	</NOM:interactions>
+	<NOM:dataTypes>
+		<NOM:basicTypes/>
+		<NOM:enumerationTypes/>
+		<NOM:complexTypes/>
+	</NOM:dataTypes>
+	<NOM:notes/>
+</NOM:Nex1ObjectModel>

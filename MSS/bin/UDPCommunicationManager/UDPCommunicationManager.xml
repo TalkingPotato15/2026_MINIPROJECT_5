@@ -127,16 +127,16 @@
 			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
 		</NOM:interaction>
 
-		<NOM:interaction name="InnerUplinkInfoToMiss" id="0x62" sharing="Publish" orderType="Receive" alignment="false">
+		<NOM:interaction name="InnerATSInformationToMSS" id="0x62" sharing="Publish" orderType="Receive" alignment="false">
 			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
 		</NOM:interaction>
 
-		<NOM:interaction name="InnerMissileDetonationToComm" id="0x65" sharing="Subscribe" orderType="Receive" alignment="false">
+		<NOM:interaction name="InnerMSSInterceptionResultToComm" id="0x65" sharing="Subscribe" orderType="Receive" alignment="false">
 			<NOM:parameter name="targetID" dataType="uintBE"/>
 			<NOM:parameter name="missionFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
-		<NOM:interaction name="InnerFireMissileToMiss" id="0x66" sharing="Publish" orderType="Receive" alignment="false">
+		<NOM:interaction name="InnerIgnitionCommandToMSS" id="0x66" sharing="Publish" orderType="Receive" alignment="false">
 			<NOM:parameter name="missileID" dataType="uintBE"/>
 			<NOM:parameter name="targetID" dataType="uintBE"/>
 			<NOM:parameter name="launchPos" dataType="PosStruct"/>

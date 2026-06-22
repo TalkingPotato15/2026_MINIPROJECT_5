@@ -37,7 +37,6 @@ enum class InnerICD_MessageID
 	InnerStopSimulationToModel = 0x29,
 
 	// RSS ICD 내부 메시지
-	InnerRSSStatusToComm = 0x30,
 
 	// ATS ICD 내부 메시지
 	InnerAirThreatDetonationToATM = 0x40,
@@ -51,11 +50,11 @@ enum class InnerICD_MessageID
 	// MSS ICD 내부 메시지
 	InnerMSSStatusToComm = 0x60,
 	InnerMissileInfoToDeto,
-	InnerUplinkInfoToMiss,
+	InnerATSInformationToMSS,
 	InnerUplinkInfoToDeto,
 	InnerMissileDetonationToMiss,
-	InnerMissileDetonationToComm,
-	InnerFireMissileToMiss,
+	InnerMSSInterceptionResultToComm,
+	InnerIgnitionCommandToMSS,
 	
 	// MFRS ICD 내부 메시지
 	InnerAirThreatInfo = 0x70,
