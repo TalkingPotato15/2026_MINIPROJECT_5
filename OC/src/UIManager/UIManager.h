@@ -1,0 +1,66 @@
+#pragma once
+
+#include <afxwin.h>
+#include <functional>
+#include <map>
+#include <memory>
+
+#include <nFramework/BaseManager.h>
+#include <nFramework/mec/MECComponent.h>
+#include <nFramework/nom/NOMMain.h>
+
+using namespace nframework;
+using namespace nom;
+
+struct NOMInfo
+{
+	TCHAR MsgName[1024];
+	unsigned int MsgID;
+	unsigned int MsgInstanceID;
+	int MsgLen;
+};
+
+class BASEMGRDLL_API UIManager : public BaseManager
+{
+public:
+	UIManager(void);
+	~UIManager(void);
+
+	std::shared_ptr<NOM> registerMsg(tstring) override;
+	void discoverMsg(std::shared_ptr<NOM>) override;
+	void updateMsg(std::shared_ptr<NOM>) override;
+	void reflectMsg(std::shared_ptr<NOM>) override;
+	void deleteMsg(std::shared_ptr<NOM>) override;
+	void removeMsg(std::shared_ptr<NOM>) override;
+	void sendMsg(std::shared_ptr<NOM>) override;
+	void recvMsg(std::shared_ptr<NOM>) override;
+	void setUserName(tstring) override;
+	tstring getUserName() override;
+	void setData(void*) override;
+	bool start() override;
+	bool stop() override;
+	void setMEBComponent(IMEBComponent*) override;
+
+private:
+	void initialize();
+	void release();
+	void funcMapInit();
+	void notifyGui(std::shared_ptr<NOM> nomMsg, UINT message);
+
+	void onATSStatus(std::shared_ptr<NOM> nomMsg);
+	void onRSSStatus(std::shared_ptr<NOM> nomMsg);
+	void onMSSStatus(std::shared_ptr<NOM> nomMsg);
+	void onMLSStatus(std::shared_ptr<NOM> nomMsg);
+	void onTargetDetection(std::shared_ptr<NOM> nomMsg);
+	void onTargetDestroyed(std::shared_ptr<NOM> nomMsg);
+
+private:
+	IMEBComponent* meb = nullptr;
+	MECComponent* mec = nullptr;
+	HWND winHandle = nullptr;
+	tstring name;
+
+	std::map<unsigned int, std::shared_ptr<NOM>> registeredMsgMap;
+	std::map<unsigned int, std::shared_ptr<NOM>> discoveredMsgMap;
+	std::map<tstring, std::function<void(std::shared_ptr<NOM>)>> funcMap;
+};

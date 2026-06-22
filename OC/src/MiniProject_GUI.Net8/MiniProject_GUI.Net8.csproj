@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<!-- 원하는 절대 경로나 상대 경로를 지정 -->
+		<OutputPath>$(SolutionDir)bin\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<OutputPath>$(SolutionDir)bin\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\korea_satellite_map.png" />
+    <Resource Include="Assets\launcher_vehicle.png" />
+    <Resource Include="Assets\radar_station.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CS_Log4nF.Net8">
+        <HintPath Condition="'$(Configuration)' == 'Debug'">$(NFW_DIR)bin\CS_Log4nF.Net8\Debug\net8.0\CS_Log4nF.Net8.dll</HintPath>
+		<HintPath Condition="'$(Configuration)' == 'Release'">$(NFW_DIR)bin\CS_Log4nF.Net8\Release\net8.0\CS_Log4nF.Net8.dll</HintPath>
+	</Reference>
+    <Reference Include="CS_NOM.Net8">
+		<HintPath Condition="'$(Configuration)' == 'Debug'">$(NFW_DIR)bin\CS_NOM.Net8\Debug\net8.0\CS_NOM.Net8.dll</HintPath>
+		<HintPath Condition="'$(Configuration)' == 'Release'">$(NFW_DIR)bin\CS_NOM.Net8\Release\net8.0\CS_NOM.Net8.dll</HintPath>
+	</Reference>
+    <Reference Include="NOMHandlerLib.Net8">
+		<HintPath Condition="'$(Configuration)' == 'Debug'">$(NFW_DIR)bin\NOMHandlerLib.Net8\Debug\net8.0-windows\NOMHandlerLib.Net8.dll</HintPath>
+		<HintPath Condition="'$(Configuration)' == 'Release'">$(NFW_DIR)bin\NOMHandlerLib.Net8\Release\net8.0-windows\NOMHandlerLib.Net8.dll</HintPath>
+	</Reference>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="IF EXIST &quot;$(NFW_DIR)bin\nFConnectd.dll&quot; COPY &quot;$(NFW_DIR)bin\nFConnectd.dll&quot; &quot;$(SolutionDir)bin\nFConnectd.dll&quot; /Y&#xD;&#xA;IF EXIST &quot;$(NFW_DIR)bin\nFConnect.dll&quot;  COPY &quot;$(NFW_DIR)bin\nFConnect.dll&quot;  &quot;$(SolutionDir)bin\nFConnect.dll&quot;  /Y&#xD;&#xA;powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(SolutionDir)bin\nFConnect_ACL.ps1&quot;" />
+  </Target>
+
+</Project>

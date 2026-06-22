@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="EngagementManager" date="2026-06-18" author="SAMS OC">
+  <NOM:interactions>
+    <!-- OC Publish -->
+    <NOM:interaction name="ATSInformationToRSS" id="0x07" sharing="Publish" orderType="Receive" alignment="false" semantics="OC가 RSS로 전달하는 ATS 표적 위치 정보">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="targetCount" dataType="uintBE" />
+      <NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="20" />
+    </NOM:interaction>
+    <NOM:interaction name="LaunchCommand" id="0x09" sharing="Publish" orderType="Receive" alignment="false" semantics="발사 명령 (OC → MLS)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="targetID" dataType="uintBE" />
+    </NOM:interaction>
+    <NOM:interaction name="MSSInformationDownlinkToRSS" id="0x0c" sharing="Publish" orderType="Receive" alignment="false" semantics="OC가 RSS로 전달하는 MSS 유도탄 위치 정보">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="missileCount" dataType="uintBE" />
+      <NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4" />
+    </NOM:interaction>
+    <NOM:interaction name="ATSInterceptionResult" id="0x0e" sharing="Publish" orderType="Receive" alignment="false" semantics="OC가 ATS에 전달하는 요격 결과 (ICD명: ATSInformation)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="targetID" dataType="uintBE" />
+      <NOM:parameter name="interceptionFlag" dataType="boolean" />
+    </NOM:interaction>
+    <NOM:interaction name="MSSInterceptionResult" id="0x0f" sharing="Publish" orderType="Receive" alignment="false" semantics="OC가 MSS에 전달하는 요격 결과 (ICD명: MSSInformation)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="missileID" dataType="uintBE" />
+      <NOM:parameter name="isIntercepted" dataType="boolean" />
+    </NOM:interaction>
+    <NOM:interaction name="MissionFailed" id="0x11" sharing="Publish" orderType="Receive" alignment="false" semantics="임무 실패 통보 (OC → ATS/MSS)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="missionFlag" dataType="boolean" />
+    </NOM:interaction>
+    <!-- OC Subscribe -->
+    <NOM:interaction name="ATSStatus" id="0x02" sharing="Subscribe" orderType="Receive" alignment="false" semantics="ATS 상태/위치 주기 수신 (1Hz)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="status" dataType="intBE" />
+      <NOM:parameter name="targetCount" dataType="uintBE" />
+      <NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="20" />
+    </NOM:interaction>
+    <NOM:interaction name="MSSStatus" id="0x04" sharing="Subscribe" orderType="Receive" alignment="false" semantics="MSS 유도탄 상태 주기 수신 (1Hz)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="status" dataType="intBE" />
+      <NOM:parameter name="missileCount" dataType="uintBE" />
+      <NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4" />
+    </NOM:interaction>
+    <NOM:interaction name="TargetDetection" id="0x08" sharing="Subscribe" orderType="Receive" alignment="false" semantics="표적 탐지 결과 수신 (RSS → OC)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="targetID" dataType="uintBE" />
+      <NOM:parameter name="targetDetectionSuccess" dataType="boolean" />
+    </NOM:interaction>
+    <NOM:interaction name="TargetDestroyed" id="0x0d" sharing="Subscribe" orderType="Receive" alignment="false" semantics="요격 판정 결과 수신 (RSS → OC)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="missionSuccess" dataType="boolean" />
+    </NOM:interaction>
+  </NOM:interactions>
+  <NOM:dataTypes>
+    <NOM:basicTypes />
+    <NOM:enumerationTypes />
+    <NOM:complexTypes />
+  </NOM:dataTypes>
+  <NOM:notes />
+</NOM:Nex1ObjectModel>

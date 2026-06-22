@@ -1,0 +1,86 @@
+#pragma once
+
+enum class ICD_MessageID
+{
+	// OC SAMS ICD
+	Scenario = 0x01,
+	ATSStatus,
+	RSSStatus,
+	MSSStatus,
+	MLSStatus,
+	StartSimulation,
+	ATSInformationToRSS,
+	TargetDetection,
+	LaunchCommand,
+	IgnitionCommand = 0x0A,
+	ATSInformationUplink,
+	MSSInformationDownlinkToRSS,
+	TargetDestroyed,
+	ATSInterceptionResult,
+	MSSInterceptionResult,
+	Stop,
+	MissionFailed,
+};
+
+enum class InnerICD_MessageID
+{
+	// 공용 ICD 내부 메시지
+	InnerSimulatorStateToComm = 0x20,
+	InnerSendScenario,
+	InnerSendScenarioAck,
+	InnerSendScenarioToModel,
+	InnerStartSimulation,
+	InnerStartSimulationAck,
+	InnerStartSimulationToModel,
+	InnerStopSimulation,
+	InnerStopSimulationAck,
+	InnerStopSimulationToModel = 0x29,
+
+	// RSS ICD 내부 메시지
+	InnerRSSStatusToComm = 0x30,
+
+	// ATS ICD 내부 메시지
+	InnerAirThreatDetonationToATM = 0x40,
+	InnerAirThreatInfoToComm,
+
+	// LCS ICD 내부 메시지
+	InnerFireMissileAckToLCS = 0x50,
+	InnerFireMissileToMSS,
+	InnerSendMissileInfoToComm,
+
+	// MSS ICD 내부 메시지
+	InnerMSSStatusToComm = 0x60,
+	InnerMissileInfoToDeto,
+	InnerUplinkInfoToMiss,
+	InnerUplinkInfoToDeto,
+	InnerMissileDetonationToMiss,
+	InnerMissileDetonationToComm,
+	InnerFireMissileToMiss,
+	
+	// MFRS ICD 내부 메시지
+	InnerAirThreatInfo = 0x70,
+	InnerMissileInfo,
+	InnerRadarDetectionInfo,
+	InnerAirThreatDetonation,
+};
+
+enum class SimulatorID
+{
+	TCC = 100,
+	LCS,
+	ATS,
+	MSS,
+	MFRS,
+};
+
+enum class TrackState
+{
+	// ATS
+	ATS_Flight = 0,
+	ATS_Detonation,
+
+	// MSS
+	MSS_Flight = 10,
+	MSS_Detonation,
+	MSS_EmergencyDetonation,
+};

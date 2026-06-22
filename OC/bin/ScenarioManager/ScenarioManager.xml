@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="ScenarioManager" date="2026-06-18" author="SAMS OC">
+  <NOM:interactions>
+    <!-- OC Publish: Scenario (0x01) -> UDPCommunicationManager -->
+    <NOM:interaction name="Scenario" id="0x01" sharing="Publish" orderType="Receive" alignment="false" semantics="시나리오 배포 메시지 (OC 송신)">
+      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
+      <NOM:parameter name="targetCount" dataType="uintBE" />
+      <NOM:parameter name="scenarioInfo" dataType="TargetInfoStruct" size="20" />
+      <NOM:parameter name="rssPos" dataType="PosStruct" />
+      <NOM:parameter name="radius" dataType="doubleBE" />
+      <NOM:parameter name="mlsPos" dataType="PosStruct" />
+    </NOM:interaction>
+  </NOM:interactions>
+  <NOM:dataTypes>
+    <NOM:basicTypes />
+    <NOM:enumerationTypes />
+    <NOM:complexTypes />
+  </NOM:dataTypes>
+  <NOM:notes />
+</NOM:Nex1ObjectModel>

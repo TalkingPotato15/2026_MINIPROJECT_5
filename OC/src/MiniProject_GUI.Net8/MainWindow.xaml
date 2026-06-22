@@ -1,0 +1,379 @@
+﻿<Window x:Class="MiniProject_GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="SAMS OC"
+        Height="720" Width="1180"
+        MinHeight="680" MinWidth="1120"
+        Background="Black"
+        FontFamily="Malgun Gothic">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="PanelBg" Color="#000000"/>
+        <SolidColorBrush x:Key="PanelBorder" Color="#E8E8E8"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#E31212"/>
+
+        <Style x:Key="Panel" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PanelBg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PanelBorder}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+
+        <Style x:Key="PanelTitle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+
+        <Style x:Key="InfoText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="MinWidth" Value="112"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#101010"/>
+            <Setter Property="Background" Value="#F3F3F3"/>
+            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LaunchButton" BasedOn="{StaticResource ActionButton}" TargetType="Button">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="MinWidth" Value="96"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{StaticResource AccentRed}"/>
+            <Setter Property="BorderBrush" Value="#FF5A5A"/>
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="282"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="280"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="88"/>
+                <RowDefinition Height="204"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource Panel}" Padding="10,8">
+                <StackPanel>
+                    <TextBlock Text="레이다 정보" Style="{StaticResource PanelTitle}" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="X : " Style="{StaticResource InfoText}"/>
+                        <TextBlock Text="{Binding RssPosX}" Style="{StaticResource InfoText}" Width="86"/>
+                        <TextBlock Text="Y : " Style="{StaticResource InfoText}"/>
+                        <TextBlock Text="{Binding RssPosY}" Style="{StaticResource InfoText}" Width="86"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="1" Style="{StaticResource Panel}" Margin="0,4,0,0" Padding="10,8">
+                <StackPanel>
+                    <TextBlock Text="발사대 정보" Style="{StaticResource PanelTitle}" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="X : " Style="{StaticResource InfoText}"/>
+                        <TextBlock Text="{Binding MlsPosX}" Style="{StaticResource InfoText}" Width="86"/>
+                        <TextBlock Text="Y : " Style="{StaticResource InfoText}"/>
+                        <TextBlock Text="{Binding MlsPosY}" Style="{StaticResource InfoText}" Width="86"/>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding MssMissileList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding SummaryText}"
+                                           FontSize="15" FontWeight="Bold" Foreground="White"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource Panel}" Margin="0,4,0,0" Padding="10,6">
+                    <TextBlock Text="공중위협 정보" Style="{StaticResource PanelTitle}" Margin="0"/>
+            </Border>
+
+            <ItemsControl Grid.Row="3" ItemsSource="{Binding ScenarioThreatDisplays}" Margin="0,4,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Panel}" Height="{Binding PanelHeight}" Padding="8,4" Margin="0,0,0,4">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="106"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding Name}" Foreground="{Binding NameBrush}"
+                                           FontSize="{Binding NameFontSize}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" Content="발사" Style="{StaticResource LaunchButton}" Height="24"
+                                        Command="{Binding DataContext.LaunchThreatCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding TargetId}"/>
+
+                                <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
+                                           Text="{Binding CoordinateText}"
+                                           Foreground="{Binding NameBrush}"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"
+                                           FontSize="{Binding CoordinateFontSize}"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+        <Border Grid.Column="1" Background="#071014" BorderBrush="#D0D0D0" BorderThickness="1">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="620" Height="660" Background="#071014" ClipToBounds="True">
+                    <Image Canvas.Left="0" Canvas.Top="0"
+                           Width="620" Height="660"
+                           Source="Assets/korea_satellite_map.png"
+                           Stretch="Fill"/>
+
+                    <Border Canvas.Left="214" Canvas.Top="14"
+                            Background="#A8000000"
+                            BorderBrush="#44FFFFFF"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12,5">
+                        <TextBlock Text="대한민국 작전 구역"
+                                   Foreground="White"
+                                   FontSize="20"
+                                   FontWeight="Bold"/>
+                    </Border>
+
+                    <Canvas Canvas.Left="{Binding RadarRangeLeft}"
+                            Canvas.Top="{Binding RadarRangeTop}"
+                            Width="{Binding RadarRangeDiameter}"
+                            Height="{Binding RadarRangeDiameter}">
+                        <Viewbox Width="{Binding RadarRangeDiameter}"
+                                 Height="{Binding RadarRangeDiameter}"
+                                 Stretch="Fill">
+                            <Canvas Width="100" Height="100">
+                                <Ellipse Width="100" Height="100"
+                                         Fill="#73EA73" Opacity="0.28" Stroke="#77FF77" StrokeThickness="1.8"/>
+                                <Ellipse Canvas.Left="16.7" Canvas.Top="16.7" Width="66.6" Height="66.6"
+                                         Fill="Transparent" Stroke="#B9EAB9" StrokeThickness="1.2"/>
+                                <Ellipse Canvas.Left="33.3" Canvas.Top="33.3" Width="33.4" Height="33.4"
+                                         Fill="Transparent" Stroke="#B9EAB9" StrokeThickness="1.2"/>
+                                <Line X1="50" Y1="0" X2="50" Y2="100" Stroke="#B9EAB9" StrokeThickness="1.2"/>
+                                <Line X1="0" Y1="50" X2="100" Y2="50" Stroke="#B9EAB9" StrokeThickness="1.2"/>
+                                <Line X1="14.6" Y1="14.6" X2="85.4" Y2="85.4" Stroke="#B9EAB9" StrokeThickness="1.2"/>
+                                <Line X1="85.4" Y1="14.6" X2="14.6" Y2="85.4" Stroke="#B9EAB9" StrokeThickness="1.2"/>
+                            </Canvas>
+                        </Viewbox>
+                    </Canvas>
+
+                    <Border Canvas.Left="{Binding LauncherIconLeft}" Canvas.Top="{Binding LauncherIconTop}" Width="84" Height="58"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            Padding="0">
+                        <Grid>
+                            <Image Source="Assets/launcher_vehicle.png" Stretch="Uniform"/>
+                            <Border Background="#B0000000"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Bottom"
+                                    Padding="4,1"
+                                    CornerRadius="2">
+                                <TextBlock Text="MLS" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Canvas.Left="{Binding RadarIconLeft}" Canvas.Top="{Binding RadarIconTop}" Width="62" Height="62"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            Padding="0">
+                        <Grid>
+                            <Image Source="Assets/radar_station.png" Stretch="Uniform"/>
+                            <Border Background="#B0000000"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Bottom"
+                                    Padding="4,1"
+                                    CornerRadius="2">
+                                <TextBlock Text="RSS" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <ItemsControl ItemsSource="{Binding MapThreatPaths}" Canvas.Left="0" Canvas.Top="0" Width="620" Height="660">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas Width="620" Height="660"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Polyline Points="{Binding Points}" Stroke="{Binding Stroke}"
+                                          StrokeThickness="3" StrokeDashArray="7 4" Opacity="0.95"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ItemsControl ItemsSource="{Binding MapThreatMarkers}" Canvas.Left="0" Canvas.Top="0" Width="620" Height="660">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas Width="620" Height="660"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Top}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="26" Height="26">
+                                    <Ellipse Fill="{Binding Fill}" Stroke="White" StrokeThickness="2"/>
+                                    <TextBlock Text="{Binding Label}" FontSize="9" FontWeight="Bold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="#101010"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+            </Viewbox>
+        </Border>
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="128"/>
+                <RowDefinition Height="112"/>
+                <RowDefinition Height="112"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource Panel}">
+                <StackPanel>
+                <TextBlock Text="상태 정보" Style="{StaticResource PanelTitle}" Margin="0,0,0,10"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <Ellipse Width="36" Height="36" Fill="{Binding AtsStatusColor}"/>
+                            <TextBlock Text="공중위협" Foreground="White" FontSize="13" FontWeight="Bold" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <Ellipse Width="36" Height="36" Fill="{Binding MlsStatusColor}"/>
+                            <TextBlock Text="발사대" Foreground="White" FontSize="13" FontWeight="Bold" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <Ellipse Width="36" Height="36" Fill="{Binding MssStatusColor}"/>
+                            <TextBlock Text="유도탄" Foreground="White" FontSize="13" FontWeight="Bold" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                            <Ellipse Width="36" Height="36" Fill="{Binding RssStatusColor}"/>
+                            <TextBlock Text="레이더" Foreground="White" FontSize="13" FontWeight="Bold" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="1" Style="{StaticResource Panel}" Margin="0,4,0,0">
+                <StackPanel>
+                <TextBlock Text="시나리오 설정" Style="{StaticResource PanelTitle}" Margin="0,0,0,12"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                    <Button Content="시나리오 생성" Style="{StaticResource ActionButton}"
+                                Command="{Binding OpenScenarioEditorCommand}"/>
+                    <Button Grid.Column="2" Content="시나리오 배포" Style="{StaticResource ActionButton}"
+                                Command="{Binding SendScenarioCommand}"
+                                IsEnabled="{Binding IsPlugOutEnabled}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource Panel}" Margin="0,4,0,0">
+                <StackPanel>
+                <TextBlock Text="모의 제어" Style="{StaticResource PanelTitle}" Margin="0,0,0,12"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                    <Button Content="모의 시작" Style="{StaticResource ActionButton}"
+                                Command="{Binding StartSimulationCommand}"
+                                IsEnabled="{Binding IsStartEnabled}"/>
+                    <Button Grid.Column="2" Content="모의 종료" Style="{StaticResource ActionButton}"
+                                Command="{Binding StopSimulationCommand}"
+                                IsEnabled="{Binding IsStopEnabled}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="3" Style="{StaticResource Panel}" Margin="0,4,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                <TextBlock Text="이벤트" Style="{StaticResource PanelTitle}" Margin="0"/>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding EventLogList}"
+                             Background="Black" BorderThickness="0"
+                             Foreground="White" FontSize="14"
+                             FontFamily="Malgun Gothic"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
+
