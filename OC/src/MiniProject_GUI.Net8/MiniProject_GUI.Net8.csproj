@@ -26,6 +26,12 @@
 	</ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\korea_satellite_map.png" />
+    <Resource Include="Assets\launcher_vehicle.png" />
+    <Resource Include="Assets\radar_station.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="CS_Log4nF.Net8">
         <HintPath Condition="'$(Configuration)' == 'Debug'">$(NFW_DIR)bin\CS_Log4nF.Net8\Debug\net8.0\CS_Log4nF.Net8.dll</HintPath>
 		<HintPath Condition="'$(Configuration)' == 'Release'">$(NFW_DIR)bin\CS_Log4nF.Net8\Release\net8.0\CS_Log4nF.Net8.dll</HintPath>
