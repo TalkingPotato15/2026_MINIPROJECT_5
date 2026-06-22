@@ -1,297 +1,362 @@
-// ATSManager.cpp
-// 역할: 공중위협(Air Threat) 시뮬레이션 매니저.
-//       시나리오(웨이포인트)를 수신하고, 시뮬레이션 시작 시 공중위협의
-//       비행 경로를 보간하여 주기적으로 위치 정보를 송신한다.
-
-#pragma once
-#include <nFramework/util/IniHandler.h>
 #include "ATSManager.h"
-#include <nFramework/util/util.h>
-#include <map>
 
-/************************************************************************
-    constructor / destructor
-************************************************************************/
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <vector>
 
-ATSManager::ATSManager(void)
+namespace
+{
+constexpr int kStatusPeriodMilliseconds = 1000;
+constexpr std::size_t kMaximumWayPointCount = 8;
+
+const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointXFields{
+    _T("Scenario.WayPoint0_X"), _T("Scenario.WayPoint1_X"),
+    _T("Scenario.WayPoint2_X"), _T("Scenario.WayPoint3_X"),
+    _T("Scenario.WayPoint4_X"), _T("Scenario.WayPoint5_X"),
+    _T("Scenario.WayPoint6_X"), _T("Scenario.WayPoint7_X")
+};
+
+const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointYFields{
+    _T("Scenario.WayPoint0_Y"), _T("Scenario.WayPoint1_Y"),
+    _T("Scenario.WayPoint2_Y"), _T("Scenario.WayPoint3_Y"),
+    _T("Scenario.WayPoint4_Y"), _T("Scenario.WayPoint5_Y"),
+    _T("Scenario.WayPoint6_Y"), _T("Scenario.WayPoint7_Y")
+};
+
+const std::array<const TCHAR*, kMaximumWayPointCount> kWayPointZFields{
+    _T("Scenario.WayPoint0_Z"), _T("Scenario.WayPoint1_Z"),
+    _T("Scenario.WayPoint2_Z"), _T("Scenario.WayPoint3_Z"),
+    _T("Scenario.WayPoint4_Z"), _T("Scenario.WayPoint5_Z"),
+    _T("Scenario.WayPoint6_Z"), _T("Scenario.WayPoint7_Z")
+};
+}
+
+ManeuverManager::ManeuverManager()
 {
     initialize();
 }
 
-ATSManager::~ATSManager(void)
+ManeuverManager::~ManeuverManager()
 {
     release();
 }
 
-/************************************************************************
-    initialize / release
-    - initialize: MEC 생성, 이름 설정, 메시지-함수 바인딩 초기화
-    - release   : 자원 해제 (MEC, MEB, 타이머, AirThreat 인스턴스)
-************************************************************************/
-
-void ATSManager::initialize(void)
+void ManeuverManager::initialize()
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << std::endl;
-
-    // 이 매니저의 이름 설정 (MEB에서 메시지를 가져올 때 식별자로 사용)
     setUserName(_T("ATSManager"));
-
-    // MEC(MECComponent) 생성 — nFramework에서 메시지 송수신을 담당하는 객체.
-    // setUser(this): 이 ATSManager가 MEC의 사용자임을 등록.
-    mec = new MECComponent;
-    mec->setUser(this);
-
-    // 수신 메시지 이름과 처리 함수를 바인딩한다.
-    funcMapInit();
+    mec_ = new MECComponent;
+    mec_->setUser(this);
+    initializeMessageHandlers();
 }
 
-void ATSManager::release()
+void ManeuverManager::release()
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << std::endl;
-
-    // 실행 중인 타이머 정지
-    stopSequence();
-
-    delete mec;
-    mec = nullptr;
-    meb = nullptr;
+    removePeriodicTask();
+    delete mec_;
+    mec_ = nullptr;
+    meb_ = nullptr;
+    messageHandlers_.clear();
 }
 
-/************************************************************************
-    funcMapInit
-    수신 메시지 이름 → 처리 함수를 msgFuncMap에 등록한다.
-    recvMsg()에서 메시지 이름으로 이 맵을 조회하여 적절한 함수를 호출한다.
-************************************************************************/
-
-void ATSManager::funcMapInit()
+void ManeuverManager::initializeMessageHandlers()
 {
-    std::function<void(std::shared_ptr<NOM>)> msgProc;
-
-    // InnerSendScenarioToModel: SimulationManager가 시나리오를 포워딩해준 메시지.
-    // 웨이포인트(위도/경도)를 파싱하고 비행 경로를 생성한다.
-    msgProc = std::bind(&ATSManager::pointParser, this, std::placeholders::_1);
-    msgFuncMap.insert({ _T("InnerSendScenarioToModel"), msgProc });
-
-    // InnerStartSimulationToModel: 시뮬레이션 시작 명령.
-    // 타이머를 등록하여 sendATInfo()를 주기적으로 호출한다.
-    msgProc = std::bind(&ATSManager::recvInnerStartSimulationToModel, this, std::placeholders::_1);
-    msgFuncMap.insert({ _T("InnerStartSimulationToModel"), msgProc });
-
-    // InnerStopSimulationToModel: 시뮬레이션 정지 명령.
-    msgProc = std::bind(&ATSManager::recvInnerStopSimulationToModel, this, std::placeholders::_1);
-    msgFuncMap.insert({ _T("InnerStopSimulationToModel"), msgProc });
-
-    // InnerAirThreatDetonationToATM: 격추(Detonation) 이벤트.
-    msgProc = std::bind(&ATSManager::recvDetonation, this, std::placeholders::_1);
-    msgFuncMap.insert({ _T("InnerAirThreatDetonationToATM"), msgProc });
+    messageHandlers_.emplace(
+        _T("InnerSendScenarioToModel"),
+        std::bind(&ManeuverManager::receiveScenario, this, std::placeholders::_1));
+    messageHandlers_.emplace(
+        _T("InnerStartSimulationToModel"),
+        std::bind(&ManeuverManager::receiveStart, this, std::placeholders::_1));
+    messageHandlers_.emplace(
+        _T("InnerStopSimulationToModel"),
+        std::bind(&ManeuverManager::receiveStop, this, std::placeholders::_1));
+    messageHandlers_.emplace(
+        _T("InnerAirThreatDetonationToATM"),
+        std::bind(&ManeuverManager::receiveInterception, this, std::placeholders::_1));
 }
 
-/************************************************************************
-    BaseManager 인터페이스 구현
-    nFramework가 호출하는 표준 메서드들이다.
-    FooManager.cpp 패턴을 따른다.
-************************************************************************/
-
-std::shared_ptr<NOM>
-ATSManager::registerMsg(tstring msgName)
+std::shared_ptr<NOM> ManeuverManager::registerMsg(tstring msgName)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << msgName << std::endl;
-
-    // mec를 통해 NOM 인스턴스를 등록하고 registeredMsgMap에 저장한다.
-    std::shared_ptr<NOM> nomMsg = mec->registerMsg(msgName);
-    registeredMsgMap.emplace(nomMsg->getInstanceID(), nomMsg);
+    auto nomMsg = mec_->registerMsg(msgName);
+    registeredMessages_.emplace(nomMsg->getInstanceID(), nomMsg);
     return nomMsg;
 }
 
-void ATSManager::discoverMsg(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::discoverMsg(std::shared_ptr<NOM> nomMsg)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
-    discoveredMsgMap.emplace(nomMsg->getInstanceID(), nomMsg);
+    discoveredMessages_.emplace(nomMsg->getInstanceID(), nomMsg);
 }
 
-void ATSManager::updateMsg(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::updateMsg(std::shared_ptr<NOM> nomMsg)
 {
-    mec->updateMsg(nomMsg);
+    mec_->updateMsg(nomMsg);
 }
 
-void ATSManager::reflectMsg(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::reflectMsg(std::shared_ptr<NOM> nomMsg)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
+    ntcout << _T("[ManeuverManager::reflectMsg] ") << nomMsg->getName() << std::endl;
 }
 
-void ATSManager::deleteMsg(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::deleteMsg(std::shared_ptr<NOM> nomMsg)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
-    mec->deleteMsg(nomMsg);
-    registeredMsgMap.erase(nomMsg->getInstanceID());
+    mec_->deleteMsg(nomMsg);
+    registeredMessages_.erase(nomMsg->getInstanceID());
 }
 
-void ATSManager::removeMsg(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::removeMsg(std::shared_ptr<NOM> nomMsg)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
-    discoveredMsgMap.erase(nomMsg->getInstanceID());
+    discoveredMessages_.erase(nomMsg->getInstanceID());
 }
 
-void ATSManager::sendMsg(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::sendMsg(std::shared_ptr<NOM> nomMsg)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
-    mec->sendMsg(nomMsg);
+    mec_->sendMsg(nomMsg);
 }
 
-void ATSManager::recvMsg(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
-
-    // msgFuncMap에서 메시지 이름으로 핸들러를 찾아 호출한다.
-    auto iter = msgFuncMap.find(nomMsg->getName());
-    if (iter != msgFuncMap.end())
+    const auto handler = messageHandlers_.find(nomMsg->getName());
+    if (handler != messageHandlers_.end())
     {
-        iter->second(nomMsg);
+        handler->second(nomMsg);
     }
 }
 
-void ATSManager::setUserName(tstring userName)
+void ManeuverManager::setUserName(tstring userName)
 {
-    name = userName;
+    name_ = std::move(userName);
 }
 
-tstring ATSManager::getUserName()
+tstring ManeuverManager::getUserName()
 {
-    return name;
+    return name_;
 }
 
-void ATSManager::setData(void* data)
+void ManeuverManager::setData(void*)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << std::endl;
 }
 
-bool ATSManager::start()
+bool ManeuverManager::start()
 {
-    IniHandler iniHandler;
-    iniHandler.readIni(_T("ATSManager/ATSManager.ini"));
-
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << std::endl;
-    return true;
-}
-
-bool ATSManager::stop()
-{
-    stopSequence();
-    return true;
-}
-
-void ATSManager::setMEBComponent(IMEBComponent* realMEB)
-{
-    meb = realMEB;
-    mec->setMEB(meb);
-}
-
-/************************************************************************
-    ATSManager 전용 메서드 구현
-************************************************************************/
-
-// pointParser: InnerSendScenarioToModel 수신 핸들러.
-// 사전 설계된 시나리오 메시지에서 필요한 정보를 파싱하여 가져오는 예시  
-void ATSManager::pointParser(std::shared_ptr<NOM> nomMsg)
-{
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
-
-    // 기준 좌표(원점) 파싱 — NOM 필드 접근 방식: "구조체명.필드명"
-    origin.first  = nomMsg->getValue(_T("Scenario.OriginLat"))->toDouble();
-    origin.second = nomMsg->getValue(_T("Scenario.OriginLng"))->toDouble();
-
-    ntcout << _T("[ATSManager] 원점 위도=") << origin.first
-           << _T(", 경도=") << origin.second << std::endl;
-    
-    /* 코드는 단순 미완성 예시 일뿐, 팀별로 설계한대로 구현하기 */
-
-}
-
-
-
-
-// recvInnerStartSimulationToModel: 시뮬레이션 시작 명령 처리.
-// AirThreat 인스턴스를 생성하고 NTimer를 통해 실질적으로 공중 위협 표적 좌표를 보내는 함수 sendATInfo()를 주기적으로 호출한다.
-// *  코드는 단순 예시일뿐, 각 팀 별로 설계한대로 구현하기 
-void ATSManager::recvInnerStartSimulationToModel(std::shared_ptr<NOM> nomMsg)
-{
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << std::endl;
-
-    if (flightTimeTable.empty())
     {
-        ntcout << _T("[ATSManager] 경고: 시나리오 배포 없이 시작 명령 수신. 무시합니다.") << std::endl;
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        operationalStatus_ = ATSOperationalStatus::Ready;
+    }
+
+    timer_ = &NTimer::getInstance();
+    periodicCallback_ = [this](void*) { periodicUpdate(); };
+    timerHandle_ = timer_->addPeriodicTask(kStatusPeriodMilliseconds, periodicCallback_);
+
+    ntcout << _T("[ManeuverManager] READY, ATSStatus period = 1000 ms") << std::endl;
+    publishATSStatus();
+    return timerHandle_ != -1;
+}
+
+bool ManeuverManager::stop()
+{
+    {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        operationalStatus_ = ATSOperationalStatus::Idle;
+        airThreat_.stop();
+    }
+
+    publishATSStatus();
+    removePeriodicTask();
+    return true;
+}
+
+void ManeuverManager::setMEBComponent(IMEBComponent* realMEB)
+{
+    meb_ = realMEB;
+    mec_->setMEB(meb_);
+}
+
+void ManeuverManager::receiveScenario(std::shared_ptr<NOM> nomMsg)
+{
+    std::uint32_t targetId = 0;
+    std::uint32_t speed = 0;
+    std::uint32_t pointCount = 0;
+
+    if (const auto value = nomMsg->getValue(_T("Scenario.TargetID")))
+    {
+        targetId = value->toUInt();
+    }
+    if (const auto value = nomMsg->getValue(_T("Scenario.Speed")))
+    {
+        speed = value->toUInt();
+    }
+    if (const auto value = nomMsg->getValue(_T("Scenario.PointCount")))
+    {
+        pointCount = value->toUInt();
+    }
+
+    pointCount = std::min<std::uint32_t>(pointCount, static_cast<std::uint32_t>(kMaximumWayPointCount));
+    std::vector<Position> route;
+    route.reserve(pointCount);
+
+    for (std::size_t index = 0; index < pointCount; ++index)
+    {
+        Position point;
+        if (const auto value = nomMsg->getValue(kWayPointXFields[index]))
+        {
+            point.x = value->toDouble();
+        }
+        if (const auto value = nomMsg->getValue(kWayPointYFields[index]))
+        {
+            point.y = value->toDouble();
+        }
+        if (const auto value = nomMsg->getValue(kWayPointZFields[index]))
+        {
+            point.z = value->toDouble();
+        }
+        route.push_back(point);
+    }
+
+    const bool initialized = [&]()
+    {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        operationalStatus_ = ATSOperationalStatus::Ready;
+        return airThreat_.initialize(targetId, static_cast<double>(speed), route);
+    }();
+
+    if (!initialized)
+    {
+        ntcout << _T("[ManeuverManager] Invalid scenario: at least 2 points and speed > 0 are required.") << std::endl;
         return;
     }
 
- 
-    // NTimer 싱글톤 획득 후 콜백 등록
-    // sendATInfo_Periodic: void(void*) 형식의 타이머 콜백.
-    // sendATInfo()는 인수가 없으므로 람다로 감싸서 형식 맞춤.
-    nTimer = &(NTimer::getInstance());
-    sendATInfo_Periodic = [this](void*) { this->sendATInfo(); };
-
-    // addTimer(콜백, 주기_ms, 인수) → 타이머 핸들 반환
-    // 100ms(10Hz)마다 sendATInfo() 호출
-    timerHandle = nTimer->addPeriodicTask(1000, sendATInfo_Periodic);
-    ntcout << _T("[ATSManager] 시뮬레이션 시작 - 타이머 핸들: ") << timerHandle << std::endl;
+    ntcout << _T("[ManeuverManager] Air threat initialized. targetID=")
+           << targetId << _T(", points=") << pointCount << std::endl;
+    publishATSStatus();
 }
 
-// recvInnerStopSimulationToModel: 시뮬레이션 정지 명령 처리.
-void ATSManager::recvInnerStopSimulationToModel(std::shared_ptr<NOM> nomMsg)
+void ManeuverManager::receiveStart(std::shared_ptr<NOM>)
 {
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << std::endl;
-    stopSequence();
-}
-
-// recvDetonation: 격추(Detonation) 이벤트 처리.
-// 미사일이 공중위협을 격추하면 nFramework가 이 이벤트를 전달한다.
-void ATSManager::recvDetonation(std::shared_ptr<NOM> nomMsg)
-{
-    ntcout << _T("[") << _T(__FUNCTION__) << _T("] 공중위협 격추됨") << std::endl;
-    stopSequence();
-}
-
-// sendATInfo: NTimer에 의해 주기적으로 호출된다.
-// 현재 시뮬레이션 시간에 해당하는 공중위협의 위치/속도를 계산하여
-// InnerAirThreatInfoToComm 메시지로 송신한다.
-void ATSManager::sendATInfo()
-{
-    ntcout << _T("[ATSManager] 팀별 설계한 공중 위협 표적의 위치 좌표를 송신하는 로직 구현하기") << std::endl;
-
-}
-
-// stopSequence: 시뮬레이션 공통 정지 처리.
-// 타이머 해제 및 AirThreat 인스턴스 삭제.
-void ATSManager::stopSequence()
-{
-    ntcout << _T("[ATSManager] 시뮬레이션 정지") << std::endl;
-
-    if (nTimer != nullptr && timerHandle != -1)
+    bool started = false;
     {
-        nTimer->removeTask(timerHandle);
-        timerHandle = -1;
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        if (airThreat_.isInitialized())
+        {
+            airThreat_.start();
+            operationalStatus_ = ATSOperationalStatus::Running;
+            started = true;
+        }
     }
 
-    currentSimTime = 0.0;
-    step = 0;
+    if (!started)
+    {
+        ntcout << _T("[ManeuverManager] Start ignored because no valid scenario is loaded.") << std::endl;
+        return;
+    }
+
+    publishATSStatus();
 }
 
-
-/************************************************************************
-    DLL 진입점 (Export Function)
-    nFramework가 DLL을 동적 로드할 때 이 함수들을 호출한다.
-    createObject()  → ATSManager 인스턴스 생성
-    deleteObject()  → ATSManager 인스턴스 소멸
-************************************************************************/
-
-extern "C" BASEMGRDLL_API
-BaseManager* createObject()
+void ManeuverManager::receiveStop(std::shared_ptr<NOM>)
 {
-    return new ATSManager;
+    {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        airThreat_.stop();
+        operationalStatus_ = ATSOperationalStatus::Ready;
+    }
+    publishATSStatus();
 }
 
-extern "C" BASEMGRDLL_API
-void deleteObject(BaseManager* userManager)
+void ManeuverManager::receiveInterception(std::shared_ptr<NOM>)
+{
+    {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        airThreat_.markIntercepted();
+    }
+    publishATSStatus();
+}
+
+void ManeuverManager::periodicUpdate()
+{
+    {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        if (operationalStatus_ == ATSOperationalStatus::Running)
+        {
+            airThreat_.advance(1.0);
+        }
+    }
+    publishATSStatus();
+}
+
+void ManeuverManager::publishATSStatus()
+{
+    if (meb_ == nullptr)
+    {
+        return;
+    }
+
+    auto statusMessage = meb_->getNOMInstance(name_, _T("InnerAirThreatInfoToComm"));
+    if (!statusMessage)
+    {
+        ntcout << _T("[ManeuverManager] InnerAirThreatInfoToComm NOM is unavailable.") << std::endl;
+        return;
+    }
+
+    ATSOperationalStatus status;
+    bool hasTarget;
+    std::uint32_t targetId;
+    double speed;
+    Position position;
+    Position velocity;
+    bool intercepted;
+
+    {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        status = operationalStatus_;
+        hasTarget = airThreat_.isInitialized();
+        targetId = hasTarget ? airThreat_.targetId() : 0;
+        speed = hasTarget ? airThreat_.speed() : 0.0;
+        position = hasTarget ? airThreat_.position() : Position{};
+        velocity = hasTarget ? airThreat_.velocity() : Position{};
+        intercepted = hasTarget && airThreat_.isIntercepted();
+    }
+
+    NInteger systemStatus(static_cast<int>(status));
+    NUInteger targetCount(hasTarget ? 1U : 0U);
+    NUInteger objectId(targetId);
+    NUShort objectState(intercepted ? 1U : 0U);
+    NDouble positionX(position.x);
+    NDouble positionY(position.y);
+    NDouble positionZ(position.z);
+    NDouble velocityX(velocity.x);
+    NDouble velocityY(velocity.y);
+    NUInteger targetSpeed(static_cast<std::uint32_t>(speed));
+    NBool interceptionFlag(intercepted);
+
+    statusMessage->setValue(_T("AirThreatInfo.SystemStatus"), &systemStatus);
+    statusMessage->setValue(_T("AirThreatInfo.TargetCount"), &targetCount);
+    statusMessage->setValue(_T("AirThreatInfo.ObjectID"), &objectId);
+    statusMessage->setValue(_T("AirThreatInfo.ObjectState"), &objectState);
+    statusMessage->setValue(_T("AirThreatInfo.PositionX"), &positionX);
+    statusMessage->setValue(_T("AirThreatInfo.PositionY"), &positionY);
+    statusMessage->setValue(_T("AirThreatInfo.PositionZ"), &positionZ);
+    statusMessage->setValue(_T("AirThreatInfo.VelocityX"), &velocityX);
+    statusMessage->setValue(_T("AirThreatInfo.VelocityY"), &velocityY);
+    statusMessage->setValue(_T("AirThreatInfo.Speed"), &targetSpeed);
+    statusMessage->setValue(_T("AirThreatInfo.InterceptionFlag"), &interceptionFlag);
+    mec_->sendMsg(statusMessage);
+}
+
+void ManeuverManager::removePeriodicTask()
+{
+    if (timer_ != nullptr && timerHandle_ != -1)
+    {
+        timer_->removeTask(timerHandle_);
+        timerHandle_ = -1;
+    }
+}
+
+extern "C" BASEMGRDLL_API BaseManager* createObject()
+{
+    return new ManeuverManager;
+}
+
+extern "C" BASEMGRDLL_API void deleteObject(BaseManager* userManager)
 {
     delete userManager;
 }

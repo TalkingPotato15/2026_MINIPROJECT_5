@@ -1,4 +1,6 @@
 #include "UDPCommunicationManager.h"
+#include <algorithm>
+#include <array>
 #include <filesystem>
 #include <cmath>
 using namespace std::filesystem;
@@ -287,25 +289,93 @@ void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 		return;
 	}
 
+	constexpr size_t maxPointCount = 8;
+	const std::array<const TCHAR*, maxPointCount> internalXFields{
+		_T("Scenario.WayPoint0_X"), _T("Scenario.WayPoint1_X"),
+		_T("Scenario.WayPoint2_X"), _T("Scenario.WayPoint3_X"),
+		_T("Scenario.WayPoint4_X"), _T("Scenario.WayPoint5_X"),
+		_T("Scenario.WayPoint6_X"), _T("Scenario.WayPoint7_X")
+	};
+	const std::array<const TCHAR*, maxPointCount> internalYFields{
+		_T("Scenario.WayPoint0_Y"), _T("Scenario.WayPoint1_Y"),
+		_T("Scenario.WayPoint2_Y"), _T("Scenario.WayPoint3_Y"),
+		_T("Scenario.WayPoint4_Y"), _T("Scenario.WayPoint5_Y"),
+		_T("Scenario.WayPoint6_Y"), _T("Scenario.WayPoint7_Y")
+	};
+	const std::array<const TCHAR*, maxPointCount> internalZFields{
+		_T("Scenario.WayPoint0_Z"), _T("Scenario.WayPoint1_Z"),
+		_T("Scenario.WayPoint2_Z"), _T("Scenario.WayPoint3_Z"),
+		_T("Scenario.WayPoint4_Z"), _T("Scenario.WayPoint5_Z"),
+		_T("Scenario.WayPoint6_Z"), _T("Scenario.WayPoint7_Z")
+	};
+	const std::array<const TCHAR*, maxPointCount> externalXFields{
+		_T("scenarioInfo.point[0].x"), _T("scenarioInfo.point[1].x"),
+		_T("scenarioInfo.point[2].x"), _T("scenarioInfo.point[3].x"),
+		_T("scenarioInfo.point[4].x"), _T("scenarioInfo.point[5].x"),
+		_T("scenarioInfo.point[6].x"), _T("scenarioInfo.point[7].x")
+	};
+	const std::array<const TCHAR*, maxPointCount> externalYFields{
+		_T("scenarioInfo.point[0].y"), _T("scenarioInfo.point[1].y"),
+		_T("scenarioInfo.point[2].y"), _T("scenarioInfo.point[3].y"),
+		_T("scenarioInfo.point[4].y"), _T("scenarioInfo.point[5].y"),
+		_T("scenarioInfo.point[6].y"), _T("scenarioInfo.point[7].y")
+	};
+	const std::array<const TCHAR*, maxPointCount> externalZFields{
+		_T("scenarioInfo.point[0].z"), _T("scenarioInfo.point[1].z"),
+		_T("scenarioInfo.point[2].z"), _T("scenarioInfo.point[3].z"),
+		_T("scenarioInfo.point[4].z"), _T("scenarioInfo.point[5].z"),
+		_T("scenarioInfo.point[6].z"), _T("scenarioInfo.point[7].z")
+	};
+
+	uint32_t targetCount = 0;
+	uint32_t pointCount = 0;
+	uint32_t targetID = 0;
+	uint32_t speed = 0;
+	if (auto value = nomMsg->getValue(_T("targetCount"))) targetCount = value->toUInt();
+	if (targetCount > 0)
+	{
+		if (auto value = nomMsg->getValue(_T("scenarioInfo.targetID"))) targetID = value->toUInt();
+		if (auto value = nomMsg->getValue(_T("scenarioInfo.speed"))) speed = value->toUInt();
+		if (auto value = nomMsg->getValue(_T("scenarioInfo.pointCount"))) pointCount = value->toUInt();
+	}
+	pointCount = std::min<uint32_t>(pointCount, static_cast<uint32_t>(maxPointCount));
+
+	NUInteger internalTargetID(targetID);
+	NUInteger internalSpeed(speed);
+	NUInteger internalPointCount(pointCount);
+	nomMsg_new->setValue(_T("Scenario.TargetID"), &internalTargetID);
+	nomMsg_new->setValue(_T("Scenario.Speed"), &internalSpeed);
+	nomMsg_new->setValue(_T("Scenario.PointCount"), &internalPointCount);
+
 	NDouble zero(0.0);
 	nomMsg_new->setValue(_T("Scenario.OriginLat"), &zero);
 	nomMsg_new->setValue(_T("Scenario.OriginLng"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_X"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_Y"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_X"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_Y"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_X"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_Y"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_X"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_Y"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lat"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lng"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lat"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lng"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lat"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lng"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lat"), &zero);
-	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lng"), &zero);
+	for (size_t index = 0; index < maxPointCount; ++index)
+	{
+		NDouble x(0.0);
+		NDouble y(0.0);
+		NDouble z(0.0);
+		if (index < pointCount)
+		{
+			if (auto value = nomMsg->getValue(externalXFields[index])) x = NDouble(value->toDouble());
+			if (auto value = nomMsg->getValue(externalYFields[index])) y = NDouble(value->toDouble());
+			if (auto value = nomMsg->getValue(externalZFields[index])) z = NDouble(value->toDouble());
+		}
+		nomMsg_new->setValue(internalXFields[index], &x);
+		nomMsg_new->setValue(internalYFields[index], &y);
+		nomMsg_new->setValue(internalZFields[index], &z);
+	}
+
+	const std::array<const TCHAR*, 8> legacyLatLngFields{
+		_T("Scenario.WayPoint0_Lat"), _T("Scenario.WayPoint0_Lng"),
+		_T("Scenario.WayPoint1_Lat"), _T("Scenario.WayPoint1_Lng"),
+		_T("Scenario.WayPoint2_Lat"), _T("Scenario.WayPoint2_Lng"),
+		_T("Scenario.WayPoint3_Lat"), _T("Scenario.WayPoint3_Lng")
+	};
+	for (const auto field : legacyLatLngFields)
+	{
+		nomMsg_new->setValue(field, &zero);
+	}
 
 	if (auto value = nomMsg->getValue(_T("rssPos.x")))
 	{
@@ -316,6 +386,11 @@ void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 	{
 		NDouble v(value->toDouble());
 		nomMsg_new->setValue(_T("Scenario.RadarPositionY"), &v);
+	}
+	if (auto value = nomMsg->getValue(_T("radius")))
+	{
+		NDouble v(value->toDouble());
+		nomMsg_new->setValue(_T("Scenario.RadarRadius"), &v);
 	}
 	if (auto value = nomMsg->getValue(_T("mlsPos.x")))
 	{
@@ -350,34 +425,58 @@ void UDPCommunicationManager::recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg)
 	NUShort msgID((ushort)ICD_MessageID::ATSStatus);
 	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
 
-	NInteger status(1);
-	NUInteger targetCount(1);
+	int statusValue = 1;
+	uint32_t targetCountValue = 0;
+	if (auto value = nomMsg->getValue(_T("AirThreatInfo.SystemStatus"))) statusValue = value->toInt();
+	if (auto value = nomMsg->getValue(_T("AirThreatInfo.TargetCount"))) targetCountValue = value->toUInt();
+
+	NInteger status(statusValue);
+	NUInteger targetCount(targetCountValue);
 	nomMsg_new->setValue(_T("status"), &status);
 	nomMsg_new->setValue(_T("targetCount"), &targetCount);
 
-	NUInteger targetID(nomMsg->getValue(_T("AirThreatInfo.ObjectID"))->toUInt());
-	nomMsg_new->setValue(_T("targetInfo[0].targetID"), &targetID);
-
-	NDouble posX(nomMsg->getValue(_T("AirThreatInfo.PositionX"))->toDouble());
-	nomMsg_new->setValue(_T("targetInfo[0].pos.x"), &posX);
-
-	NDouble posY(nomMsg->getValue(_T("AirThreatInfo.PositionY"))->toDouble());
-	nomMsg_new->setValue(_T("targetInfo[0].pos.y"), &posY);
-
-	NDouble posZ(0.0);
-	nomMsg_new->setValue(_T("targetInfo[0].pos.z"), &posZ);
-
-	double velX = nomMsg->getValue(_T("AirThreatInfo.VelocityX"))->toDouble();
-	double velY = nomMsg->getValue(_T("AirThreatInfo.VelocityY"))->toDouble();
-	NUInteger speed((uint32_t)std::sqrt((velX * velX) + (velY * velY)));
-	nomMsg_new->setValue(_T("targetInfo[0].speed"), &speed);
-
-	NBool interceptionFlag(false);
-	if (auto value = nomMsg->getValue(_T("AirThreatInfo.ObjectState")))
+	if (targetCountValue > 0)
 	{
-		interceptionFlag = NBool(value->toUShort() == (ushort)TrackState::ATS_Detonation);
+		NUInteger targetID(nomMsg->getValue(_T("AirThreatInfo.ObjectID"))->toUInt());
+		nomMsg_new->setValue(_T("targetInfo[0].targetID"), &targetID);
+
+		NDouble posX(nomMsg->getValue(_T("AirThreatInfo.PositionX"))->toDouble());
+		nomMsg_new->setValue(_T("targetInfo[0].pos.x"), &posX);
+
+		NDouble posY(nomMsg->getValue(_T("AirThreatInfo.PositionY"))->toDouble());
+		nomMsg_new->setValue(_T("targetInfo[0].pos.y"), &posY);
+
+		double positionZ = 0.0;
+		if (auto value = nomMsg->getValue(_T("AirThreatInfo.PositionZ"))) positionZ = value->toDouble();
+		NDouble posZ(positionZ);
+		nomMsg_new->setValue(_T("targetInfo[0].pos.z"), &posZ);
+
+		uint32_t speedValue = 0;
+		if (auto value = nomMsg->getValue(_T("AirThreatInfo.Speed")))
+		{
+			speedValue = value->toUInt();
+		}
+		else
+		{
+			double velX = nomMsg->getValue(_T("AirThreatInfo.VelocityX"))->toDouble();
+			double velY = nomMsg->getValue(_T("AirThreatInfo.VelocityY"))->toDouble();
+			speedValue = static_cast<uint32_t>(std::sqrt((velX * velX) + (velY * velY)));
+		}
+		NUInteger speed(speedValue);
+		nomMsg_new->setValue(_T("targetInfo[0].speed"), &speed);
+
+		bool intercepted = false;
+		if (auto value = nomMsg->getValue(_T("AirThreatInfo.InterceptionFlag")))
+		{
+			intercepted = value->toByte() != 0;
+		}
+		else if (auto value = nomMsg->getValue(_T("AirThreatInfo.ObjectState")))
+		{
+			intercepted = value->toUShort() == (ushort)TrackState::ATS_Detonation;
+		}
+		NBool interceptionFlag(intercepted);
+		nomMsg_new->setValue(_T("targetInfo[0].interceptionFlag"), &interceptionFlag);
 	}
-	nomMsg_new->setValue(_T("targetInfo[0].interceptionFlag"), &interceptionFlag);
 
 	commInterface->sendCommMsg(nomMsg_new);
 }

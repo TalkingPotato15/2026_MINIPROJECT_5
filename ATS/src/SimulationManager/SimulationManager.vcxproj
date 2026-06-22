@@ -22,7 +22,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{e9eb236b-61ef-4646-8728-aa3434fe8b01}</ProjectGuid>
-    <RootNamespace>SimulationManager</RootNamespace>
+    <RootNamespace>ScenarioManager</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -147,10 +147,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scenario.cpp" />
     <ClCompile Include="SimulationManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MFRSHeader.h" />
+    <ClInclude Include="Scenario.h" />
     <ClInclude Include="SimulationManager.h" />
   </ItemGroup>
   <ItemGroup>

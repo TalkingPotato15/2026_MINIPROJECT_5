@@ -15,15 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AirThreat.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="ATSManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ATSManager.h">
+    <ClInclude Include="AirThreat.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="polylineencoder.h">
+    <ClInclude Include="ATSManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

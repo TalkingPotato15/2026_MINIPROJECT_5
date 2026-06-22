@@ -4,59 +4,59 @@
 #include <nFramework/mec/MECComponent.h>
 #include <nFramework/nLineStream/NLineStreamMain.h>
 #include <nFramework/nom/NOMMain.h>
-#include <nFramework/util/IniHandler.h>
-#include <sstream>
-#include <windows.h>
+
+#include <functional>
+#include <map>
+#include <memory>
 
 #include "MFRSHeader.h"
+#include "Scenario.h"
 
 using namespace nframework;
 using namespace nlinestream;
 using namespace nom;
-using namespace std;
 
-class BASEMGRDLL_API SimulationManager : public BaseManager
+class BASEMGRDLL_API ScenarioManager : public BaseManager
 {
 public:
-	SimulationManager();
-	~SimulationManager();
+    ScenarioManager();
+    ~ScenarioManager() override;
 
-public:
-	// inherited from the BaseManager class
-	virtual std::shared_ptr<NOM> registerMsg(tstring) override;
-	virtual void discoverMsg(std::shared_ptr<NOM>) override;
-	virtual void updateMsg(std::shared_ptr<NOM>) override;
-	virtual void reflectMsg(std::shared_ptr<NOM>) override;
-	virtual void deleteMsg(std::shared_ptr<NOM>) override;
-	virtual void removeMsg(std::shared_ptr<NOM>) override;
-	virtual void sendMsg(std::shared_ptr<NOM>) override;
-	virtual void recvMsg(std::shared_ptr<NOM>) override;
-	virtual void setUserName(tstring) override;
-	virtual tstring getUserName() override;
-	virtual void setData(void*) override;
-	virtual bool start() override;
-	virtual bool stop() override;
-	virtual void setMEBComponent(IMEBComponent*) override;
+    std::shared_ptr<NOM> registerMsg(tstring msgName) override;
+    void discoverMsg(std::shared_ptr<NOM> nomMsg) override;
+    void updateMsg(std::shared_ptr<NOM> nomMsg) override;
+    void reflectMsg(std::shared_ptr<NOM> nomMsg) override;
+    void deleteMsg(std::shared_ptr<NOM> nomMsg) override;
+    void removeMsg(std::shared_ptr<NOM> nomMsg) override;
+    void sendMsg(std::shared_ptr<NOM> nomMsg) override;
+    void recvMsg(std::shared_ptr<NOM> nomMsg) override;
+    void setUserName(tstring userName) override;
+    tstring getUserName() override;
+    void setData(void* data) override;
+    bool start() override;
+    bool stop() override;
+    void setMEBComponent(IMEBComponent* realMEB) override;
 
 private:
-	void initialize();
-	void release();
-	void funcMapInit();
+    void initialize();
+    void release();
+    void initializeMessageHandlers();
+    void receiveScenario(std::shared_ptr<NOM> nomMsg);
+    void receiveStart(std::shared_ptr<NOM> nomMsg);
+    void receiveStop(std::shared_ptr<NOM> nomMsg);
+    bool loadScenario(const std::shared_ptr<NOM>& nomMsg);
+    void publishScenarioToManeuver();
+    void publishControlMessage(const tstring& messageName);
+    void publishAck(const tstring& messageName);
 
-private:
-	void recvInnerSendScenario(std::shared_ptr<NOM>);
-	void recvInnerStartSimulation(std::shared_ptr<NOM>);
-	void recvInnerStopSimulation(std::shared_ptr<NOM>);
+    IMEBComponent* meb_{ nullptr };
+    MECComponent* mec_{ nullptr };
+    tstring name_;
+    std::map<unsigned int, std::shared_ptr<NOM>> registeredMessages_;
+    std::map<unsigned int, std::shared_ptr<NOM>> discoveredMessages_;
+    std::map<tstring, std::function<void(std::shared_ptr<NOM>)>> messageHandlers_;
+    Scenario currentScenario_;
+    bool hasValidScenario_{ false };
 
-private:
-	IMEBComponent* meb;
-	MECComponent* mec;
-	tstring name;
-	std::map<unsigned int, std::shared_ptr<NOM>> registeredMsgMap;
-	std::map<unsigned int, std::shared_ptr<NOM>> discoveredMsgMap;
-	map<tstring, function<void(shared_ptr<NOM>)>> funcMap;
-
-	std::shared_ptr<NOM> testObjNOM;
-
-	NLineTstream ntcout{ Level::COUT };
+    NLineTstream ntcout{ Level::COUT };
 };

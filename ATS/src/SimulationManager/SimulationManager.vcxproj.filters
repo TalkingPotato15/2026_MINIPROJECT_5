@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Scenario.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="SimulationManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -24,6 +27,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MFRSHeader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenario.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

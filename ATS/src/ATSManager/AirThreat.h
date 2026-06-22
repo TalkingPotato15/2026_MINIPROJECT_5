@@ -1,29 +1,50 @@
-﻿#pragma once
-#include <iostream>
-#include <map>
-#include <utility>
-#include <tuple>
+#pragma once
+
+#include <cstdint>
+#include <cstddef>
+#include <vector>
+
+struct Position
+{
+    double x{ 0.0 };
+    double y{ 0.0 };
+    double z{ 0.0 };
+};
+
+enum class AirThreatState : std::uint16_t
+{
+    Ready = 0,
+    Flying,
+    Intercepted,
+    Completed
+};
 
 class AirThreat
 {
-private:
-    static AirThreat* instance;
-
-    std::pair<double, double> pos;
-    std::pair<double, double> vel;
-    unsigned short state;
-
-    AirThreat();
-
 public:
-    ~AirThreat();
+    bool initialize(std::uint32_t targetId, double speed, const std::vector<Position>& route);
+    void start();
+    void stop();
+    void advance(double deltaSeconds);
+    void markIntercepted();
 
-    static AirThreat* getInstance();
-    static void destroyInstance();
+    bool isInitialized() const;
+    bool isActive() const;
+    bool isIntercepted() const;
+    std::uint32_t targetId() const;
+    double speed() const;
+    const Position& position() const;
+    const Position& velocity() const;
+    AirThreatState state() const;
 
-    virtual void setValue(std::pair<double, double> newPos, std::pair<double, double> newVel, unsigned short newState);
-
-    virtual std::tuple<std::pair<double, double>, std::pair<double, double>, unsigned short> getValue();
-
-    virtual void updateValue(const std::pair<double, double>& newPos, const std::pair<double, double>& newVel);
+private:
+    std::uint32_t targetId_{ 0 };
+    double speed_{ 0.0 };
+    std::vector<Position> route_;
+    std::size_t nextPointIndex_{ 0 };
+    Position position_{};
+    Position velocity_{};
+    AirThreatState state_{ AirThreatState::Ready };
+    bool initialized_{ false };
+    bool active_{ false };
 };
