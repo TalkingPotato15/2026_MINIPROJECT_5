@@ -149,6 +149,11 @@
 			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
 		</NOM:interaction>
 
+		<NOM:interaction name="InnerRSSDetectionAreaToRSS" id="0x36" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="rssPos" dataType="PosStruct"/>
+			<NOM:parameter name="rssRadius" dataType="uintBE"/>
+		</NOM:interaction>
+
 		<NOM:interaction name="InnerSendScenario" id="0x21" sharing="Publish" orderType="Receive" alignment="false">
 			<NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
 		</NOM:interaction>

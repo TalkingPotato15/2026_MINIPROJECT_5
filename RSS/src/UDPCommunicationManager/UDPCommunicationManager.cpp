@@ -381,6 +381,20 @@ void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 		nomMsg_new->setValue(_T("Scenario.LauncherPositionY"), &v);
 	}
 
+	auto detectionAreaMsg = meb->getNOMInstance(name, _T("InnerRSSDetectionAreaToRSS"));
+	if (detectionAreaMsg.get())
+	{
+		copyDoubleValue(nomMsg, _T("rssPos.x"), detectionAreaMsg, _T("rssPos.x"));
+		copyDoubleValue(nomMsg, _T("rssPos.y"), detectionAreaMsg, _T("rssPos.y"));
+		copyDoubleValue(nomMsg, _T("rssPos.z"), detectionAreaMsg, _T("rssPos.z"));
+		copyUIntValue(nomMsg, _T("rssRadius"), detectionAreaMsg, _T("rssRadius"));
+		this->sendMsg(detectionAreaMsg);
+	}
+	else
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerRSSDetectionAreaToRSS NOM is undefined.") << endl;
+	}
+
 	this->sendMsg(nomMsg_new);
 }
 
