@@ -1,36 +1,6 @@
 #include <nFramework/util/IniHandler.h>
 #include "RSSManager.h"
-
-namespace
-{
-	void copyUIntValue(const std::shared_ptr<NOM>& src, const tstring& srcName, const std::shared_ptr<NOM>& dst, const tstring& dstName)
-	{
-		if (auto value = src->getValue(srcName))
-		{
-			NUInteger v(value->toUInt());
-			dst->setValue(dstName, &v);
-		}
-	}
-
-	void copyDoubleValue(const std::shared_ptr<NOM>& src, const tstring& srcName, const std::shared_ptr<NOM>& dst, const tstring& dstName)
-	{
-		if (auto value = src->getValue(srcName))
-		{
-			NDouble v(value->toDouble());
-			dst->setValue(dstName, &v);
-		}
-	}
-
-	void copyATSInformation(const std::shared_ptr<NOM>& src, const tstring& srcPrefix, const std::shared_ptr<NOM>& dst, const tstring& dstPrefix)
-	{
-		copyDoubleValue(src, srcPrefix + _T(".ATSPos.x"), dst, dstPrefix + _T(".ATSPos.x"));
-		copyDoubleValue(src, srcPrefix + _T(".ATSPos.y"), dst, dstPrefix + _T(".ATSPos.y"));
-		copyDoubleValue(src, srcPrefix + _T(".ATSPos.z"), dst, dstPrefix + _T(".ATSPos.z"));
-		copyUIntValue(src, srcPrefix + _T(".speed"), dst, dstPrefix + _T(".speed"));
-		copyUIntValue(src, srcPrefix + _T(".targetId"), dst, dstPrefix + _T(".targetId"));
-		copyUIntValue(src, srcPrefix + _T(".atsStatus"), dst, dstPrefix + _T(".atsStatus"));
-	}
-}
+#include <cmath>
 
 RSSManager::RSSManager(void)
 {
@@ -71,6 +41,7 @@ void RSSManager::release()
 	meb = nullptr;
 	funcMap.clear();
 	detectedTargetIds.clear();
+	detectedTargetInfoMap.clear();
 	destroyedTargetIds.clear();
 }
 
@@ -83,6 +54,9 @@ void RSSManager::funcMapInit()
 
 	msgProc = std::bind(&RSSManager::recvInnerMSSInformationToRSS, this, std::placeholders::_1);
 	funcMap.insert({ _T("InnerMSSInformationToRSS"), msgProc });
+
+	msgProc = std::bind(&RSSManager::recvInnerRSSDetectionAreaToRSS, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerRSSDetectionAreaToRSS"), msgProc });
 }
 
 void RSSManager::sendRSSStatus()
@@ -200,41 +174,69 @@ void RSSManager::setMEBComponent(IMEBComponent* realMEB)
 	mec->setMEB(meb);
 }
 
+void RSSManager::recvInnerRSSDetectionAreaToRSS(std::shared_ptr<NOM> nomMsg)
+{
+	auto xValue = nomMsg->getValue(_T("rssPos.x"));
+	auto yValue = nomMsg->getValue(_T("rssPos.y"));
+	auto zValue = nomMsg->getValue(_T("rssPos.z"));
+	auto radiusValue = nomMsg->getValue(_T("rssRadius"));
+	if (!xValue || !yValue || !zValue || !radiusValue)
+	{
+		ntcout << _T("[RSSManager] RSS detection area is incomplete.") << std::endl;
+		return;
+	}
+
+	rssPosX = xValue->toDouble();
+	rssPosY = yValue->toDouble();
+	rssPosZ = zValue->toDouble();
+	rssRadius = static_cast<double>(radiusValue->toUInt());
+	hasRSSDetectionArea = rssRadius > 0.0;
+	detectedTargetIds.clear();
+	detectedTargetInfoMap.clear();
+}
+
 void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 {
 	for (int i = 0; i < 4; ++i)
 	{
 		tstring prefix = _T("targetInfo[") + to_tstring(i) + _T("]");
-		auto targetIDValue = nomMsg->getValue(prefix + _T(".targetId"));
-		if (!targetIDValue)
+		CachedATSInfo atsInfo;
+		if (!tryReadATSInfo(nomMsg, prefix, atsInfo))
 		{
 			continue;
 		}
 
-		uint32_t targetID = targetIDValue->toUInt();
-		if (targetID == 0)
+		if (atsInfo.targetId == 0 || atsInfo.atsStatus == 0)
 		{
 			continue;
 		}
 
-		uint32_t success = 1;
-		if (auto atsStatusValue = nomMsg->getValue(prefix + _T(".atsStatus")))
+		bool inRange = isInRSSRange(atsInfo);
+		auto detectedTarget = detectedTargetIds.find(atsInfo.targetId);
+		if (detectedTarget == detectedTargetIds.end())
 		{
-			success = atsStatusValue->toUInt() == 0 ? 0 : 1;
-		}
+			if (!inRange)
+			{
+				continue;
+			}
 
-		if (success != 0)
-		{
-			sendATSInformationUplink(nomMsg, prefix);
-		}
-
-		if (detectedTargetIds.find(targetID) != detectedTargetIds.end())
-		{
+			detectedTargetIds.insert(atsInfo.targetId);
+			detectedTargetInfoMap[atsInfo.targetId] = atsInfo;
+			sendTargetDetection(atsInfo.targetId, 1);
+			sendATSInformationUplink(atsInfo);
 			continue;
 		}
 
-		sendTargetDetection(targetID, success);
-		detectedTargetIds.insert(targetID);
+		if (inRange)
+		{
+			detectedTargetInfoMap[atsInfo.targetId] = atsInfo;
+		}
+
+		auto cachedTarget = detectedTargetInfoMap.find(atsInfo.targetId);
+		if (cachedTarget != detectedTargetInfoMap.end())
+		{
+			sendATSInformationUplink(cachedTarget->second);
+		}
 	}
 }
 
@@ -260,6 +262,44 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 		sendTargetDestroyed(targetID, missionFlag);
 		destroyedTargetIds.insert(targetID);
 	}
+}
+
+bool RSSManager::tryReadATSInfo(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix, CachedATSInfo& atsInfo) const
+{
+	auto xValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.x"));
+	auto yValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.y"));
+	auto zValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.z"));
+	auto speedValue = nomMsg->getValue(targetPrefix + _T(".speed"));
+	auto targetIDValue = nomMsg->getValue(targetPrefix + _T(".targetId"));
+	auto atsStatusValue = nomMsg->getValue(targetPrefix + _T(".atsStatus"));
+	if (!xValue || !yValue || !zValue || !speedValue || !targetIDValue || !atsStatusValue)
+	{
+		return false;
+	}
+
+	atsInfo.x = xValue->toDouble();
+	atsInfo.y = yValue->toDouble();
+	atsInfo.z = zValue->toDouble();
+	atsInfo.speed = speedValue->toUInt();
+	atsInfo.targetId = targetIDValue->toUInt();
+	atsInfo.atsStatus = atsStatusValue->toUInt();
+
+	return true;
+}
+
+bool RSSManager::isInRSSRange(const CachedATSInfo& atsInfo) const
+{
+	if (!hasRSSDetectionArea)
+	{
+		return false;
+	}
+
+	double dx = atsInfo.x - rssPosX;
+	double dy = atsInfo.y - rssPosY;
+	double dz = atsInfo.z - rssPosZ;
+	double distance = std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
+
+	return distance <= rssRadius;
 }
 
 void RSSManager::sendTargetDetection(uint32_t targetID, uint32_t success)
@@ -294,7 +334,7 @@ void RSSManager::sendTargetDestroyed(uint32_t targetID, uint32_t missionFlag)
 	sendMsg(nomMsg);
 }
 
-void RSSManager::sendATSInformationUplink(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix)
+void RSSManager::sendATSInformationUplink(const CachedATSInfo& atsInfo)
 {
 	auto uplinkMsg = meb->getNOMInstance(name, _T("InnerATSInformationUplinkToComm"));
 	if (!uplinkMsg.get())
@@ -303,7 +343,19 @@ void RSSManager::sendATSInformationUplink(std::shared_ptr<NOM> nomMsg, const tst
 		return;
 	}
 
-	copyATSInformation(nomMsg, targetPrefix, uplinkMsg, _T("matchedTarget"));
+	NDouble x(atsInfo.x);
+	NDouble y(atsInfo.y);
+	NDouble z(atsInfo.z);
+	NUInteger speed(atsInfo.speed);
+	NUInteger targetId(atsInfo.targetId);
+	NUInteger atsStatus(atsInfo.atsStatus);
+
+	uplinkMsg->setValue(_T("matchedTarget.ATSPos.x"), &x);
+	uplinkMsg->setValue(_T("matchedTarget.ATSPos.y"), &y);
+	uplinkMsg->setValue(_T("matchedTarget.ATSPos.z"), &z);
+	uplinkMsg->setValue(_T("matchedTarget.speed"), &speed);
+	uplinkMsg->setValue(_T("matchedTarget.targetId"), &targetId);
+	uplinkMsg->setValue(_T("matchedTarget.atsStatus"), &atsStatus);
 	sendMsg(uplinkMsg);
 }
 
