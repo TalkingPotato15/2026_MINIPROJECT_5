@@ -29,11 +29,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UIManager", "src\UIManager\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NewRoleManager", "src\NewRoleManager\NewRoleManager.vcxproj", "{45CB52AD-8334-0964-7535-2B818EF60312}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ATSManager", "src\ATSManager\ATSManager.vcxproj", "{BCA2CFAC-D2D8-43BA-9FE4-258A90BF8720}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ManeuverManager", "src\ManeuverManager\ManeuverManager.vcxproj", "{BCA2CFAC-D2D8-43BA-9FE4-258A90BF8720}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StateManager", "src\StateManager\StateManager.vcxproj", "{EED5CCBC-117C-4D6A-98B1-DAF64A9C2C73}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimulationManager", "src\SimulationManager\SimulationManager.vcxproj", "{E9EB236B-61EF-4646-8728-AA3434FE8B01}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScenarioManager", "src\ScenarioManager\ScenarioManager.vcxproj", "{E9EB236B-61EF-4646-8728-AA3434FE8B01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
