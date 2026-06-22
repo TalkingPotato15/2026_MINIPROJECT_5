@@ -495,17 +495,20 @@ void UDPCommunicationManager::recvStopSimulation(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvInnerSendScenarioAck(shared_ptr<NOM> nomMsg)
 {
-	tcout << _T("[UDPCommunicationManager] OC ICD has no SendScenarioAck message. Skip external send.") << endl;
+	(void)nomMsg;
+	tcout << _T("[UDPCommunicationManager] SendScenarioAck received.") << endl;
 }
 
 void UDPCommunicationManager::recvInnerStartSimulationAck(shared_ptr<NOM> nomMsg)
 {
 	(void)nomMsg;
+	tcout << _T("[UDPCommunicationManager] StartSimulationAck received.") << endl;
 }
 
 void UDPCommunicationManager::recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg)
 {
 	(void)nomMsg;
+	tcout << _T("[UDPCommunicationManager] StopSimulationAck received.") << endl;
 }
 
 void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
