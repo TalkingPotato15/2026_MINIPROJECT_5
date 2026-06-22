@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="ATSManager" date="2025-11-03" author="레이다연구소.3팀 유석현">
+	<NOM:objects>
+	</NOM:objects>
+	<NOM:interactions>
+
+		<NOM:interaction name="InnerSendScenarioToModel" id="0x23" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStartSimulationToModel" id="0x26" sharing="Subscribe" orderType="Receive" alignment="false">
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStopSimulationToModel" id="0x29" sharing="Subscribe" orderType="Receive" alignment="false">
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerAirThreatDetonationToATM" id="0x40" sharing="Subscribe" orderType="Receive" alignment="false">
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerAirThreatInfoToComm" id="0x41" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="AirThreatInfo" dataType="TrackInfoStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerRouteToComm" id="0x42" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="RouteAT" dataType="stringBE"/>
+		</NOM:interaction>	
+
+	</NOM:interactions>
+	<NOM:dataTypes>
+		<NOM:basicTypes>
+		</NOM:basicTypes>
+		<NOM:enumerationTypes>
+		</NOM:enumerationTypes>
+		<NOM:complexTypes>
+		</NOM:complexTypes>
+	</NOM:dataTypes>
+	<NOM:notes>
+		
+	</NOM:notes>
+
+</NOM:Nex1ObjectModel>
