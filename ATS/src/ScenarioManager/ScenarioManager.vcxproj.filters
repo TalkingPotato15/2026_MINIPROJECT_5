@@ -15,29 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AirThreat.cpp">
+    <ClCompile Include="Scenario.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ATSManager.cpp">
+    <ClCompile Include="ScenarioManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AirThreat.h">
+    <ClInclude Include="ScenarioManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ATSManager.h">
+    <ClInclude Include="MFRSHeader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenario.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\..\bin\ATSManager\ATSManager.xml">
+    <Xml Include="..\..\bin\ScenarioManager\ScenarioManager.xml">
       <Filter>리소스 파일</Filter>
     </Xml>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\bin\ATSManager\ATSManager.ini">
-      <Filter>리소스 파일</Filter>
-    </None>
   </ItemGroup>
 </Project>

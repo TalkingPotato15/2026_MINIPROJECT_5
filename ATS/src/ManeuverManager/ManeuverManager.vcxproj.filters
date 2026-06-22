@@ -15,27 +15,29 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Scenario.cpp">
+    <ClCompile Include="AirThreat.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SimulationManager.cpp">
+    <ClCompile Include="ManeuverManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SimulationManager.h">
+    <ClInclude Include="AirThreat.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MFRSHeader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenario.h">
+    <ClInclude Include="ManeuverManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\..\bin\SimulationManager\SimulationManager.xml">
+    <Xml Include="..\..\bin\ManeuverManager\ManeuverManager.xml">
       <Filter>리소스 파일</Filter>
     </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\bin\ManeuverManager\ManeuverManager.ini">
+      <Filter>리소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>

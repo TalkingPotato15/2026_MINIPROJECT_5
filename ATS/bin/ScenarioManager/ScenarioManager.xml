@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="ScenarioManager" date="2026-06-19" author="ATS Team">
+  <NOM:objects/>
+  <NOM:interactions>
+    <NOM:interaction name="InnerSendScenario" id="0x21" sharing="Subscribe" orderType="Receive" alignment="false">
+      <NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
+    </NOM:interaction>
+    <NOM:interaction name="InnerSendScenarioAck" id="0x22" sharing="Publish" orderType="Receive" alignment="false">
+      <NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+    </NOM:interaction>
+    <NOM:interaction name="InnerSendScenarioToModel" id="0x23" sharing="Publish" orderType="Receive" alignment="false">
+      <NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
+    </NOM:interaction>
+    <NOM:interaction name="InnerStartSimulation" id="0x24" sharing="Subscribe" orderType="Receive" alignment="false"/>
+    <NOM:interaction name="InnerStartSimulationAck" id="0x25" sharing="Publish" orderType="Receive" alignment="false">
+      <NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+    </NOM:interaction>
+    <NOM:interaction name="InnerStartSimulationToModel" id="0x26" sharing="Publish" orderType="Receive" alignment="false"/>
+    <NOM:interaction name="InnerStopSimulation" id="0x27" sharing="Subscribe" orderType="Receive" alignment="false"/>
+    <NOM:interaction name="InnerStopSimulationAck" id="0x28" sharing="Publish" orderType="Receive" alignment="false">
+      <NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+    </NOM:interaction>
+    <NOM:interaction name="InnerStopSimulationToModel" id="0x29" sharing="Publish" orderType="Receive" alignment="false"/>
+  </NOM:interactions>
+  <NOM:dataTypes>
+    <NOM:basicTypes/>
+    <NOM:enumerationTypes/>
+    <NOM:complexTypes/>
+  </NOM:dataTypes>
+  <NOM:notes/>
+</NOM:Nex1ObjectModel>

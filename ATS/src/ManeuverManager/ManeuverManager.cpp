@@ -1,4 +1,4 @@
-#include "ATSManager.h"
+#include "ManeuverManager.h"
 
 #include <algorithm>
 #include <array>
@@ -44,7 +44,7 @@ ManeuverManager::~ManeuverManager()
 
 void ManeuverManager::initialize()
 {
-    setUserName(_T("ATSManager"));
+    setUserName(_T("ManeuverManager"));
     mec_ = new MECComponent;
     mec_->setUser(this);
     initializeMessageHandlers();

@@ -1,4 +1,4 @@
-#include "SimulationManager.h"
+#include "ScenarioManager.h"
 
 #include <algorithm>
 #include <array>
@@ -43,7 +43,7 @@ ScenarioManager::~ScenarioManager()
 
 void ScenarioManager::initialize()
 {
-    setUserName(_T("SimulationManager"));
+    setUserName(_T("ScenarioManager"));
     mec_ = new MECComponent;
     mec_->setUser(this);
     initializeMessageHandlers();

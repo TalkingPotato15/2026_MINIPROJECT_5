@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{bca2cfac-d2d8-43ba-9fe4-258a90bf8720}</ProjectGuid>
-    <RootNamespace>ManeuverManager</RootNamespace>
+    <ProjectGuid>{e9eb236b-61ef-4646-8728-aa3434fe8b01}</ProjectGuid>
+    <RootNamespace>ScenarioManager</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -44,7 +44,6 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -72,13 +71,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)lib</OutDir>
+    <OutDir>$(SolutionDir)lib\</OutDir>
     <IntDir>Debug</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)/lib</OutDir>
     <IntDir>Release</IntDir>
-    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,27 +112,18 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;BASEMGRDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(NFW_DIR)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(NFW_DIR)include;$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <BrowseInformation>true</BrowseInformation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <OutputFile>$(SolutionDir)bin/$(ProjectName)/$(ProjectName)d.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(NFW_DIR)\lib;$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>nLineStreamd.lib;nLineLogd.lib;MECd.lib;NOMd.lib;NICEd.lib;utild.lib;NTimerd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ProgramDatabaseFile>Debug\$(ProjectName)d.pdb</ProgramDatabaseFile>
-      <ImportLibrary>$(SolutionDir)lib\$(ProjectName)d.lib</ImportLibrary>
+      <OutputFile>$(SolutionDIr)bin\$(ProjectName)\$(ProjectName)d.dll</OutputFile>
+      <AdditionalLibraryDirectories>$(NFW_DIR)include\;$(NFW_DIR)bin\;$(NFW_DIR)lib\;$(SolutionDir)lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>nLineStreamd.lib;nLineLogd.lib;MECd.lib;NOMd.lib;NICEd.lib;utild.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Manifest>
-      <OutputManifestFile />
-    </Manifest>
-    <ManifestResourceCompile>
-      <ResourceOutputFileName />
-    </ManifestResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -157,18 +147,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AirThreat.cpp" />
-    <ClCompile Include="ATSManager.cpp" />
+    <ClCompile Include="Scenario.cpp" />
+    <ClCompile Include="ScenarioManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AirThreat.h" />
-    <ClInclude Include="ATSManager.h" />
+    <ClInclude Include="MFRSHeader.h" />
+    <ClInclude Include="Scenario.h" />
+    <ClInclude Include="ScenarioManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\..\bin\ATSManager\ATSManager.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\bin\ATSManager\ATSManager.ini" />
+    <Xml Include="..\..\bin\ScenarioManager\ScenarioManager.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
