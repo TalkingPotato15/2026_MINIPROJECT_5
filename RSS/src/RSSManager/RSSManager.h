@@ -55,7 +55,10 @@ private:
 	void initialize();
 	void release();
 	void funcMapInit();
+	void resetDetectionState();
 	void sendRSSStatus();
+	void recvInnerStartSimulation(std::shared_ptr<NOM> nomMsg);
+	void recvInnerStopSimulation(std::shared_ptr<NOM> nomMsg);
 	void recvInnerRSSDetectionAreaToRSS(std::shared_ptr<NOM> nomMsg);
 	void recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg);
 	void recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg);
@@ -84,6 +87,7 @@ private:
 	double rssPosY = 0.0;
 	double rssPosZ = 0.0;
 	double rssRadius = 0.0;
+	bool detectionActive = false;
 
 	std::function<void(void*)> periodicFunc;
 	NTimer* nTimer;
