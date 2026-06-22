@@ -238,6 +238,11 @@
 				<NOM:fieldType name="z" dataType="doubleBE"/>
 			</NOM:complexType>
 
+			<NOM:complexType name="TargetScenarioStruct" semantics="SAMS scenario target path information">
+				<NOM:fieldType name="ATSPos" dataType="PosStruct" size="4"/>
+				<NOM:fieldType name="speed" dataType="uintBE"/>
+			</NOM:complexType>
+
 			<!-- 시나리오 표적 정보 구조체 (경로점 포함) -->
 			<NOM:complexType name="TrackInfoStruct">
 				<NOM:fieldType name="ObjectID" dataType="ushortBE"/>
@@ -272,6 +277,8 @@
 				<NOM:fieldType name="LauncherPositionX" dataType="doubleBE"/>
 				<NOM:fieldType name="LauncherPositionY" dataType="doubleBE"/>
 			</NOM:complexType>
+
+			
 
 			
 			<NOM:complexType name="TargetInfoStruct" semantics="SAMS target information">
