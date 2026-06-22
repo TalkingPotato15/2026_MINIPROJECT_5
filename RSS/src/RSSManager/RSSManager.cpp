@@ -234,9 +234,8 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		tstring prefix = _T("targetInfo[") + to_tstring(i) + _T("]");
 		CachedATSInfo atsInfo;
-		if (!tryReadATSInfo(nomMsg, prefix, atsInfo))
+		if (!tryReadATSInfo(nomMsg, i, atsInfo))
 		{
 			continue;
 		}
@@ -297,9 +296,8 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		tstring prefix = _T("missileInfo[") + to_tstring(i) + _T("]");
 		CachedMSSInfo mssInfo;
-		if (!tryReadMSSInfo(nomMsg, prefix, mssInfo))
+		if (!tryReadMSSInfo(nomMsg, i, mssInfo))
 		{
 			continue;
 		}
@@ -329,14 +327,14 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 	}
 }
 
-bool RSSManager::tryReadATSInfo(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix, CachedATSInfo& atsInfo) const
+bool RSSManager::tryReadATSInfo(std::shared_ptr<NOM> nomMsg, int targetIndex, CachedATSInfo& atsInfo) const
 {
-	auto xValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.x"));
-	auto yValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.y"));
-	auto zValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.z"));
-	auto speedValue = nomMsg->getValue(targetPrefix + _T(".speed"));
-	auto targetIDValue = nomMsg->getValue(targetPrefix + _T(".targetId"));
-	auto atsStatusValue = nomMsg->getValue(targetPrefix + _T(".atsStatus"));
+	auto xValue = nomMsg->getValue(_T("targetInfo.ATSPos.x"), targetIndex);
+	auto yValue = nomMsg->getValue(_T("targetInfo.ATSPos.y"), targetIndex);
+	auto zValue = nomMsg->getValue(_T("targetInfo.ATSPos.z"), targetIndex);
+	auto speedValue = nomMsg->getValue(_T("targetInfo.speed"), targetIndex);
+	auto targetIDValue = nomMsg->getValue(_T("targetInfo.targetId"), targetIndex);
+	auto atsStatusValue = nomMsg->getValue(_T("targetInfo.atsStatus"), targetIndex);
 	if (!xValue || !yValue || !zValue || !speedValue || !targetIDValue || !atsStatusValue)
 	{
 		return false;
@@ -352,13 +350,13 @@ bool RSSManager::tryReadATSInfo(std::shared_ptr<NOM> nomMsg, const tstring& targ
 	return true;
 }
 
-bool RSSManager::tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, const tstring& missilePrefix, CachedMSSInfo& mssInfo) const
+bool RSSManager::tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, int missileIndex, CachedMSSInfo& mssInfo) const
 {
-	auto targetIDValue = nomMsg->getValue(missilePrefix + _T(".targetId"));
-	auto missileIDValue = nomMsg->getValue(missilePrefix + _T(".missileId"));
-	auto xValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.x"));
-	auto yValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.y"));
-	auto zValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.z"));
+	auto targetIDValue = nomMsg->getValue(_T("missileInfo.targetId"), missileIndex);
+	auto missileIDValue = nomMsg->getValue(_T("missileInfo.missileId"), missileIndex);
+	auto xValue = nomMsg->getValue(_T("missileInfo.MSSPos.x"), missileIndex);
+	auto yValue = nomMsg->getValue(_T("missileInfo.MSSPos.y"), missileIndex);
+	auto zValue = nomMsg->getValue(_T("missileInfo.MSSPos.z"), missileIndex);
 	if (!targetIDValue || !missileIDValue || !xValue || !yValue || !zValue)
 	{
 		return false;

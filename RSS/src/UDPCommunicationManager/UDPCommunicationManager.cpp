@@ -14,12 +14,30 @@ namespace
 		}
 	}
 
+	void copyUIntValue(const shared_ptr<NOM>& src, const tstring& srcName, const shared_ptr<NOM>& dst, const tstring& dstName, int index)
+	{
+		if (auto value = src->getValue(srcName, index))
+		{
+			NUInteger v(value->toUInt());
+			dst->setValue(dstName, &v, index);
+		}
+	}
+
 	void copyDoubleValue(const shared_ptr<NOM>& src, const tstring& srcName, const shared_ptr<NOM>& dst, const tstring& dstName)
 	{
 		if (auto value = src->getValue(srcName))
 		{
 			NDouble v(value->toDouble());
 			dst->setValue(dstName, &v);
+		}
+	}
+
+	void copyDoubleValue(const shared_ptr<NOM>& src, const tstring& srcName, const shared_ptr<NOM>& dst, const tstring& dstName, int index)
+	{
+		if (auto value = src->getValue(srcName, index))
+		{
+			NDouble v(value->toDouble());
+			dst->setValue(dstName, &v, index);
 		}
 	}
 
@@ -33,6 +51,16 @@ namespace
 		copyUIntValue(src, srcPrefix + _T(".atsStatus"), dst, dstPrefix + _T(".atsStatus"));
 	}
 
+	void copyATSInformation(const shared_ptr<NOM>& src, const tstring& srcPrefix, const shared_ptr<NOM>& dst, const tstring& dstPrefix, int index)
+	{
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.x"), dst, dstPrefix + _T(".ATSPos.x"), index);
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.y"), dst, dstPrefix + _T(".ATSPos.y"), index);
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.z"), dst, dstPrefix + _T(".ATSPos.z"), index);
+		copyUIntValue(src, srcPrefix + _T(".speed"), dst, dstPrefix + _T(".speed"), index);
+		copyUIntValue(src, srcPrefix + _T(".targetId"), dst, dstPrefix + _T(".targetId"), index);
+		copyUIntValue(src, srcPrefix + _T(".atsStatus"), dst, dstPrefix + _T(".atsStatus"), index);
+	}
+
 	void copyMSSInformation(const shared_ptr<NOM>& src, const tstring& srcPrefix, const shared_ptr<NOM>& dst, const tstring& dstPrefix)
 	{
 		copyUIntValue(src, srcPrefix + _T(".targetId"), dst, dstPrefix + _T(".targetId"));
@@ -41,6 +69,16 @@ namespace
 		copyDoubleValue(src, srcPrefix + _T(".MSSPos.y"), dst, dstPrefix + _T(".MSSPos.y"));
 		copyDoubleValue(src, srcPrefix + _T(".MSSPos.z"), dst, dstPrefix + _T(".MSSPos.z"));
 		copyUIntValue(src, srcPrefix + _T(".mssStatus"), dst, dstPrefix + _T(".mssStatus"));
+	}
+
+	void copyMSSInformation(const shared_ptr<NOM>& src, const tstring& srcPrefix, const shared_ptr<NOM>& dst, const tstring& dstPrefix, int index)
+	{
+		copyUIntValue(src, srcPrefix + _T(".targetId"), dst, dstPrefix + _T(".targetId"), index);
+		copyUIntValue(src, srcPrefix + _T(".missileId"), dst, dstPrefix + _T(".missileId"), index);
+		copyDoubleValue(src, srcPrefix + _T(".MSSPos.x"), dst, dstPrefix + _T(".MSSPos.x"), index);
+		copyDoubleValue(src, srcPrefix + _T(".MSSPos.y"), dst, dstPrefix + _T(".MSSPos.y"), index);
+		copyDoubleValue(src, srcPrefix + _T(".MSSPos.z"), dst, dstPrefix + _T(".MSSPos.z"), index);
+		copyUIntValue(src, srcPrefix + _T(".mssStatus"), dst, dstPrefix + _T(".mssStatus"), index);
 	}
 }
 
@@ -621,8 +659,7 @@ void UDPCommunicationManager::recvATSInformationToRSS(shared_ptr<NOM> nomMsg)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		tstring index = _T("[") + to_tstring(i) + _T("]");
-		copyATSInformation(nomMsg, _T("targetInfo") + index, nomMsg_new, _T("targetInfo") + index);
+		copyATSInformation(nomMsg, _T("targetInfo"), nomMsg_new, _T("targetInfo"), i);
 	}
 
 	this->sendMsg(nomMsg_new);
@@ -639,8 +676,7 @@ void UDPCommunicationManager::recvMSSInformationDownlinkToRSS(shared_ptr<NOM> no
 
 	for (int i = 0; i < 4; ++i)
 	{
-		tstring index = _T("[") + to_tstring(i) + _T("]");
-		copyMSSInformation(nomMsg, _T("missileInfo") + index, nomMsg_new, _T("missileInfo") + index);
+		copyMSSInformation(nomMsg, _T("missileInfo"), nomMsg_new, _T("missileInfo"), i);
 	}
 
 	this->sendMsg(nomMsg_new);
