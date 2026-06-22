@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="CommandManager" date="2023-12-06" author="PGM3연구소.4팀 하재희">
+<?xml version="1.0" encoding="UTF-8"?>
+<NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd" version="0.1" name="CommandManager" date="2023-12-06" author="SAMS OC">
 	<NOM:dataTypes>
 		<NOM:basicTypes>
 			<NOM:basicType name="double" length="8" endian="little" type="Double" nameNotes="1 2" semantics="64bit double, little endian"/>
@@ -101,45 +101,68 @@
 				<NOM:fieldType name="TopicNumber" dataType="ushortBE" />
 				<NOM:fieldType name="SystemTime" dataType="uint64BE" />
 			</NOM:complexType>
-			<NOM:complexType name="MessageHeaderStruct" semantics="지대공유도탄체계종합_교전모의시스템ICD">
+			<NOM:complexType name="MessageHeaderStruct" semantics="SAAM_CFCS_ICD의 메시지 헤더 구조">
 				<NOM:fieldType name="MessageID" dataType="ushortBE"/>
 				<NOM:fieldType name="MessageLength" dataType="ushortBE"/>
-				<!-- AirThreat_Missile_RadarDetection_Info -->
-			</NOM:complexType>
-			<NOM:complexType name="TrackInfoStruct">
+			  </NOM:complexType>
+			<NOM:complexType name="AirThreatStruct">
 				<NOM:fieldType name="ObjectID" dataType="ushortBE"/>
-				<NOM:fieldType name="ObjectState" dataType="ushortBE"/>
-				<NOM:fieldType name="PositionX" dataType="doubleBE"/>
-				<NOM:fieldType name="PositionY" dataType="doubleBE"/>
-				<NOM:fieldType name="VelocityX" dataType="doubleBE"/>
-				<NOM:fieldType name="VelocityY" dataType="doubleBE"/>
+				<NOM:fieldType name="ObjectType" dataType="byte"/>
+				<NOM:fieldType name="DestructionFlag" dataType="byte"/>
+				<NOM:fieldType name="PositionX" dataType="uintBE"/>
+				<NOM:fieldType name="PositionY" dataType="uintBE"/>
+				<NOM:fieldType name="PositionZ" dataType="uintBE"/>
+				<NOM:fieldType name="VelocityX" dataType="ushortBE"/>
+				<NOM:fieldType name="VelocityY" dataType="ushortBE"/>
+				<NOM:fieldType name="VelocityZ" dataType="ushortBE"/>
+				<NOM:fieldType name="AccelerationX" dataType="ushortBE"/>
+				<NOM:fieldType name="AccelerationY" dataType="ushortBE"/>
+				<NOM:fieldType name="AccelerationZ" dataType="ushortBE"/>
+				<NOM:fieldType name="MeanRCS" dataType="ushortBE"/>
+				<NOM:fieldType name="Reserved" dataType="byte"/>
+				<NOM:fieldType name="JammingType" dataType="byte"/>
+				<NOM:fieldType name="JammingPower" dataType="ushortBE"/>
+				<NOM:fieldType name="JammingPullOff" dataType="ushortBE"/>
 			</NOM:complexType>
-
-			<!-- SendScenario-->
-			<NOM:complexType name="ScenarioStruct">
-				<NOM:fieldType name="OriginLat" dataType="doubleBE"/>
-				<NOM:fieldType name="OriginLng" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint0_Lat" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint0_Lng" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint1_Lat" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint1_Lng" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint2_Lat" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint2_Lng" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint3_Lat" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint3_Lng" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint0_X" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint0_Y" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint1_X" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint1_Y" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint2_X" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint2_Y" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint3_X" dataType="doubleBE"/>
-				<NOM:fieldType name="WayPoint3_Y" dataType="doubleBE"/>
-				<NOM:fieldType name="RadarPositionX" dataType="doubleBE"/>
-				<NOM:fieldType name="RadarPositionY" dataType="doubleBE"/>
-				<NOM:fieldType name="LauncherPositionX" dataType="doubleBE"/>
-				<NOM:fieldType name="LauncherPositionY" dataType="doubleBE"/>
-			</NOM:complexType>			<NOM:complexType name="AccelerationVectorStruct">
+			<NOM:complexType name="InterceptorStruct">
+				<NOM:fieldType name="ObjectID" dataType="ushortBE" />
+				<NOM:fieldType name="MissileType" dataType="byte" />
+				<NOM:fieldType name="DestructionFlag" dataType="byte" />
+				<NOM:fieldType name="PositionX" dataType="intBE" />
+				<NOM:fieldType name="PositionY" dataType="intBE" />
+				<NOM:fieldType name="PositionZ" dataType="intBE" />
+				<NOM:fieldType name="VelocityX" dataType="shortBE" />
+				<NOM:fieldType name="VelocityY" dataType="shortBE" />
+				<NOM:fieldType name="VelocityZ" dataType="shortBE" />
+				<NOM:fieldType name="AccelerationX" dataType="shortBE" />
+				<NOM:fieldType name="AccelerationY" dataType="shortBE" />
+				<NOM:fieldType name="AccelerationZ" dataType="shortBE" />
+				<NOM:fieldType name="MeanRCS" dataType="ushortBE" />
+				<NOM:fieldType name="Reserved" dataType="ushortBE" />
+				<NOM:fieldType name="SignalPower" dataType="ushortBE" />
+				<NOM:fieldType name="SeekerPhase" dataType="byte" />
+				<NOM:fieldType name="AddressKey" dataType="ushortBE" />
+			</NOM:complexType>
+			<NOM:complexType name="UplinkStruct">
+				<NOM:fieldType name="AddressKey" dataType="ushortBE" />
+				<NOM:fieldType name="MissileType" dataType="ushortBE" />
+				<NOM:fieldType name="Data" size="26" dataType="ushortBE" />
+			</NOM:complexType>
+			<NOM:complexType name="DownlinkStruct">
+				<NOM:fieldType name="AddressKey" dataType="ushortBE" />
+				<NOM:fieldType name="CRC" dataType="ushortBE" />
+				<NOM:fieldType name="Data" size="24" dataType="ushortBE" />
+			</NOM:complexType>
+			<NOM:complexType name="TimeTickStruct">
+				<NOM:fieldType name="SyncCycle" dataType="uintBE" />
+				<NOM:fieldType name="TimeTick" dataType="uintBE" />
+			</NOM:complexType>
+			<NOM:complexType name="MFRAttitudeStruct">
+				<NOM:fieldType name="MFRAntennaRoll" dataType="floatBE" />
+				<NOM:fieldType name="MFRAntennaPitch" dataType="floatBE" />
+				<NOM:fieldType name="MFRAntennaHeading" dataType="floatBE" />
+			</NOM:complexType>
+			<NOM:complexType name="AccelerationVectorStruct">
 				<NOM:fieldType name="XAcceleration" dataType="floatBE"/>
 				<NOM:fieldType name="YAcceleration" dataType="floatBE"/>
 				<NOM:fieldType name="ZAcceleration" dataType="floatBE"/>
@@ -199,7 +222,11 @@
 				<NOM:fieldType name="Y" dataType="doubleBE"/>
 				<NOM:fieldType name="Z" dataType="doubleBE"/>
 			</NOM:complexType>
-
+			<NOM:complexType name="Padding3Struct" semantics="Padding 3byte">
+				<NOM:fieldType name="PaddingA" dataType="byte"/>
+				<NOM:fieldType name="PaddingB" dataType="byte"/>
+				<NOM:fieldType name="PaddingC" dataType="byte"/>
+			</NOM:complexType>
 			<!-- ============================================================ -->
 			<!-- SAMS ICD 공통 complexType                                    -->
 			<!-- ============================================================ -->
@@ -212,28 +239,67 @@
 			</NOM:complexType>
 
 			<!-- 시나리오 표적 정보 구조체 (경로점 포함) -->
-			<NOM:complexType name="TargetInfoStruct" semantics="시나리오 배포 시 표적 정보">
-				<NOM:fieldType name="targetID" dataType="uintBE"/>
+			<NOM:complexType name="TrackInfoStruct">
+				<NOM:fieldType name="ObjectID" dataType="ushortBE"/>
+				<NOM:fieldType name="ObjectState" dataType="ushortBE"/>
+				<NOM:fieldType name="PositionX" dataType="doubleBE"/>
+				<NOM:fieldType name="PositionY" dataType="doubleBE"/>
+				<NOM:fieldType name="VelocityX" dataType="doubleBE"/>
+				<NOM:fieldType name="VelocityY" dataType="doubleBE"/>
+			</NOM:complexType>
+
+			<NOM:complexType name="ScenarioStruct">
+				<NOM:fieldType name="OriginLat" dataType="doubleBE"/>
+				<NOM:fieldType name="OriginLng" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint0_Lat" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint0_Lng" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint1_Lat" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint1_Lng" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint2_Lat" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint2_Lng" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint3_Lat" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint3_Lng" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint0_X" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint0_Y" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint1_X" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint1_Y" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint2_X" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint2_Y" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint3_X" dataType="doubleBE"/>
+				<NOM:fieldType name="WayPoint3_Y" dataType="doubleBE"/>
+				<NOM:fieldType name="RadarPositionX" dataType="doubleBE"/>
+				<NOM:fieldType name="RadarPositionY" dataType="doubleBE"/>
+				<NOM:fieldType name="LauncherPositionX" dataType="doubleBE"/>
+				<NOM:fieldType name="LauncherPositionY" dataType="doubleBE"/>
+			</NOM:complexType>
+
+			
+			<NOM:complexType name="TargetScenarioStruct" semantics="SAMS scenario target path information">
+				<NOM:fieldType name="ATSPos" dataType="PosStruct" size="4"/>
 				<NOM:fieldType name="speed" dataType="uintBE"/>
-				<NOM:fieldType name="pointCount" dataType="uintBE"/>
-				<NOM:fieldType name="point" dataType="PosStruct" size="8"/>
+			</NOM:complexType>
+
+			<NOM:complexType name="TargetInfoStruct" semantics="SAMS target information">
+				<NOM:fieldType name="ATSPos" dataType="PosStruct"/>
+				<NOM:fieldType name="speed" dataType="uintBE"/>
+				<NOM:fieldType name="targetId" dataType="uintBE"/>
+				<NOM:fieldType name="atsStatus" dataType="uintBE"/>
 			</NOM:complexType>
 
 			<!-- ATS 위치/상태 구조체 (주기 송신) -->
-			<NOM:complexType name="ATSInformationStruct" semantics="ATS 표적 위치/상태 정보">
-				<NOM:fieldType name="targetID" dataType="uintBE"/>
-				<NOM:fieldType name="pos" dataType="PosStruct"/>
+			<NOM:complexType name="ATSInformationStruct" semantics="SAMS ATS target information">
+				<NOM:fieldType name="ATSPos" dataType="PosStruct"/>
 				<NOM:fieldType name="speed" dataType="uintBE"/>
-				<NOM:fieldType name="interceptionFlag" dataType="boolean"/>
+				<NOM:fieldType name="targetId" dataType="uintBE"/>
+				<NOM:fieldType name="atsStatus" dataType="uintBE"/>
 			</NOM:complexType>
 
 			<!-- MSS 유도탄 상태 구조체 -->
-			<NOM:complexType name="MSSInformationStruct" semantics="MSS 유도탄 위치/상태 정보">
-				<NOM:fieldType name="missileID" dataType="uintBE"/>
-				<NOM:fieldType name="targetID" dataType="uintBE"/>
-				<NOM:fieldType name="pos" dataType="PosStruct"/>
-				<NOM:fieldType name="mssStatus" dataType="intBE"/>
-				<NOM:fieldType name="isIntercepted" dataType="boolean"/>
+			<NOM:complexType name="MSSInformationStruct" semantics="SAMS missile information">
+				<NOM:fieldType name="targetId" dataType="uintBE"/>
+				<NOM:fieldType name="missileId" dataType="uintBE"/>
+				<NOM:fieldType name="MSSPos" dataType="PosStruct"/>
+				<NOM:fieldType name="mssStatus" dataType="uintBE"/>
 			</NOM:complexType>
 
 			<!-- MLS 발사대 상태 구조체 -->
@@ -244,16 +310,11 @@
 				<NOM:fieldType name="missileStatus4" dataType="uintBE"/>
 				<NOM:fieldType name="missileStock" dataType="uintBE"/>
 			</NOM:complexType>
+
 		</NOM:complexTypes>
-
-
 	</NOM:dataTypes>
 	<NOM:notes>
 		<NOM:note name="1" semantics="semantic"/>
 		<NOM:note name="2" semantics="semantic"/>
 	</NOM:notes>
 </NOM:Nex1ObjectModel>
-
-
-
-

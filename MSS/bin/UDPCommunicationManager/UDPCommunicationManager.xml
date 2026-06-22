@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd"
@@ -9,126 +9,137 @@
 	<NOM:interactions>
 
 		<NOM:interaction name="Scenario" id="0x01" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="시나리오 배포 메시지 (OC 송신)">
+			orderType="Receive" alignment="false" semantics="SAMS scenario distribution">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="targetCount" dataType="uintBE"/>
-			<NOM:parameter name="scenarioInfo" dataType="TargetInfoStruct" size="20"/>
+			<NOM:parameter name="sceneInfo" dataType="TargetScenarioStruct" size="4"/>
 			<NOM:parameter name="rssPos" dataType="PosStruct"/>
-			<NOM:parameter name="radius" dataType="doubleBE"/>
+			<NOM:parameter name="rssRadius" dataType="uintBE"/>
 			<NOM:parameter name="mlsPos" dataType="PosStruct"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="ATSStatus" id="0x02" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="ATS 상태/위치 주기 수신 (1Hz)">
+			orderType="Receive" alignment="false" semantics="SAMS ATS status">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="status" dataType="intBE"/>
-			<NOM:parameter name="targetCount" dataType="uintBE"/>
-			<NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="20"/>
+			<NOM:parameter name="status" dataType="uintBE"/>
+			<NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="4"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="RSSStatus" id="0x03" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="RSS 상태 주기 수신 (1Hz)">
+			orderType="Receive" alignment="false" semantics="SAMS RSS status">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="status" dataType="intBE"/>
+			<NOM:parameter name="status" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="MSSStatus" id="0x04" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="MSS 유도탄 상태 주기 수신 (1Hz)">
+			orderType="Receive" alignment="false" semantics="SAMS MSS status">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="status" dataType="intBE"/>
-			<NOM:parameter name="missileCount" dataType="uintBE"/>
+			<NOM:parameter name="status" dataType="uintBE"/>
 			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="MLSStatus" id="0x05" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="MLS 발사대 상태 주기 수신 (1Hz)">
+			orderType="Receive" alignment="false" semantics="SAMS MLS status">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="status" dataType="intBE"/>
+			<NOM:parameter name="status" dataType="uintBE"/>
 			<NOM:parameter name="launcherInfo" dataType="MLSInformationStruct"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="StartSimulation" id="0x06" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="모의 시작/중지 명령 (OC 송신)">
+			orderType="Receive" alignment="false" semantics="SAMS start simulation command">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="simulationStatus" dataType="boolean"/>
+			<NOM:parameter name="startFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="ATSInformationToRSS" id="0x07" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="OC가 RSS로 전달하는 ATS 표적 위치 정보">
+			orderType="Receive" alignment="false" semantics="SAMS ATS information relay to RSS">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="targetCount" dataType="uintBE"/>
-			<NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="20"/>
+			<NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="4"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="TargetDetection" id="0x08" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="표적 탐지 결과 수신 (RSS → OC)">
+			orderType="Receive" alignment="false" semantics="SAMS target detection result">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
 			<NOM:parameter name="targetID" dataType="uintBE"/>
-			<NOM:parameter name="targetDetectionSuccess" dataType="boolean"/>
+			<NOM:parameter name="targetDetectonSuccess" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="LaunchCommand" id="0x09" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="발사 명령 (OC → MLS)">
+			orderType="Receive" alignment="false" semantics="SAMS launch command">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
 			<NOM:parameter name="targetID" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="IgnitionCommand" id="0x0a" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="Ignition command">
+			orderType="Receive" alignment="false" semantics="SAMS ignition command">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
 			<NOM:parameter name="missileID" dataType="uintBE"/>
 			<NOM:parameter name="targetID" dataType="uintBE"/>
 			<NOM:parameter name="launchPos" dataType="PosStruct"/>
 		</NOM:interaction>
 
-		<NOM:interaction name="SimulatorState" id="0x0b" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="ATS simulator state">
+		<NOM:interaction name="ATSInformationUplink" id="0x0b" sharing="PublishSubscribe"
+			orderType="Receive" alignment="false" semantics="SAMS ATS information uplink to MSS">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="MSSInformationDownlinkToRSS" id="0x0c" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="OC가 RSS로 전달하는 MSS 유도탄 위치 정보">
+			orderType="Receive" alignment="false" semantics="SAMS MSS information downlink to RSS">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="missileCount" dataType="uintBE"/>
 			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="TargetDestroyed" id="0x0d" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="요격 판정 결과 수신 (RSS → OC)">
+			orderType="Receive" alignment="false" semantics="SAMS target destroyed result">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="missionSuccess" dataType="boolean"/>
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="ATSInterceptionResult" id="0x0e" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="OC가 ATS에 전달하는 요격 결과 (ICD명: ATSInformation)">
+			orderType="Receive" alignment="false" semantics="SAMS ATS interception result">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
 			<NOM:parameter name="targetID" dataType="uintBE"/>
-			<NOM:parameter name="interceptionFlag" dataType="boolean"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="MSSInterceptionResult" id="0x0f" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="OC가 MSS에 전달하는 요격 결과 (ICD명: MSSInformation)">
+			orderType="Receive" alignment="false" semantics="SAMS MSS interception result">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="missileID" dataType="uintBE"/>
-			<NOM:parameter name="isIntercepted" dataType="boolean"/>
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="Stop" id="0x10" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="모의 중지 명령 (OC 송신)">
+			orderType="Receive" alignment="false" semantics="SAMS stop simulation command">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="stopFlag" dataType="boolean"/>
+			<NOM:parameter name="stopFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
-		<NOM:interaction name="MissionFailed" id="0x11" sharing="PublishSubscribe"
-			orderType="Receive" alignment="false" semantics="임무 실패 통보 (OC → ATS/MSS)">
-			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="missionFlag" dataType="boolean"/>
-		</NOM:interaction>
 
 
 		<NOM:interaction name="SimulatorStateToComm" id="0x20" sharing="Subscribe" orderType="Receive" alignment="false">
 			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerMSSStatusToComm" id="0x60" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="status" dataType="uintBE"/>
+			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerUplinkInfoToMiss" id="0x62" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerMissileDetonationToComm" id="0x65" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerFireMissileToMiss" id="0x66" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="missileID" dataType="uintBE"/>
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="launchPos" dataType="PosStruct"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="InnerSendScenario" id="0x21" sharing="Publish" orderType="Receive" alignment="false">
@@ -178,4 +189,3 @@
 	<NOM:notes/>
 
 </NOM:Nex1ObjectModel>
-

@@ -1,551 +1,952 @@
 #include "UDPCommunicationManager.h"
 #include <filesystem>
 #include <cmath>
+#include <algorithm>
+#include <iomanip>
+#include <sstream>
 using namespace std::filesystem;
+
 /************************************************************************
-    Constructor / Destructor
+	Constructor / Destructor
 ************************************************************************/
 UDPCommunicationManager::UDPCommunicationManager(void)
 {
-    init();
+	init();
 }
+
 UDPCommunicationManager::~UDPCommunicationManager(void)
 {
-    release();
+	release();
 }
+
 /************************************************************************
-    initialize / release
+	initialize / release
 ************************************************************************/
 void
 UDPCommunicationManager::init()
 {
-    tcout << "[" << __FUNCTIONT__ << "] " << std::endl;
-    setUserName(_T("UDPCommunicationManager"));
-    mec = new MECComponent;
-    mec->setUser(this);
-    commConfig = new CommunicationConfig;
-    commConfig->setIni(_T("CommLinkInfo.ini"));
-    tstring schRegFilePath = current_path().c_str();
-    schRegFilePath += _T("\\..\\SchemaRegistryData.xml");
-    nomParser = std::make_unique<NOMParser>();
-    nomParser->setNOMFile(schRegFilePath);
-    nomParser->parseNote();
-    auto noteMap = nomParser->getNoteMap();
-    nomParser->parseDataType();
-    auto dataTypeMap = nomParser->getDataTypeMap();
-    tstring nomFilePath = current_path().c_str();
-    nomFilePath += _T("\\");
-    nomFilePath += getUserName();
-    nomFilePath += _T(".xml");
-    nomParser->setNOMFile(nomFilePath);
-    if (nomParser->parse(dataTypeMap, noteMap))
-    {
-        list<NMessage*> msgList = nomParser->getMessageList();
-        list<NMessage*>::iterator itr;
-        for (itr = msgList.begin(); itr != msgList.end(); itr++)
-        {
-            NMessage* nMsg = *itr;
-            commMsgHandler.setIDNameTable(nMsg->getMessageID(), nMsg->getName());
-        }
-    }
-    funcMapInit();
+	tcout << "[" << __FUNCTIONT__ << "] " << std::endl;
+	setUserName(_T("UDPCommunicationManager"));
+
+	// by contract
+	mec = new MECComponent;
+	mec->setUser(this);
+
+	commConfig = new CommunicationConfig;
+	commConfig->setIni(_T("CommLinkInfo.ini"));
+	tcout << _T("[COMM][CONFIG] local=") << commConfig->getLocalIPNumber()
+		<< _T(":") << commConfig->getLocalPortNumber()
+		<< _T(" remote=") << commConfig->getRemoteIPNumber()
+		<< _T(":") << commConfig->getRemotePortNumber()
+		<< _T(" multicast=") << commConfig->getMulticastIPNumber()
+		<< _T(":") << commConfig->getMulticastPort()
+		<< _T(" protocol=") << commConfig->getProtocolName()
+		<< _T(" role=") << commConfig->getServerRole()
+		<< _T(" cast=") << commConfig->getCastType() << endl;
+	tcout << _T("[COMM][CONFIG] headerSize=") << commConfig->getHeaderSize()
+		<< _T(" idPos=") << commConfig->getHeaderIDPos()
+		<< _T(" idSize=") << commConfig->getHeaderIDSize()
+		<< _T(" lengthPos=") << commConfig->getHeaderLengthPos()
+		<< _T(" lengthSize=") << commConfig->getHeaderLengthSize() << endl;
+
+	//socket issue
+	//commInterface = new NCommInterface(this);
+
+	//NOM 메시지 등록
+	tstring schRegFilePath = current_path().c_str();
+	schRegFilePath += _T("\\..\\SchemaRegistryData.xml");
+	nomParser = std::make_unique<NOMParser>();
+	nomParser->setNOMFile(schRegFilePath);
+
+	nomParser->parseNote();
+	auto noteMap = nomParser->getNoteMap();
+	nomParser->parseDataType();
+	auto dataTypeMap = nomParser->getDataTypeMap();
+
+	//NOM 파싱 
+	tstring nomFilePath = current_path().c_str();
+	nomFilePath += _T("\\");
+	nomFilePath += getUserName();
+	nomFilePath += _T(".xml");
+	nomParser->setNOMFile(nomFilePath);
+
+	if (nomParser->parse(dataTypeMap, noteMap))
+		//if (nomParser->parse())
+	{
+		list<NMessage*> msgList = nomParser->getMessageList();
+		list<NMessage*>::iterator itr;
+		for (itr = msgList.begin(); itr != msgList.end(); itr++)
+		{
+			NMessage* nMsg = *itr;
+			commMsgHandler.setIDNameTable(nMsg->getMessageID(), nMsg->getName());
+			tcout << _T("[COMM][MAP] id=") << nMsg->getMessageID()
+				<< _T(" name=") << nMsg->getName() << endl;
+		}
+	}
+	else
+	{
+		tcerr << _T("[COMM][ERROR] Failed to parse UDPCommunicationManager.xml") << endl;
+	}
+
+	funcMapInit();
 }
+
 void
 UDPCommunicationManager::release()
 {
-    delete commConfig;
-    meb = nullptr;
-    delete mec;
-    mec = nullptr;
-    funcMap.clear();
+	delete commConfig;
+
+	//socket issue
+	//delete commInterface;
+
+	meb = nullptr;
+	delete mec;
+	mec = nullptr;
+
+	funcMap.clear();
 }
+
 /************************************************************************
-    Inherit Function
+	Inherit Function
 ************************************************************************/
 shared_ptr<NOM>
 UDPCommunicationManager::registerMsg(tstring msgName)
 {
-    shared_ptr<NOM> nomMsg = mec->registerMsg(msgName);
-    registeredMsg.insert(pair<unsigned int, shared_ptr<NOM>>(nomMsg->getInstanceID(), nomMsg));
-    return nomMsg;
+	shared_ptr<NOM> nomMsg = mec->registerMsg(msgName);
+	registeredMsg.insert(pair<unsigned int, shared_ptr<NOM>>(nomMsg->getInstanceID(), nomMsg));
+
+	return nomMsg;
 }
+
 void
 UDPCommunicationManager::discoverMsg(shared_ptr<NOM> nomMsg)
 {
-    discoveredMsg.insert(pair<unsigned int, shared_ptr<NOM>>(nomMsg->getInstanceID(), nomMsg));
-    commInterface->registerCommMsg(nomMsg);
+	discoveredMsg.insert(pair<unsigned int, shared_ptr<NOM>>(nomMsg->getInstanceID(), nomMsg));
+	commInterface->registerCommMsg(nomMsg);
 }
+
 void
 UDPCommunicationManager::updateMsg(shared_ptr<NOM> nomMsg)
 {
-    unsigned int oid = getObjectInstanceID(nomMsg);
-    if (oid > 0)
-    {
-        nomMsg->setInstanceID(oid);
-        mec->updateMsg(nomMsg);
-    }
-    else
-    {
-        printf("oid error:%u\n", oid);
-    }
+	unsigned int oid = getObjectInstanceID(nomMsg);
+
+	if (oid > 0)
+	{
+		nomMsg->setInstanceID(oid);
+		mec->updateMsg(nomMsg);
+	}
+	else
+	{
+		printf("oid error:%u\n", oid);
+	}
 }
+
 void
 UDPCommunicationManager::reflectMsg(shared_ptr<NOM> nomMsg)
 {
-    tcout << _T("UDPCommunicationManager::Message is reflected.") << endl;
-    commInterface->updateCommMsg(nomMsg);
+	tcout << _T("UDPCommunicationManager::Message is reflected.") << endl;
+	commInterface->updateCommMsg(nomMsg);
 }
+
 void
 UDPCommunicationManager::deleteMsg(shared_ptr<NOM> nomMsg)
 {
-    mec->deleteMsg(nomMsg);
-    registeredMsg.erase(nomMsg->getInstanceID());
+	mec->deleteMsg(nomMsg);
+	registeredMsg.erase(nomMsg->getInstanceID());
 }
+
 void
 UDPCommunicationManager::removeMsg(shared_ptr<NOM> nomMsg)
 {
-    map<unsigned int, shared_ptr<NOM>>::iterator itr;
-    itr = discoveredMsg.find(nomMsg->getInstanceID());
-    if (itr != discoveredMsg.end())
-    {
-        discoveredMsg.erase(nomMsg->getInstanceID());
-    }
-    else
-    {
-        tcerr << _T("UDPCommunicationManager::Message was removed.") << endl;
-    }
+	map<unsigned int, shared_ptr<NOM>>::iterator itr;
+	itr = discoveredMsg.find(nomMsg->getInstanceID());
+
+	if(itr != discoveredMsg.end())
+	{
+		discoveredMsg.erase(nomMsg->getInstanceID());
+	}
+	else
+	{
+		tcerr << _T("UDPCommunicationManager::Message was removed.") << endl;
+	}
 }
+
 void
 UDPCommunicationManager::sendMsg(shared_ptr<NOM> nomMsg)
 {
-    mec->sendMsg(nomMsg);
+	if (!nomMsg.get())
+	{
+		tcerr << _T("[COMM][INNER TX][ERROR] null NOM") << endl;
+		return;
+	}
+	tcout << _T("[COMM][INNER TX] name=") << nomMsg->getName()
+		<< _T(" id=") << nomMsg->getMessageID()
+		<< _T(" bytes=") << nomMsg->getLength() << endl;
+	mec->sendMsg(nomMsg);
 }
+
+void UDPCommunicationManager::sendExternalMsg(shared_ptr<NOM> nomMsg, const tstring& reason)
+{
+	if (!nomMsg.get())
+	{
+		tcerr << _T("[COMM][TX][ERROR] null NOM, reason=") << reason << endl;
+		return;
+	}
+
+	unsigned int payloadLength = 0;
+	if (auto value = nomMsg->getValue(_T("Header.MessageLength")))
+	{
+		payloadLength = value->toUInt();
+	}
+
+	std::wostringstream idStream;
+	idStream << _T("0x") << std::uppercase << std::hex
+		<< std::setw(2) << std::setfill(_T('0')) << nomMsg->getMessageID();
+	tcout << _T("[COMM][TX] id=") << idStream.str()
+		<< _T(" name=") << nomMsg->getName()
+		<< _T(" payloadLength=") << payloadLength
+		<< _T(" serializedBytes=") << nomMsg->getLength()
+		<< _T(" reason=") << reason << endl;
+
+	commInterface->sendCommMsg(nomMsg);
+}
+
 void
 UDPCommunicationManager::recvMsg(shared_ptr<NOM> nomMsg)
 {
-    if (auto iter = funcMap.find(nomMsg->getName()); iter != funcMap.end())
-    {
-        iter->second(nomMsg);
-    }
+	if (!nomMsg.get())
+	{
+		tcerr << _T("[COMM][INNER RX][ERROR] null NOM") << endl;
+		return;
+	}
+
+	tcout << _T("[COMM][INNER RX] name=") << nomMsg->getName()
+		<< _T(" id=") << nomMsg->getMessageID()
+		<< _T(" bytes=") << nomMsg->getLength() << endl;
+
+	if (auto iter = funcMap.find(nomMsg->getName()); iter != funcMap.end())
+	{
+		iter->second(nomMsg);
+	}
+	else
+	{
+		tcerr << _T("[COMM][INNER RX][WARN] no handler for ") << nomMsg->getName() << endl;
+	}
+
+	//commInterface->sendCommMsg(nomMsg);
 }
+
 void
 UDPCommunicationManager::setUserName(tstring userName)
 {
-    name = userName;
+	name = userName; 
 }
+
 tstring
 UDPCommunicationManager::getUserName()
 {
-    return name;
+	return name;
 }
+
 void
 UDPCommunicationManager::setData(void* data)
 {
-    // if need be
+	// if need be
 }
+
 bool
 UDPCommunicationManager::start()
 {
-    tcout << "[" << __FUNCTIONT__ << "] " << std::endl;
-    commInterface = new NCommInterface(this);
-    commInterface->setMEBComponent(meb);
-    MessageProcessor msgProcessor = bind(&UDPCommunicationManager::processRecvMessage, this, placeholders::_1, placeholders::_2);
-    commConfig->setMsgProcessor(msgProcessor);
-    commInterface->initNetEnv(commConfig);
-    list<NMessage*> msgList = nomParser->getObjectList();
-    list<NMessage*>::iterator itr;
-    for (itr = msgList.begin(); itr != msgList.end(); itr++)
-    {
-        NMessage* nMsg = *itr;
-        if (nMsg->getSharing() == ESharing::ENUM_SHARING_PUBLISHSUBSCRIBE || nMsg->getSharing() == ESharing::ENUM_SHARING_PUBLISH)
-        {
-            this->registerMsg(nMsg->getName());
-        }
-    }
-    return true;
+	tcout << "[" << __FUNCTIONT__ << "] " << std::endl;
+
+	//socket issue
+	commInterface = new NCommInterface(this);
+	
+	commInterface->setMEBComponent(meb);
+	MessageProcessor msgProcessor = bind(&UDPCommunicationManager::processRecvMessage, this, placeholders::_1, placeholders::_2);
+	commConfig->setMsgProcessor(msgProcessor);
+	const bool initialized = commInterface->initNetEnv(commConfig);
+	if (initialized)
+	{
+		tcout << _T("[COMM][START] network initialization succeeded") << endl;
+	}
+	else
+	{
+		tcerr << _T("[COMM][START][ERROR] network initialization failed") << endl;
+	}
+
+	//메시지 등록
+	list<NMessage*> msgList = nomParser->getObjectList();
+	list<NMessage*>::iterator itr;
+	for (itr = msgList.begin(); itr != msgList.end(); itr++)
+	{
+		NMessage* nMsg = *itr;
+		if (nMsg->getSharing() == ESharing::ENUM_SHARING_PUBLISHSUBSCRIBE || nMsg->getSharing() == ESharing::ENUM_SHARING_PUBLISH)
+		{
+			this->registerMsg(nMsg->getName());
+		}
+	}
+
+	return true;
 }
+
 bool
 UDPCommunicationManager::stop()
 {
-    commInterface->releaseNetEnv(commConfig);
-    delete commInterface;
-    return true;
+	commInterface->releaseNetEnv(commConfig);
+
+	//socket issue
+	delete commInterface;
+	return true;
 }
+
 void
 UDPCommunicationManager::setMEBComponent(IMEBComponent* realMEB)
 {
-    meb = realMEB;
-    mec->setMEB(meb);
+	meb = realMEB;
+	mec->setMEB(meb);
 }
-/************************************************************************
-    funcMapInit - MSS 수신 메시지 등록
-************************************************************************/
+
 void UDPCommunicationManager::funcMapInit()
 {
-    function<void(shared_ptr<NOM>)> msgProc;
-    // ── 네트워크 수신 메시지 (OC / MLS → MSS) ──────────────────────────
-    msgProc = bind(&UDPCommunicationManager::recvScenario, this, placeholders::_1);
-    funcMap.insert({ _T("Scenario"), msgProc });                     // 0x01
-    msgProc = bind(&UDPCommunicationManager::recvStartSimulation, this, placeholders::_1);
-    funcMap.insert({ _T("StartSimulation"), msgProc });              // 0x06
-    // [추가] IgnitionCommand (0x0a) : MLS → MSS 발사 명령
-    msgProc = bind(&UDPCommunicationManager::recvIgnitionCommand, this, placeholders::_1);
-    funcMap.insert({ _T("IgnitionCommand"), msgProc });              // 0x0a
-    // [추가] SimulatorState (0x0b) : RSS → MSS ATS 표적 위치 업링크
-    msgProc = bind(&UDPCommunicationManager::recvSimulatorState, this, placeholders::_1);
-    funcMap.insert({ _T("SimulatorState"), msgProc });               // 0x0b
-    // [추가] MSSInterceptionResult (0x0f) : OC → MSS 요격 결과
-    msgProc = bind(&UDPCommunicationManager::recvMSSInterceptionResult, this, placeholders::_1);
-    funcMap.insert({ _T("MSSInterceptionResult"), msgProc });        // 0x0f
-    msgProc = bind(&UDPCommunicationManager::recvStop, this, placeholders::_1);
-    funcMap.insert({ _T("Stop"), msgProc });                         // 0x10
-    msgProc = bind(&UDPCommunicationManager::recvMissionFailed, this, placeholders::_1);
-    funcMap.insert({ _T("MissionFailed"), msgProc });                // 0x11
-    // ── 내부 메시지 (Inner) ─────────────────────────────────────────────
-    msgProc = bind(&UDPCommunicationManager::recvInnerSimulatorStateComm, this, placeholders::_1);
-    funcMap.insert({ _T("SimulatorStateToComm"), msgProc });         // Inner 0x20
-    msgProc = bind(&UDPCommunicationManager::recvInnerSendScenarioAck, this, placeholders::_1);
-    funcMap.insert({ _T("InnerSendScenarioAck"), msgProc });         // Inner 0x22
-    msgProc = bind(&UDPCommunicationManager::recvInnerStartSimulationAck, this, placeholders::_1);
-    funcMap.insert({ _T("InnerStartSimulationAck"), msgProc });      // Inner 0x25
-    msgProc = bind(&UDPCommunicationManager::recvInnerStopSimulationAck, this, placeholders::_1);
-    funcMap.insert({ _T("InnerStopSimulationAck"), msgProc });       // Inner 0x28
-    // [추가] InnerMissileInfoToComm (Inner 0x60) : 유도탄 상태 → MSSStatus (0x04) 발행
-    msgProc = bind(&UDPCommunicationManager::recvInnerMissileInfoToComm, this, placeholders::_1);
-    funcMap.insert({ _T("InnerMissileInfoToComm"), msgProc });       // Inner 0x60
+	function<void(shared_ptr<NOM>)> msgProc;
+
+	msgProc = bind(&UDPCommunicationManager::recvScenario, this, placeholders::_1);
+	funcMap.insert({ _T("Scenario"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvATSInformationUplink, this, placeholders::_1);
+	funcMap.insert({ _T("ATSInformationUplink"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvIgnitionCommand, this, placeholders::_1);
+	funcMap.insert({ _T("IgnitionCommand"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerSendScenarioAck, this, placeholders::_1);
+	funcMap.insert({ _T("InnerSendScenarioAck"), msgProc });
+
+
+	msgProc = bind(&UDPCommunicationManager::recvSendScenario, this, placeholders::_1);
+	funcMap.insert({ _T("SendScenario"), msgProc});
+
+	msgProc = bind(&UDPCommunicationManager::recvStartSimulation, this, placeholders::_1);
+	funcMap.insert({ _T("StartSimulation"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvStop, this, placeholders::_1);
+	funcMap.insert({ _T("Stop"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerStartSimulationAck, this, placeholders::_1);
+	funcMap.insert({ _T("InnerStartSimulationAck"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerStopSimulationAck, this, placeholders::_1);
+	funcMap.insert({ _T("InnerStopSimulationAck"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerSimulatorStateComm, this, placeholders::_1);
+	funcMap.insert({ _T("SimulatorStateToComm"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerMSSStatusToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerMSSStatusToComm"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerMissileDetonationToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerMissileDetonationToComm"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerRouteToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerRouteToComm"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerAirThreatInfo, this, placeholders::_1);
+	funcMap.insert({ _T("InnerAirThreatInfoToComm"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvMissileDetonation, this, placeholders::_1);
+	funcMap.insert({ _T("MissileDetonation"), msgProc });
 }
-/************************************************************************
-    Network Receive Handlers
-************************************************************************/
-// 0x01 Scenario : OC → MSS (발사대 위치, 레이더 위치 추출)
+
 void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 {
-    auto nomMsg_new = meb->getNOMInstance(name, _T("InnerSendScenario"));
-    if (!nomMsg_new.get())
-    {
-        tcerr << _T("[UDPCommunicationManager] InnerSendScenario NOM is undefined.") << endl;
-        return;
-    }
-    // WayPoint는 MSS 모델 내부에서 처리하므로 0으로 초기화
-    NDouble zero(0.0);
-    nomMsg_new->setValue(_T("Scenario.OriginLat"), &zero);
-    nomMsg_new->setValue(_T("Scenario.OriginLng"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint0_X"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint0_Y"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint1_X"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint1_Y"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint2_X"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint2_Y"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint3_X"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint3_Y"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint0_Lat"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint0_Lng"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint1_Lat"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint1_Lng"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint2_Lat"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint2_Lng"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint3_Lat"), &zero);
-    nomMsg_new->setValue(_T("Scenario.WayPoint3_Lng"), &zero);
-    // MSS 발사대 위치 (mlsPos)
-    if (auto value = nomMsg->getValue(_T("mlsPos.x")))
-    {
-        NDouble v(value->toDouble());
-        nomMsg_new->setValue(_T("Scenario.LauncherPositionX"), &v);
-    }
-    if (auto value = nomMsg->getValue(_T("mlsPos.y")))
-    {
-        NDouble v(value->toDouble());
-        nomMsg_new->setValue(_T("Scenario.LauncherPositionY"), &v);
-    }
-    // 레이더(RSS) 위치 참조용 (rssPos)
-    if (auto value = nomMsg->getValue(_T("rssPos.x")))
-    {
-        NDouble v(value->toDouble());
-        nomMsg_new->setValue(_T("Scenario.RadarPositionX"), &v);
-    }
-    if (auto value = nomMsg->getValue(_T("rssPos.y")))
-    {
-        NDouble v(value->toDouble());
-        nomMsg_new->setValue(_T("Scenario.RadarPositionY"), &v);
-    }
-    this->sendMsg(nomMsg_new);
+	tcout << _T("[COMM][BRIDGE] Scenario -> InnerSendScenario") << endl;
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerSendScenario"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerSendScenario NOM is undefined.") << endl;
+		return;
+	}
+
+	NDouble zero(0.0);
+	nomMsg_new->setValue(_T("Scenario.OriginLat"), &zero);
+	nomMsg_new->setValue(_T("Scenario.OriginLng"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_X"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_Y"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_X"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_Y"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_X"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_Y"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_X"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_Y"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lat"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lng"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lat"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lng"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lat"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lng"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lat"), &zero);
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lng"), &zero);
+
+	if (auto value = nomMsg->getValue(_T("rssPos.x")))
+	{
+		NDouble v(value->toDouble());
+		nomMsg_new->setValue(_T("Scenario.RadarPositionX"), &v);
+	}
+	if (auto value = nomMsg->getValue(_T("rssPos.y")))
+	{
+		NDouble v(value->toDouble());
+		nomMsg_new->setValue(_T("Scenario.RadarPositionY"), &v);
+	}
+	if (auto value = nomMsg->getValue(_T("mlsPos.x")))
+	{
+		NDouble v(value->toDouble());
+		nomMsg_new->setValue(_T("Scenario.LauncherPositionX"), &v);
+	}
+	if (auto value = nomMsg->getValue(_T("mlsPos.y")))
+	{
+		NDouble v(value->toDouble());
+		nomMsg_new->setValue(_T("Scenario.LauncherPositionY"), &v);
+	}
+
+	this->sendMsg(nomMsg_new);
 }
-// 0x06 StartSimulation : OC → MSS
-void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
+
+void UDPCommunicationManager::recvATSInformationUplink(shared_ptr<NOM> nomMsg)
 {
-    if (auto value = nomMsg->getValue(_T("simulationStatus")))
-    {
-        if (!value->toByte())
-        {
-            recvStopSimulation(nomMsg);
-            return;
-        }
-    }
-    auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStartSimulation"));
-    this->sendMsg(nomMsg_new);
+	auto targetId = nomMsg->getValue(_T("matchedTarget.targetId"));
+	auto atsStatus = nomMsg->getValue(_T("matchedTarget.atsStatus"));
+	tcout << _T("[COMM][BRIDGE] ATSInformationUplink -> InnerUplinkInfoToMiss targetId=")
+		<< (targetId ? targetId->toUInt() : 0)
+		<< _T(" atsStatus=") << (atsStatus ? atsStatus->toUInt() : 0) << endl;
+
+	auto innerMsg = meb->getNOMInstance(name, _T("InnerUplinkInfoToMiss"));
+	if (!innerMsg.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerUplinkInfoToMiss NOM is undefined.") << endl;
+		return;
+	}
+
+	const tstring fields[] = {
+		_T("ATSPos.x"), _T("ATSPos.y"), _T("ATSPos.z"),
+		_T("speed"), _T("targetId"), _T("atsStatus")
+	};
+	for (const auto& field : fields)
+	{
+		auto value = nomMsg->getValue(_T("matchedTarget.") + field);
+		if (value) innerMsg->setValue(_T("matchedTarget.") + field, value);
+	}
+
+	this->sendMsg(innerMsg);
 }
-// [추가] 0x0a IgnitionCommand : MLS → MSS 발사 명령
+
 void UDPCommunicationManager::recvIgnitionCommand(shared_ptr<NOM> nomMsg)
 {
-    auto nomMsg_new = meb->getNOMInstance(name, _T("InnerFireMissileToMiss"));
-    if (!nomMsg_new.get())
-    {
-        tcerr << _T("[UDPCommunicationManager] InnerFireMissileToMiss NOM is undefined.") << endl;
-        return;
-    }
-    if (auto value = nomMsg->getValue(_T("missileID")))
-    {
-        NUInteger missileID(value->toUInt());
-        nomMsg_new->setValue(_T("missileID"), &missileID);
-    }
-    if (auto value = nomMsg->getValue(_T("targetID")))
-    {
-        NUInteger targetID(value->toUInt());
-        nomMsg_new->setValue(_T("targetID"), &targetID);
-    }
-    if (auto value = nomMsg->getValue(_T("launchPos.x")))
-    {
-        NDouble x(value->toDouble());
-        nomMsg_new->setValue(_T("launchPos.x"), &x);
-    }
-    if (auto value = nomMsg->getValue(_T("launchPos.y")))
-    {
-        NDouble y(value->toDouble());
-        nomMsg_new->setValue(_T("launchPos.y"), &y);
-    }
-    if (auto value = nomMsg->getValue(_T("launchPos.z")))
-    {
-        NDouble z(value->toDouble());
-        nomMsg_new->setValue(_T("launchPos.z"), &z);
-    }
-    this->sendMsg(nomMsg_new);
+	auto missileId = nomMsg->getValue(_T("missileID"));
+	auto targetId = nomMsg->getValue(_T("targetID"));
+	tcout << _T("[COMM][BRIDGE] IgnitionCommand -> InnerFireMissileToMiss missileID=")
+		<< (missileId ? missileId->toUInt() : 0)
+		<< _T(" targetID=") << (targetId ? targetId->toUInt() : 0) << endl;
+
+	auto innerMsg = meb->getNOMInstance(name, _T("InnerFireMissileToMiss"));
+	if (!innerMsg.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerFireMissileToMiss NOM is undefined.") << endl;
+		return;
+	}
+
+	const tstring fields[] = {
+		_T("missileID"), _T("targetID"),
+		_T("launchPos.x"), _T("launchPos.y"), _T("launchPos.z")
+	};
+	for (const auto& field : fields)
+	{
+		auto value = nomMsg->getValue(field);
+		if (value) innerMsg->setValue(field, value);
+	}
+
+	this->sendMsg(innerMsg);
 }
-// [추가] 0x0b SimulatorState : RSS → MSS ATS 표적 위치 업링크
-void UDPCommunicationManager::recvSimulatorState(shared_ptr<NOM> nomMsg)
+
+void UDPCommunicationManager::recvMissileDetonation(shared_ptr<NOM> nomMsg)
 {
-    auto nomMsg_new = meb->getNOMInstance(name, _T("InnerUplinkInfoToMiss"));
-    if (!nomMsg_new.get())
-    {
-        tcerr << _T("[UDPCommunicationManager] InnerUplinkInfoToMiss NOM is undefined.") << endl;
-        return;
-    }
-    if (auto value = nomMsg->getValue(_T("SimulatorID")))
-    {
-        NUShort simulatorID(value->toUShort());
-        nomMsg_new->setValue(_T("SimulatorID"), &simulatorID);
-    }
-    this->sendMsg(nomMsg_new);
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerAirThreatDetonationToATM"));
+	mec->sendMsg(nomMsg_new);
+	//std::cout << "\n\n\n\nUDP에서 미사일 폭파 이벤트 수신\n\n\n" << std::endl;
 }
-// [추가] 0x0f MSSInterceptionResult : OC → MSS 요격 결과
-void UDPCommunicationManager::recvMSSInterceptionResult(shared_ptr<NOM> nomMsg)
+
+void UDPCommunicationManager::recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg)
 {
-    auto nomMsg_new = meb->getNOMInstance(name, _T("InnerMissileDetonationToMiss"));
-    if (!nomMsg_new.get())
-    {
-        tcerr << _T("[UDPCommunicationManager] InnerMissileDetonationToMiss NOM is undefined.") << endl;
-        return;
-    }
-    if (auto value = nomMsg->getValue(_T("missileID")))
-    {
-        NUInteger missileID(value->toUInt());
-        nomMsg_new->setValue(_T("missileID"), &missileID);
-    }
-    if (auto value = nomMsg->getValue(_T("isIntercepted")))
-    {
-        NBool isIntercepted(value->toByte());
-        nomMsg_new->setValue(_T("isIntercepted"), &isIntercepted);
-    }
-    this->sendMsg(nomMsg_new);
+	auto nomMsg_new = meb->getNOMInstance(name, _T("ATSStatus"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] ATSStatus NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort msgID((ushort)ICD_MessageID::ATSStatus);
+	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
+
+	NUInteger status(1);
+	nomMsg_new->setValue(_T("status"), &status);
+
+	NUInteger targetID(nomMsg->getValue(_T("AirThreatInfo.ObjectID"))->toUInt());
+	nomMsg_new->setValue(_T("targetInfo[0].targetId"), &targetID);
+
+	NDouble posX(nomMsg->getValue(_T("AirThreatInfo.PositionX"))->toDouble());
+	nomMsg_new->setValue(_T("targetInfo[0].ATSPos.x"), &posX);
+
+	NDouble posY(nomMsg->getValue(_T("AirThreatInfo.PositionY"))->toDouble());
+	nomMsg_new->setValue(_T("targetInfo[0].ATSPos.y"), &posY);
+
+	NDouble posZ(0.0);
+	nomMsg_new->setValue(_T("targetInfo[0].ATSPos.z"), &posZ);
+
+	double velX = nomMsg->getValue(_T("AirThreatInfo.VelocityX"))->toDouble();
+	double velY = nomMsg->getValue(_T("AirThreatInfo.VelocityY"))->toDouble();
+	NUInteger speed((uint32_t)std::sqrt((velX * velX) + (velY * velY)));
+	nomMsg_new->setValue(_T("targetInfo[0].speed"), &speed);
+
+	NUInteger atsStatus(1);
+	if (auto value = nomMsg->getValue(_T("AirThreatInfo.ObjectState")))
+	{
+		atsStatus = NUInteger(value->toUInt());
+	}
+	nomMsg_new->setValue(_T("targetInfo[0].atsStatus"), &atsStatus);
+
+	sendExternalMsg(nomMsg_new, _T("ATS status"));
 }
-// 0x10 Stop : OC → MSS
+
+void UDPCommunicationManager::recvInnerRouteToComm(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("sendRouteAT"));
+	routeString = nomMsg->getValue(_T("RouteAT"))->toString();
+	NUShort msgID(0x43);;
+	NString route(routeString);
+
+	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
+	nomMsg_new->setValue(_T("RouteAT"), &route);
+
+	sendExternalMsg(nomMsg_new, _T("ATS route"));
+}
+
+void UDPCommunicationManager::recvSendScenario(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerSendScenario"));
+
+	nomMsg_new->setValue(_T("Scenario.OriginLat"), &(NDouble)(nomMsg->getValue(_T("Scenario.OriginLat"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.OriginLng"), &(NDouble)(nomMsg->getValue(_T("Scenario.OriginLng"))->toDouble()));
+
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_X"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_Y"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_X"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_Y"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_X"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_Y"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_X"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_X"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_Y"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_Y"))->toDouble()));
+
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_Lat"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint0_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint0_Lng"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_Lat"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint1_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint1_Lng"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_Lat"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint2_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint2_Lng"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lat"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_Lat"))->toDouble()));
+	nomMsg_new->setValue(_T("Scenario.WayPoint3_Lng"), &(NDouble)(nomMsg->getValue(_T("Scenario.WayPoint3_Lng"))->toDouble()));
+
+	this->sendMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
+{
+	auto value = nomMsg->getValue(_T("startFlag"));
+	if (!value)
+	{
+		value = nomMsg->getValue(_T("simulationStatus"));
+	}
+
+	if (value && value->toUInt() == 0)
+	{
+		tcout << _T("[COMM][BRIDGE] StartSimulation flag=0 -> InnerStopSimulation") << endl;
+		recvStopSimulation(nomMsg);
+		return;
+	}
+
+	tcout << _T("[COMM][BRIDGE] StartSimulation -> InnerStartSimulation flag=")
+		<< (value ? value->toUInt() : 1) << endl;
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStartSimulation"));
+
+	this->sendMsg(nomMsg_new);
+}
+
 void UDPCommunicationManager::recvStop(shared_ptr<NOM> nomMsg)
 {
-    recvStopSimulation(nomMsg);
+	if (auto value = nomMsg->getValue(_T("stopFlag")))
+	{
+		if (value->toUInt() == 0)
+		{
+			tcout << _T("[COMM][BRIDGE] Stop ignored because stopFlag=0") << endl;
+			return;
+		}
+	}
+
+	tcout << _T("[COMM][BRIDGE] Stop -> InnerStopSimulation") << endl;
+	recvStopSimulation(nomMsg);
 }
-// 0x11 MissionFailed : OC → MSS
+
+void UDPCommunicationManager::recvATSInterceptionResult(shared_ptr<NOM> nomMsg)
+{
+	auto value = nomMsg->getValue(_T("missionFlag"));
+	if (!value)
+	{
+		value = nomMsg->getValue(_T("interceptionFlag"));
+	}
+
+	if (value && value->toUInt() == 0)
+	{
+		return;
+	}
+
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerAirThreatDetonationToATM"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerAirThreatDetonationToATM NOM is undefined.") << endl;
+		return;
+	}
+
+	mec->sendMsg(nomMsg_new);
+}
+
 void UDPCommunicationManager::recvMissionFailed(shared_ptr<NOM> nomMsg)
 {
-    if (auto value = nomMsg->getValue(_T("missionFlag")))
-    {
-        if (!value->toByte())
-        {
-            return;
-        }
-    }
-    recvStopSimulation(nomMsg);
+	if (auto value = nomMsg->getValue(_T("missionFlag")))
+	{
+		if (value->toUInt() == 0)
+		{
+			return;
+		}
+	}
+
+	recvStopSimulation(nomMsg);
 }
-// 모의 중지 공통 처리 (InnerStopSimulation 전달)
+
 void UDPCommunicationManager::recvStopSimulation(shared_ptr<NOM> nomMsg)
 {
-    auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStopSimulation"));
-    this->sendMsg(nomMsg_new);
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStopSimulation"));
+
+	this->sendMsg(nomMsg_new);
 }
-/************************************************************************
-    Inner Message Handlers
-************************************************************************/
-// Inner 0x20 → SimulatorState (0x0b) 외부 송신 : MSS 모의기 상태 보고
-void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
-{
-    auto nomMsg_new = meb->getNOMInstance(name, _T("SimulatorState"));
-    NUShort msgID = NUShort((ushort)ICD_MessageID::SimulatorState);
-    NUShort simulatorID = nomMsg->getValue(_T("SimulatorID"))->toUShort();
-    nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
-    nomMsg_new->setValue(_T("SimulatorID"), &simulatorID);
-    commInterface->sendCommMsg(nomMsg_new);
-}
-// Inner 0x22 SendScenarioAck : 새 OC ICD에 Ack 없으므로 로그만 출력
+
 void UDPCommunicationManager::recvInnerSendScenarioAck(shared_ptr<NOM> nomMsg)
 {
-    tcout << _T("[UDPCommunicationManager] OC ICD has no SendScenarioAck message. Skip external send.") << endl;
+	tcout << _T("[UDPCommunicationManager] OC ICD has no SendScenarioAck message. Skip external send.") << endl;
 }
-// Inner 0x25 StartSimulationAck : 새 OC ICD에 Ack 없으므로 로그만 출력
+
 void UDPCommunicationManager::recvInnerStartSimulationAck(shared_ptr<NOM> nomMsg)
 {
-    tcout << _T("[UDPCommunicationManager] OC ICD has no StartSimulationAck message. Skip external send.") << endl;
+	(void)nomMsg;
 }
-// Inner 0x28 StopSimulationAck : 새 OC ICD에 Ack 없으므로 로그만 출력
+
 void UDPCommunicationManager::recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg)
 {
-    tcout << _T("[UDPCommunicationManager] OC ICD has no StopSimulationAck message. Skip external send.") << endl;
+	(void)nomMsg;
 }
-// [추가] Inner 0x60 InnerMissileInfoToComm → MSSStatus (0x04) 외부 송신
-void UDPCommunicationManager::recvInnerMissileInfoToComm(shared_ptr<NOM> nomMsg)
+
+void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
 {
-    auto nomMsg_new = meb->getNOMInstance(name, _T("MSSStatus"));
-    if (!nomMsg_new.get())
-    {
-        tcerr << _T("[UDPCommunicationManager] MSSStatus NOM is undefined.") << endl;
-        return;
-    }
-    NUShort msgID((ushort)ICD_MessageID::MSSStatus);
-    nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
-    if (auto value = nomMsg->getValue(_T("status")))
-    {
-        NInteger status(value->toInt());
-        nomMsg_new->setValue(_T("status"), &status);
-    }
-    if (auto cntValue = nomMsg->getValue(_T("missileCount")))
-    {
-        NUInteger missileCount(cntValue->toUInt());
-        nomMsg_new->setValue(_T("missileCount"), &missileCount);
-        uint32_t count = cntValue->toUInt();
-        for (uint32_t i = 0; i < count && i < 4; i++)
-        {
-            tstring idx = _T("[") + to_tstring(i) + _T("]");
-            if (auto v = nomMsg->getValue(_T("missileInfo") + idx + _T(".missileID")))
-            {
-                NUInteger val(v->toUInt());
-                nomMsg_new->setValue(_T("missileInfo") + idx + _T(".missileID"), &val);
-            }
-            if (auto v = nomMsg->getValue(_T("missileInfo") + idx + _T(".targetID")))
-            {
-                NUInteger val(v->toUInt());
-                nomMsg_new->setValue(_T("missileInfo") + idx + _T(".targetID"), &val);
-            }
-            if (auto v = nomMsg->getValue(_T("missileInfo") + idx + _T(".pos.x")))
-            {
-                NDouble val(v->toDouble());
-                nomMsg_new->setValue(_T("missileInfo") + idx + _T(".pos.x"), &val);
-            }
-            if (auto v = nomMsg->getValue(_T("missileInfo") + idx + _T(".pos.y")))
-            {
-                NDouble val(v->toDouble());
-                nomMsg_new->setValue(_T("missileInfo") + idx + _T(".pos.y"), &val);
-            }
-            if (auto v = nomMsg->getValue(_T("missileInfo") + idx + _T(".pos.z")))
-            {
-                NDouble val(v->toDouble());
-                nomMsg_new->setValue(_T("missileInfo") + idx + _T(".pos.z"), &val);
-            }
-            if (auto v = nomMsg->getValue(_T("missileInfo") + idx + _T(".mssStatus")))
-            {
-                NInteger val(v->toInt());
-                nomMsg_new->setValue(_T("missileInfo") + idx + _T(".mssStatus"), &val);
-            }
-            if (auto v = nomMsg->getValue(_T("missileInfo") + idx + _T(".isIntercepted")))
-            {
-                NBool val(v->toByte());
-                nomMsg_new->setValue(_T("missileInfo") + idx + _T(".isIntercepted"), &val);
-            }
-        }
-    }
-    commInterface->sendCommMsg(nomMsg_new);
+	tcout << _T("[UDPCommunicationManager] OC ICD has no ATSInformationUplink bridge yet. Skip external send.") << endl;
 }
-/************************************************************************
-    Utility
-************************************************************************/
+
+void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
+{
+	auto mssStatusMsg = meb->getNOMInstance(name, _T("MSSStatus"));
+	auto downlinkMsg = meb->getNOMInstance(name, _T("MSSInformationDownlinkToRSS"));
+	if (!mssStatusMsg.get() || !downlinkMsg.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] MSS output NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort statusMsgID((ushort)ICD_MessageID::MSSStatus);
+	NUShort statusMsgLength(148);
+	mssStatusMsg->setValue(_T("Header.MessageID"), &statusMsgID);
+	mssStatusMsg->setValue(_T("Header.MessageLength"), &statusMsgLength);
+
+	NUInteger status(1);
+	if (auto value = nomMsg->getValue(_T("status")))
+	{
+		status = NUInteger(value->toUInt());
+	}
+	tcout << _T("[COMM][MSS] status=") << status.toUInt();
+	for (unsigned int i = 0; i < 4; ++i)
+	{
+		const tstring prefix = _T("missileInfo[") + std::to_wstring(i) + _T("].");
+		auto missileId = nomMsg->getValue(prefix + _T("missileId"));
+		auto targetId = nomMsg->getValue(prefix + _T("targetId"));
+		auto missileStatus = nomMsg->getValue(prefix + _T("mssStatus"));
+		tcout << _T(" [") << i
+			<< _T(":mid=") << (missileId ? missileId->toUInt() : 0)
+			<< _T(",tid=") << (targetId ? targetId->toUInt() : 0)
+			<< _T(",state=") << (missileStatus ? missileStatus->toUInt() : 0)
+			<< _T("]");
+	}
+	tcout << endl;
+	mssStatusMsg->setValue(_T("status"), &status);
+
+	auto copyMissileInfo = [&](shared_ptr<NOM> destination)
+	{
+		for (unsigned int i = 0; i < 4; ++i)
+		{
+			const tstring prefix = _T("missileInfo[") + std::to_wstring(i) + _T("].");
+			const tstring fields[] = {
+				_T("targetId"), _T("missileId"),
+				_T("MSSPos.x"), _T("MSSPos.y"), _T("MSSPos.z"), _T("mssStatus")
+			};
+			for (const auto& field : fields)
+			{
+				auto value = nomMsg->getValue(prefix + field);
+				if (value) destination->setValue(prefix + field, value);
+			}
+		}
+	};
+
+	copyMissileInfo(mssStatusMsg);
+	sendExternalMsg(mssStatusMsg, _T("periodic MSS status"));
+
+	NUShort downlinkMsgID((ushort)ICD_MessageID::MSSInformationDownlinkToRSS);
+	NUShort downlinkMsgLength(144);
+	downlinkMsg->setValue(_T("Header.MessageID"), &downlinkMsgID);
+	downlinkMsg->setValue(_T("Header.MessageLength"), &downlinkMsgLength);
+	copyMissileInfo(downlinkMsg);
+	sendExternalMsg(downlinkMsg, _T("periodic MSS downlink"));
+}
+
+void UDPCommunicationManager::recvInnerMissileDetonationToComm(shared_ptr<NOM> nomMsg)
+{
+	auto resultMsg = meb->getNOMInstance(name, _T("MSSInterceptionResult"));
+	if (!resultMsg.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] MSSInterceptionResult NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort msgID((ushort)ICD_MessageID::MSSInterceptionResult);
+	NUShort msgLength(8);
+	auto targetId = nomMsg->getValue(_T("targetID"));
+	auto missionFlag = nomMsg->getValue(_T("missionFlag"));
+	tcout << _T("[COMM][MSS] interception targetID=")
+		<< (targetId ? targetId->toUInt() : 0)
+		<< _T(" missionFlag=") << (missionFlag ? missionFlag->toUInt() : 0) << endl;
+	resultMsg->setValue(_T("Header.MessageID"), &msgID);
+	resultMsg->setValue(_T("Header.MessageLength"), &msgLength);
+
+	if (auto value = nomMsg->getValue(_T("targetID"))) resultMsg->setValue(_T("targetID"), value);
+	if (auto value = nomMsg->getValue(_T("missionFlag"))) resultMsg->setValue(_T("missionFlag"), value);
+
+	sendExternalMsg(resultMsg, _T("MSS interception result"));
+}
+
 void UDPCommunicationManager::sendInnerMsg(shared_ptr<NOM> nomMsg)
 {
-    if (auto iter = funcMap.find(nomMsg->getName()); iter != funcMap.end())
-    {
-        iter->second(nomMsg);
-    }
+	if (!nomMsg.get())
+	{
+		tcerr << _T("[COMM][DISPATCH][ERROR] null NOM") << endl;
+		return;
+	}
+
+	if (auto iter = funcMap.find(nomMsg->getName()); iter != funcMap.end())
+	{
+		tcout << _T("[COMM][DISPATCH] handler found for ") << nomMsg->getName() << endl;
+		iter->second(nomMsg);
+	}
+	else
+	{
+		tcerr << _T("[COMM][DISPATCH][WARN] no handler for ") << nomMsg->getName() << endl;
+	}
 }
+
+void UDPCommunicationManager::logPacketPreview(const unsigned char* data, int size)
+{
+	if (data == nullptr || size <= 0)
+	{
+		return;
+	}
+
+	const int previewSize = std::min(size, 32);
+	std::wostringstream preview;
+	preview << std::uppercase << std::hex << std::setfill(_T('0'));
+	for (int i = 0; i < previewSize; ++i)
+	{
+		if (i > 0) preview << _T(' ');
+		preview << std::setw(2) << static_cast<unsigned int>(data[i]);
+	}
+
+	tcout << _T("[COMM][RX][HEX] first=") << previewSize
+		<< _T(" bytes: ") << preview.str();
+	if (size > previewSize)
+	{
+		tcout << _T(" ...");
+	}
+	tcout << endl;
+}
+
 void
 UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 {
-    auto IDPos = commConfig->getHeaderIDPos();
-    auto IDSize = commConfig->getHeaderIDSize();
-    auto msgID = 0;
-    if (IDSize == 2)
-    {
-        unsigned short tmpMsgID = 0;
-        memcpy(&tmpMsgID, data + IDPos, IDSize);
-        msgID = ntohs(tmpMsgID);
-    }
-    else
-    {
-        return;
-    }
-    auto nomMsg = meb->getNOMInstance(name, commMsgHandler.getMsgName(msgID));
-    if (nomMsg.get())
-    {
-        if (nomMsg->getType() == nframework::nom::ENOMType::NOM_TYPE_OBJECT)
-        {
-            nomMsg->deserialize(data, size);
-            this->updateMsg(nomMsg);
-        }
-        else
-        {
-            auto nomMsgCP = nomMsg->clone();
-            nomMsgCP->deserialize(data, size);
-            nomMsgCP->setOwner(name);
-            sendInnerMsg(nomMsgCP);
-        }
-    }
-    else
-    {
-        tcerr << _T("undefined message") << endl;
-    }
+	if (data == nullptr || size <= 0)
+	{
+		tcerr << _T("[COMM][RX][ERROR] empty packet data=")
+			<< (data == nullptr ? _T("null") : _T("valid"))
+			<< _T(" size=") << size << endl;
+		return;
+	}
+
+	const auto headerSize = commConfig->getHeaderSize();
+	auto IDPos = commConfig->getHeaderIDPos();
+	auto IDSize = commConfig->getHeaderIDSize();
+	auto lengthPos = commConfig->getHeaderLengthPos();
+	auto lengthSize = commConfig->getHeaderLengthSize();
+
+	if (size < static_cast<int>(headerSize))
+	{
+		tcerr << _T("[COMM][RX][ERROR] packet shorter than header packetBytes=")
+			<< size << _T(" headerBytes=") << headerSize << endl;
+		logPacketPreview(data, size);
+		return;
+	}
+	if (IDPos + IDSize > static_cast<unsigned int>(size))
+	{
+		tcerr << _T("[COMM][RX][ERROR] message ID is outside packet idPos=")
+			<< IDPos << _T(" idSize=") << IDSize << _T(" packetBytes=") << size << endl;
+		logPacketPreview(data, size);
+		return;
+	}
+
+	auto msgID = 0;
+
+	//ID 형식이 short 또는 int인 경우만 처리
+	if (IDSize == 2)
+	{
+		unsigned short tmpMsgID = 0;
+		memcpy(&tmpMsgID, data + IDPos, IDSize);
+		msgID = ntohs(tmpMsgID);
+	}
+	else
+	{
+		tcerr << _T("[COMM][RX][ERROR] unsupported ID_SIZE=") << IDSize << endl;
+		logPacketPreview(data, size);
+		return;
+	}
+
+	unsigned int declaredPayloadLength = 0;
+	if (lengthPos + lengthSize <= static_cast<unsigned int>(size))
+	{
+		if (lengthSize == 2)
+		{
+			unsigned short rawLength = 0;
+			memcpy(&rawLength, data + lengthPos, lengthSize);
+			declaredPayloadLength = commConfig->getLengthBigEndian() ? ntohs(rawLength) : rawLength;
+		}
+		else if (lengthSize == 4)
+		{
+			unsigned int rawLength = 0;
+			memcpy(&rawLength, data + lengthPos, lengthSize);
+			declaredPayloadLength = commConfig->getLengthBigEndian() ? ntohl(rawLength) : rawLength;
+		}
+	}
+
+	const tstring msgName = commMsgHandler.getMsgName((unsigned short)msgID);
+	std::wostringstream idStream;
+	idStream << _T("0x") << std::uppercase << std::hex
+		<< std::setw(2) << std::setfill(_T('0')) << msgID;
+	tcout << _T("[COMM][RX] id=") << idStream.str()
+		<< _T(" name=") << (msgName.empty() ? _T("<unknown>") : msgName)
+		<< _T(" packetBytes=") << size
+		<< _T(" declaredPayloadLength=") << declaredPayloadLength
+		<< _T(" expectedPacketBytes=") << (headerSize + declaredPayloadLength) << endl;
+	logPacketPreview(data, size);
+
+	if (declaredPayloadLength > 0 && headerSize + declaredPayloadLength != static_cast<unsigned int>(size))
+	{
+		tcerr << _T("[COMM][RX][WARN] header length mismatch: actual=") << size
+			<< _T(" expected=") << (headerSize + declaredPayloadLength) << endl;
+	}
+	if (msgName.empty())
+	{
+		tcerr << _T("[COMM][RX][ERROR] unknown message ID ") << idStream.str() << endl;
+		return;
+	}
+
+	auto nomMsg = meb->getNOMInstance(name, msgName);
+
+	if (nomMsg.get())
+	{
+		if (nomMsg->getType() == nframework::nom::ENOMType::NOM_TYPE_OBJECT)
+		{
+			const bool decoded = nomMsg->deserialize(data, size);
+			if (!decoded)
+			{
+				tcerr << _T("[COMM][RX][ERROR] deserialize failed for object ") << msgName << endl;
+				return;
+			}
+			tcout << _T("[COMM][RX] deserialize succeeded for object ") << msgName << endl;
+			this->updateMsg(nomMsg);
+		}
+		else
+		{
+			auto nomMsgCP = nomMsg->clone();
+			const bool decoded = nomMsgCP->deserialize(data, size);
+			if (!decoded)
+			{
+				tcerr << _T("[COMM][RX][ERROR] deserialize failed for interaction ") << msgName << endl;
+				return;
+			}
+			tcout << _T("[COMM][RX] deserialize succeeded for interaction ") << msgName << endl;
+			nomMsgCP->setOwner(name);
+			sendInnerMsg(nomMsgCP);
+			//this->sendMsg(nomMsgCP);
+		}
+	}
+	else
+	{
+		tcerr << _T("[COMM][RX][ERROR] NOM instance is undefined for ") << msgName << endl;
+	}
 }
+
 unsigned int
 UDPCommunicationManager::getObjectInstanceID(shared_ptr<NOM> nomMsg)
 {
-    unsigned int oid = 0;
-    map<unsigned int, shared_ptr<NOM>>::iterator itr;
-    for (itr = registeredMsg.begin(); itr != registeredMsg.end(); itr++)
-    {
-        unsigned int key = itr->first;
-        shared_ptr<NOM> nom = itr->second;
-        if (nom->getMessageID() == nomMsg->getMessageID())
-        {
-            printf("[TCPCommunicationManager]Found object instance id : %u\n", key);
-            oid = key;
-            break;
-        }
-    }
-    return oid;
+	unsigned int oid = 0;
+	map<unsigned int, shared_ptr<NOM>>::iterator itr;
+	for (itr = registeredMsg.begin(); itr != registeredMsg.end(); itr++)
+	{
+		unsigned int key = itr->first;
+		shared_ptr<NOM> nom = itr->second;
+
+		if (nom->getMessageID() == nomMsg->getMessageID())
+		{
+			printf("[TCPCommunicationManager]Found object instance id : %u\n", key);
+			oid = key;
+			break;
+		}
+	}
+
+	return oid;
 }
+
 /************************************************************************
-    Export Function
+	Export Function
 ************************************************************************/
 extern "C" BASEMGRDLL_API
 BaseManager* createObject()
 {
-    return new UDPCommunicationManager;
+	return new UDPCommunicationManager;
 }
+
 extern "C" BASEMGRDLL_API
 void deleteObject(BaseManager* userManager)
 {
-    delete userManager;
+	delete userManager;
 }
+

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 enum class ICD_MessageID
 {
@@ -13,7 +13,7 @@ enum class ICD_MessageID
 	TargetDetection,
 	LaunchCommand,
 	IgnitionCommand = 0x0A,
-	SimulatorState,
+	ATSInformationUplink,
 	MSSInformationDownlinkToRSS,
 	TargetDestroyed,
 	ATSInterceptionResult,
@@ -36,18 +36,32 @@ enum class InnerICD_MessageID
 	InnerStopSimulationAck,
 	InnerStopSimulationToModel = 0x29,
 
+	// RSS ICD 내부 메시지
+	InnerRSSStatusToComm = 0x30,
+
 	// ATS ICD 내부 메시지
 	InnerAirThreatDetonationToATM = 0x40,
 	InnerAirThreatInfoToComm,
 
+	// LCS ICD 내부 메시지
+	InnerFireMissileAckToLCS = 0x50,
+	InnerFireMissileToMSS,
+	InnerSendMissileInfoToComm,
+
 	// MSS ICD 내부 메시지
-	InnerMissileInfoToComm = 0x60,    // MSS 상태 → Comm 전달 (MSSStatus 0x04 발행)
-	InnerMissileInfoToDeto,           // MSS 상태 → 격폭 모듈 전달
-	InnerUplinkInfoToMiss,            // ATS 표적 위치 → 유도탄 전달 (SimulatorState 0x0b 수신)
-	InnerUplinkInfoToDeto,            // ATS 표적 위치 → 격폭 모듈 전달
-	InnerMissileDetonationToMiss,     // 요격 결과 → 유도탄 전달 (MSSInterceptionResult 0x0f 수신)
-	InnerMissileDetonationToComm,     // 요격 결과 → Comm 전달
-	InnerFireMissileToMiss,           // 발사 명령 → 유도탄 전달 (IgnitionCommand 0x0a 수신)
+	InnerMSSStatusToComm = 0x60,
+	InnerMissileInfoToDeto,
+	InnerUplinkInfoToMiss,
+	InnerUplinkInfoToDeto,
+	InnerMissileDetonationToMiss,
+	InnerMissileDetonationToComm,
+	InnerFireMissileToMiss,
+	
+	// MFRS ICD 내부 메시지
+	InnerAirThreatInfo = 0x70,
+	InnerMissileInfo,
+	InnerRadarDetectionInfo,
+	InnerAirThreatDetonation,
 };
 
 enum class SimulatorID

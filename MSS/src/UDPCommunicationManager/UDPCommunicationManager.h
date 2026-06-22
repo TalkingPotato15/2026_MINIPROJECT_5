@@ -34,37 +34,39 @@ public:
 	virtual bool start() override;
 	virtual bool stop() override;
 	virtual void setMEBComponent(IMEBComponent*) override;
-
+	
 public:
 	void processRecvMessage(unsigned char* data, int size);
 	unsigned int getObjectInstanceID(shared_ptr<NOM> nomMsg);
-
+	
 private:
 	void init();
 	void release();
 	void sendInnerMsg(shared_ptr<NOM> nomMsg);
+	void sendExternalMsg(shared_ptr<NOM> nomMsg, const tstring& reason);
+	void logPacketPreview(const unsigned char* data, int size);
 	void funcMapInit();
 
 private:
-	// 네트워크 수신 (OC / MLS → MSS)
-	void recvScenario(shared_ptr<NOM> nomMsg);              // 0x01 시나리오 수신
-	void recvStartSimulation(shared_ptr<NOM> nomMsg);       // 0x06 모의 시작 수신
-	void recvIgnitionCommand(shared_ptr<NOM> nomMsg);       // [추가] 0x0a 발사 명령 수신 (MLS → MSS)
-	void recvSimulatorState(shared_ptr<NOM> nomMsg);        // [추가] 0x0b ATS 표적 위치 수신 (RSS → MSS)
-	void recvMSSInterceptionResult(shared_ptr<NOM> nomMsg); // [추가] 0x0f 요격 결과 수신 (OC → MSS)
-	void recvStop(shared_ptr<NOM> nomMsg);                  // 0x10 모의 중지 수신
-	void recvMissionFailed(shared_ptr<NOM> nomMsg);         // 0x11 임무 실패 수신
-
-	// 내부 공통 헬퍼
-	void recvStopSimulation(shared_ptr<NOM> nomMsg);        // [추가] InnerStopSimulation 전달 공통 처리
-
-	// 내부 메시지 수신 (Inner)
-	void recvInnerSendScenarioAck(shared_ptr<NOM> nomMsg);    // Inner 0x22
-	void recvInnerStartSimulationAck(shared_ptr<NOM> nomMsg); // Inner 0x25
-	void recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg);  // Inner 0x28
-	void recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg); // Inner 0x20 모의기 상태
-	void recvInnerMissileInfoToComm(shared_ptr<NOM> nomMsg);  // [추가] Inner 0x60 → MSSStatus (0x04) 발행
-
+	void recvScenario(shared_ptr<NOM> nomMsg);
+	void recvATSInformationUplink(shared_ptr<NOM> nomMsg);
+	void recvIgnitionCommand(shared_ptr<NOM> nomMsg);
+	void recvSendScenario(shared_ptr<NOM> nomMsg);
+	void recvStartSimulation(shared_ptr<NOM> nomMsg);
+	void recvStop(shared_ptr<NOM> nomMsg);
+	void recvATSInterceptionResult(shared_ptr<NOM> nomMsg);
+	void recvMissionFailed(shared_ptr<NOM> nomMsg);
+	void recvStopSimulation(shared_ptr<NOM> nomMsg);
+	void recvInnerSendScenarioAck(shared_ptr<NOM> nomMsg);
+	void recvInnerStartSimulationAck(shared_ptr<NOM> nomMsg);
+	void recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg);
+	void recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg);
+	void recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg);
+	void recvInnerMissileDetonationToComm(shared_ptr<NOM> nomMsg);
+	void recvInnerRouteToComm(shared_ptr<NOM> nomMsg);
+	void recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg);
+	void recvMissileDetonation(shared_ptr<NOM> nomMsg);
+	
 public:
 	std::unique_ptr<NOMParser> nomParser;
 
@@ -81,3 +83,4 @@ private:
 	CommMessageHandler commMsgHandler;
 	tstring routeString;
 };
+

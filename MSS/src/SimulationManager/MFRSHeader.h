@@ -47,7 +47,7 @@ enum class InnerICD_MessageID
 	InnerSendMissileInfoToComm,
 
 	// MSS ICD 내부 메시지
-	InnerMissileInfoToComm = 0x60,
+	InnerMSSStatusToComm = 0x60,
 	InnerMissileInfoToDeto,
 	InnerUplinkInfoToMiss,
 	InnerUplinkInfoToDeto,

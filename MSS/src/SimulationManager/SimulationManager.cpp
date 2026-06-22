@@ -190,7 +190,7 @@ void SimulationManager::recvInnerSendScenario(std::shared_ptr<NOM> nomMsg)
 	mec->sendMsg(nomMsgToModel);
 
 	auto nomMsgAck = meb->getNOMInstance(name, _T("InnerSendScenarioAck"));
-	NUShort simulatorID = NUShort((ushort)SimulatorID::ATS);
+	NUShort simulatorID = NUShort((ushort)SimulatorID::MSS);
 	nomMsgAck->setValue(_T("SimulatorID"), &simulatorID);
 
 	mec->sendMsg(nomMsgAck);
@@ -204,7 +204,7 @@ void SimulationManager::recvInnerStartSimulation(std::shared_ptr<NOM> nomMsg)
 
 
 	auto nomMsgAck = meb->getNOMInstance(name, _T("InnerStartSimulationAck"));
-	NUShort simulatorID = NUShort((ushort)SimulatorID::ATS);
+	NUShort simulatorID = NUShort((ushort)SimulatorID::MSS);
 
 	nomMsgAck->setValue(_T("SimulatorID"), &simulatorID);
 
@@ -219,7 +219,7 @@ void SimulationManager::recvInnerStopSimulation(std::shared_ptr<NOM> nomMsg)
 
 
 	auto nomMsgAck = meb->getNOMInstance(name, _T("InnerStopSimulationAck"));
-	NUShort simulatorID = NUShort((ushort)SimulatorID::ATS);
+	NUShort simulatorID = NUShort((ushort)SimulatorID::MSS);
 
 	nomMsgAck->setValue(_T("SimulatorID"), &simulatorID);
 
