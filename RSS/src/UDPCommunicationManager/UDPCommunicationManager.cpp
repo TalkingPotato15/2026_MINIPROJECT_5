@@ -247,17 +247,11 @@ void UDPCommunicationManager::funcMapInit()
 	msgProc = bind(&UDPCommunicationManager::recvStartSimulation, this, placeholders::_1);
 	funcMap.insert({ _T("StartSimulation"), msgProc });
 
-	msgProc = bind(&UDPCommunicationManager::recvStopSimulation, this, placeholders::_1);
-	funcMap.insert({ _T("StopSimulation"), msgProc });
-
 	msgProc = bind(&UDPCommunicationManager::recvStop, this, placeholders::_1);
 	funcMap.insert({ _T("Stop"), msgProc });
 
 	msgProc = bind(&UDPCommunicationManager::recvATSInterceptionResult, this, placeholders::_1);
 	funcMap.insert({ _T("ATSInterceptionResult"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvMissionFailed, this, placeholders::_1);
-	funcMap.insert({ _T("MissionFailed"), msgProc });
 
 	msgProc = bind(&UDPCommunicationManager::recvInnerStartSimulationAck, this, placeholders::_1);
 	funcMap.insert({ _T("InnerStartSimulationAck"), msgProc });
@@ -353,34 +347,32 @@ void UDPCommunicationManager::recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg)
 	NUShort msgID((ushort)ICD_MessageID::ATSStatus);
 	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
 
-	NInteger status(1);
-	NUInteger targetCount(1);
+	NUInteger status(1);
 	nomMsg_new->setValue(_T("status"), &status);
-	nomMsg_new->setValue(_T("targetCount"), &targetCount);
 
 	NUInteger targetID(nomMsg->getValue(_T("AirThreatInfo.ObjectID"))->toUInt());
-	nomMsg_new->setValue(_T("targetInfo[0].targetID"), &targetID);
+	nomMsg_new->setValue(_T("targetInfo[0].targetId"), &targetID);
 
 	NDouble posX(nomMsg->getValue(_T("AirThreatInfo.PositionX"))->toDouble());
-	nomMsg_new->setValue(_T("targetInfo[0].pos.x"), &posX);
+	nomMsg_new->setValue(_T("targetInfo[0].ATSPos.x"), &posX);
 
 	NDouble posY(nomMsg->getValue(_T("AirThreatInfo.PositionY"))->toDouble());
-	nomMsg_new->setValue(_T("targetInfo[0].pos.y"), &posY);
+	nomMsg_new->setValue(_T("targetInfo[0].ATSPos.y"), &posY);
 
 	NDouble posZ(0.0);
-	nomMsg_new->setValue(_T("targetInfo[0].pos.z"), &posZ);
+	nomMsg_new->setValue(_T("targetInfo[0].ATSPos.z"), &posZ);
 
 	double velX = nomMsg->getValue(_T("AirThreatInfo.VelocityX"))->toDouble();
 	double velY = nomMsg->getValue(_T("AirThreatInfo.VelocityY"))->toDouble();
 	NUInteger speed((uint32_t)std::sqrt((velX * velX) + (velY * velY)));
 	nomMsg_new->setValue(_T("targetInfo[0].speed"), &speed);
 
-	NBool interceptionFlag(false);
+	NUInteger atsStatus(1);
 	if (auto value = nomMsg->getValue(_T("AirThreatInfo.ObjectState")))
 	{
-		interceptionFlag = NBool(value->toUShort() == (ushort)TrackState::ATS_Detonation);
+		atsStatus = NUInteger(value->toUInt());
 	}
-	nomMsg_new->setValue(_T("targetInfo[0].interceptionFlag"), &interceptionFlag);
+	nomMsg_new->setValue(_T("targetInfo[0].atsStatus"), &atsStatus);
 
 	commInterface->sendCommMsg(nomMsg_new);
 }
@@ -428,13 +420,16 @@ void UDPCommunicationManager::recvSendScenario(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
 {
-	if (auto value = nomMsg->getValue(_T("simulationStatus")))
+	auto value = nomMsg->getValue(_T("startFlag"));
+	if (!value)
 	{
-		if (!value->toByte())
-		{
-			recvStopSimulation(nomMsg);
-			return;
-		}
+		value = nomMsg->getValue(_T("simulationStatus"));
+	}
+
+	if (value && !value->toByte())
+	{
+		recvStopSimulation(nomMsg);
+		return;
 	}
 
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStartSimulation"));
@@ -449,12 +444,15 @@ void UDPCommunicationManager::recvStop(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvATSInterceptionResult(shared_ptr<NOM> nomMsg)
 {
-	if (auto value = nomMsg->getValue(_T("interceptionFlag")))
+	auto value = nomMsg->getValue(_T("missionFlag"));
+	if (!value)
 	{
-		if (!value->toByte())
-		{
-			return;
-		}
+		value = nomMsg->getValue(_T("interceptionFlag"));
+	}
+
+	if (value && !value->toByte())
+	{
+		return;
 	}
 
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerAirThreatDetonationToATM"));
@@ -504,14 +502,7 @@ void UDPCommunicationManager::recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
 {
-	auto nomMsg_new = meb->getNOMInstance(name, _T("SimulatorState"));
-	NUShort msgID = NUShort((ushort)ICD_MessageID::SimulatorState);
-	NUShort simulatorID = nomMsg->getValue(_T("SimulatorID"))->toUShort();
-
-	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
-	nomMsg_new->setValue(_T("SimulatorID"), &simulatorID);
-
-	commInterface->sendCommMsg(nomMsg_new);
+	tcout << _T("[UDPCommunicationManager] OC ICD has no ATSInformationUplink bridge yet. Skip external send.") << endl;
 }
 
 void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
@@ -524,10 +515,10 @@ void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
 	}
 
 	NUShort msgID = NUShort((ushort)ICD_MessageID::RSSStatus);
-	NInteger status(1);
+	NUInteger status(1);
 	if (auto value = nomMsg->getValue(_T("status")))
 	{
-		status = NInteger(value->toInt());
+		status = NUInteger(value->toUInt());
 	}
 
 	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
