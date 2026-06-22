@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 enum class ICD_MessageID
 {
@@ -13,7 +13,7 @@ enum class ICD_MessageID
 	TargetDetection,
 	LaunchCommand,
 	IgnitionCommand = 0x0A,
-	SimulatorState,
+	ATSInformationUplink,
 	MSSInformationDownlinkToRSS,
 	TargetDestroyed,
 	ATSInterceptionResult,
