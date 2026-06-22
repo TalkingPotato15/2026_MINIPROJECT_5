@@ -127,6 +127,24 @@
 			<NOM:parameter name="status" dataType="intBE"/>
 		</NOM:interaction>
 
+		<NOM:interaction name="InnerATSInformationToRSS" id="0x31" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerMSSInformationToRSS" id="0x32" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerTargetDetectionToComm" id="0x33" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="targetDetectonSuccess" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerTargetDestroyedToComm" id="0x34" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
+		</NOM:interaction>
+
 		<NOM:interaction name="InnerSendScenario" id="0x21" sharing="Publish" orderType="Receive" alignment="false">
 			<NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
 		</NOM:interaction>
