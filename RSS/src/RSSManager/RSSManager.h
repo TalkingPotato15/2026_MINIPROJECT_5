@@ -61,6 +61,8 @@ private:
 	void recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg);
 	bool tryReadATSInfo(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix, CachedATSInfo& atsInfo) const;
 	bool tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, const tstring& missilePrefix, CachedMSSInfo& mssInfo) const;
+	double getDistanceToRSS(const CachedATSInfo& atsInfo) const;
+	double getDistance(const CachedATSInfo& atsInfo, const CachedMSSInfo& mssInfo) const;
 	bool isInRSSRange(const CachedATSInfo& atsInfo) const;
 	bool isIntercepted(const CachedATSInfo& atsInfo, const CachedMSSInfo& mssInfo) const;
 	void sendTargetDetection(uint32_t targetID, uint32_t success);

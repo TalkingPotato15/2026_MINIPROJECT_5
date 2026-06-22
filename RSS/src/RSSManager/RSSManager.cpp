@@ -217,6 +217,18 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 		}
 
 		bool inRange = isInRSSRange(atsInfo);
+		if (hasRSSDetectionArea)
+		{
+			ntcout << _T("[RSSManager] ATS target received: targetId=") << atsInfo.targetId
+				<< _T(", distance=") << getDistanceToRSS(atsInfo)
+				<< _T(", inRange=") << (inRange ? 1 : 0) << std::endl;
+		}
+		else
+		{
+			ntcout << _T("[RSSManager] ATS target received before RSS detection area: targetId=")
+				<< atsInfo.targetId << std::endl;
+		}
+
 		auto detectedTarget = detectedTargetIds.find(atsInfo.targetId);
 		if (detectedTarget == detectedTargetIds.end())
 		{
@@ -227,6 +239,7 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 
 			detectedTargetIds.insert(atsInfo.targetId);
 			detectedTargetInfoMap[atsInfo.targetId] = atsInfo;
+			ntcout << _T("[RSSManager] Target detected: targetId=") << atsInfo.targetId << std::endl;
 			sendTargetDetection(atsInfo.targetId, 1);
 			sendATSInformationUplink(atsInfo);
 			continue;
@@ -269,6 +282,9 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 
 		if (isIntercepted(atsInfoIter->second, mssInfo))
 		{
+			ntcout << _T("[RSSManager] Target intercepted: targetId=") << mssInfo.targetId
+				<< _T(", missileId=") << mssInfo.missileId
+				<< _T(", distance=") << getDistance(atsInfoIter->second, mssInfo) << std::endl;
 			sendTargetDestroyed(mssInfo.targetId, 1);
 			destroyedTargetIds.insert(mssInfo.targetId);
 			continue;
@@ -322,6 +338,24 @@ bool RSSManager::tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, const tstring& miss
 	return true;
 }
 
+double RSSManager::getDistanceToRSS(const CachedATSInfo& atsInfo) const
+{
+	double dx = atsInfo.x - rssPosX;
+	double dy = atsInfo.y - rssPosY;
+	double dz = atsInfo.z - rssPosZ;
+
+	return std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
+}
+
+double RSSManager::getDistance(const CachedATSInfo& atsInfo, const CachedMSSInfo& mssInfo) const
+{
+	double dx = atsInfo.x - mssInfo.x;
+	double dy = atsInfo.y - mssInfo.y;
+	double dz = atsInfo.z - mssInfo.z;
+
+	return std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
+}
+
 bool RSSManager::isInRSSRange(const CachedATSInfo& atsInfo) const
 {
 	if (!hasRSSDetectionArea)
@@ -329,22 +363,12 @@ bool RSSManager::isInRSSRange(const CachedATSInfo& atsInfo) const
 		return false;
 	}
 
-	double dx = atsInfo.x - rssPosX;
-	double dy = atsInfo.y - rssPosY;
-	double dz = atsInfo.z - rssPosZ;
-	double distance = std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
-
-	return distance <= rssRadius;
+	return getDistanceToRSS(atsInfo) <= rssRadius;
 }
 
 bool RSSManager::isIntercepted(const CachedATSInfo& atsInfo, const CachedMSSInfo& mssInfo) const
 {
-	double dx = atsInfo.x - mssInfo.x;
-	double dy = atsInfo.y - mssInfo.y;
-	double dz = atsInfo.z - mssInfo.z;
-	double distance = std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
-
-	return distance <= INTERCEPT_DISTANCE_THRESHOLD;
+	return getDistance(atsInfo, mssInfo) <= INTERCEPT_DISTANCE_THRESHOLD;
 }
 
 void RSSManager::sendTargetDetection(uint32_t targetID, uint32_t success)
@@ -401,6 +425,7 @@ void RSSManager::sendATSInformationUplink(const CachedATSInfo& atsInfo)
 	uplinkMsg->setValue(_T("matchedTarget.speed"), &speed);
 	uplinkMsg->setValue(_T("matchedTarget.targetId"), &targetId);
 	uplinkMsg->setValue(_T("matchedTarget.atsStatus"), &atsStatus);
+	ntcout << _T("[RSSManager] ATSInformationUplink sent: targetId=") << atsInfo.targetId << std::endl;
 	sendMsg(uplinkMsg);
 }
 

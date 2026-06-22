@@ -610,6 +610,8 @@ void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvATSInformationToRSS(shared_ptr<NOM> nomMsg)
 {
+	tcout << _T("[UDPCommunicationManager] ATSInformationToRSS received.") << endl;
+
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerATSInformationToRSS"));
 	if (!nomMsg_new.get())
 	{
