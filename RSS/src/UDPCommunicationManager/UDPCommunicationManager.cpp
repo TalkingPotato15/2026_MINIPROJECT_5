@@ -426,7 +426,7 @@ void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
 		value = nomMsg->getValue(_T("simulationStatus"));
 	}
 
-	if (value && !value->toByte())
+	if (value && value->toUInt() == 0)
 	{
 		recvStopSimulation(nomMsg);
 		return;
@@ -439,6 +439,14 @@ void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvStop(shared_ptr<NOM> nomMsg)
 {
+	if (auto value = nomMsg->getValue(_T("stopFlag")))
+	{
+		if (value->toUInt() == 0)
+		{
+			return;
+		}
+	}
+
 	recvStopSimulation(nomMsg);
 }
 
@@ -450,7 +458,7 @@ void UDPCommunicationManager::recvATSInterceptionResult(shared_ptr<NOM> nomMsg)
 		value = nomMsg->getValue(_T("interceptionFlag"));
 	}
 
-	if (value && !value->toByte())
+	if (value && value->toUInt() == 0)
 	{
 		return;
 	}
@@ -469,7 +477,7 @@ void UDPCommunicationManager::recvMissionFailed(shared_ptr<NOM> nomMsg)
 {
 	if (auto value = nomMsg->getValue(_T("missionFlag")))
 	{
-		if (!value->toByte())
+		if (value->toUInt() == 0)
 		{
 			return;
 		}
@@ -492,12 +500,12 @@ void UDPCommunicationManager::recvInnerSendScenarioAck(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvInnerStartSimulationAck(shared_ptr<NOM> nomMsg)
 {
-	tcout << _T("[UDPCommunicationManager] OC ICD has no StartSimulationAck message. Skip external send.") << endl;
+	(void)nomMsg;
 }
 
 void UDPCommunicationManager::recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg)
 {
-	tcout << _T("[UDPCommunicationManager] OC ICD has no StopSimulationAck message. Skip external send.") << endl;
+	(void)nomMsg;
 }
 
 void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
