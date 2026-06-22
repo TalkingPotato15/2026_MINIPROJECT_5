@@ -34,11 +34,8 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
-# Build results on 'Bin' directories
-**/[Bb]in/*
-# Uncomment if you have tasks that rely on *.refresh files to move binaries
-# (https://github.com/github/gitignore/pull/3736)
-#!**/[Bb]in/*.refresh
+# The root bin directory contains nFramework NOM/XML/INI runtime definitions.
+# Do not ignore the whole directory; binary outputs are ignored below.
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -418,3 +415,29 @@ FodyWeavers.xsd
 .git/
 *.msm
 *.msp
+
+# nFramework / ATS project-specific generated files
+# Keep source, solution, docs, and bin/**/*.xml|ini|xsd|dtd under version control.
+/lib/
+/bin/NLog/
+
+# Native build outputs
+*.dll
+*.exe
+*.lib
+*.exp
+*.bsc
+*.manifest
+
+# Crash/runtime output
+*.dmp
+*.rid
+/bin/*.csv
+/bin/*.exe.config
+
+# Local backup files generated during merges or manual recovery
+*.bak
+*.bak_*
+*.bak-*
+*.bak.*
+*.bak_ocmerge_*
