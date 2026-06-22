@@ -1,6 +1,37 @@
 #include <nFramework/util/IniHandler.h>
 #include "RSSManager.h"
 
+namespace
+{
+	void copyUIntValue(const std::shared_ptr<NOM>& src, const tstring& srcName, const std::shared_ptr<NOM>& dst, const tstring& dstName)
+	{
+		if (auto value = src->getValue(srcName))
+		{
+			NUInteger v(value->toUInt());
+			dst->setValue(dstName, &v);
+		}
+	}
+
+	void copyDoubleValue(const std::shared_ptr<NOM>& src, const tstring& srcName, const std::shared_ptr<NOM>& dst, const tstring& dstName)
+	{
+		if (auto value = src->getValue(srcName))
+		{
+			NDouble v(value->toDouble());
+			dst->setValue(dstName, &v);
+		}
+	}
+
+	void copyATSInformation(const std::shared_ptr<NOM>& src, const tstring& srcPrefix, const std::shared_ptr<NOM>& dst, const tstring& dstPrefix)
+	{
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.x"), dst, dstPrefix + _T(".ATSPos.x"));
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.y"), dst, dstPrefix + _T(".ATSPos.y"));
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.z"), dst, dstPrefix + _T(".ATSPos.z"));
+		copyUIntValue(src, srcPrefix + _T(".speed"), dst, dstPrefix + _T(".speed"));
+		copyUIntValue(src, srcPrefix + _T(".targetId"), dst, dstPrefix + _T(".targetId"));
+		copyUIntValue(src, srcPrefix + _T(".atsStatus"), dst, dstPrefix + _T(".atsStatus"));
+	}
+}
+
 RSSManager::RSSManager(void)
 {
 	initialize();
@@ -181,7 +212,7 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 		}
 
 		uint32_t targetID = targetIDValue->toUInt();
-		if (targetID == 0 || detectedTargetIds.find(targetID) != detectedTargetIds.end())
+		if (targetID == 0)
 		{
 			continue;
 		}
@@ -190,6 +221,16 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 		if (auto atsStatusValue = nomMsg->getValue(prefix + _T(".atsStatus")))
 		{
 			success = atsStatusValue->toUInt() == 0 ? 0 : 1;
+		}
+
+		if (success != 0)
+		{
+			sendATSInformationUplink(nomMsg, prefix);
+		}
+
+		if (detectedTargetIds.find(targetID) != detectedTargetIds.end())
+		{
+			continue;
 		}
 
 		sendTargetDetection(targetID, success);
@@ -251,6 +292,19 @@ void RSSManager::sendTargetDestroyed(uint32_t targetID, uint32_t missionFlag)
 	nomMsg->setValue(_T("targetID"), &target);
 	nomMsg->setValue(_T("missionFlag"), &result);
 	sendMsg(nomMsg);
+}
+
+void RSSManager::sendATSInformationUplink(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix)
+{
+	auto uplinkMsg = meb->getNOMInstance(name, _T("InnerATSInformationUplinkToComm"));
+	if (!uplinkMsg.get())
+	{
+		ntcout << _T("[RSSManager] InnerATSInformationUplinkToComm NOM is undefined.") << std::endl;
+		return;
+	}
+
+	copyATSInformation(nomMsg, targetPrefix, uplinkMsg, _T("matchedTarget"));
+	sendMsg(uplinkMsg);
 }
 
 extern "C" BASEMGRDLL_API

@@ -40,6 +40,7 @@ private:
 	void recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg);
 	void sendTargetDetection(uint32_t targetID, uint32_t success);
 	void sendTargetDestroyed(uint32_t targetID, uint32_t missionFlag);
+	void sendATSInformationUplink(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix);
 
 	IMEBComponent* meb;
 	MECComponent* mec;

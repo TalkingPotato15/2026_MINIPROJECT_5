@@ -23,6 +23,10 @@
 			<NOM:parameter name="targetID" dataType="uintBE"/>
 			<NOM:parameter name="missionFlag" dataType="uintBE"/>
 		</NOM:interaction>
+
+		<NOM:interaction name="InnerATSInformationUplinkToComm" id="0x35" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
+		</NOM:interaction>
 	</NOM:interactions>
 	<NOM:dataTypes>
 		<NOM:basicTypes/>

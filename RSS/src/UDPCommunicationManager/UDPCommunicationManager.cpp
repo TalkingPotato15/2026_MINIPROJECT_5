@@ -318,6 +318,9 @@ void UDPCommunicationManager::funcMapInit()
 	msgProc = bind(&UDPCommunicationManager::recvInnerTargetDestroyedToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerTargetDestroyedToComm"), msgProc });
 
+	msgProc = bind(&UDPCommunicationManager::recvInnerATSInformationUplinkToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerATSInformationUplinkToComm"), msgProc });
+
 	msgProc = bind(&UDPCommunicationManager::recvInnerRouteToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerRouteToComm"), msgProc });
 
@@ -566,7 +569,7 @@ void UDPCommunicationManager::recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
 {
-	tcout << _T("[UDPCommunicationManager] OC ICD has no ATSInformationUplink bridge yet. Skip external send.") << endl;
+	(void)nomMsg;
 }
 
 void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
@@ -657,6 +660,22 @@ void UDPCommunicationManager::recvInnerTargetDestroyedToComm(shared_ptr<NOM> nom
 	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
 	copyUIntValue(nomMsg, _T("targetID"), nomMsg_new, _T("targetID"));
 	copyUIntValue(nomMsg, _T("missionFlag"), nomMsg_new, _T("missionFlag"));
+
+	commInterface->sendCommMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvInnerATSInformationUplinkToComm(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("ATSInformationUplink"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] ATSInformationUplink NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort msgID((ushort)ICD_MessageID::ATSInformationUplink);
+	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
+	copyATSInformation(nomMsg, _T("matchedTarget"), nomMsg_new, _T("matchedTarget"));
 
 	commInterface->sendCommMsg(nomMsg_new);
 }
