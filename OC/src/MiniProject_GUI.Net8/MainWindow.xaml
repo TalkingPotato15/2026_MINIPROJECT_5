@@ -170,11 +170,14 @@
         <Border Grid.Column="1" Background="#071014" BorderBrush="#D0D0D0" BorderThickness="1">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="620" Height="660" Background="#071014" ClipToBounds="True">
-                    <Image Canvas.Left="0" Canvas.Top="0"
-                           Width="620" Height="660"
+                    <Image Canvas.Left="-70"
+                           Canvas.Top="-140"
+                           Width="760"
+                           Height="940"
                            Source="Assets/korea_satellite_map.png"
-                           Stretch="Fill"/>
-
+                           Stretch="Fill"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           SnapsToDevicePixels="True"/>
                     <Border Canvas.Left="214" Canvas.Top="14"
                             Background="#A8000000"
                             BorderBrush="#44FFFFFF"
@@ -197,6 +200,38 @@
                             <Canvas Width="100" Height="100">
                                 <Ellipse Width="100" Height="100"
                                          Fill="#73EA73" Opacity="0.28" Stroke="#77FF77" StrokeThickness="1.8"/>
+                                <Canvas Width="100" Height="100" RenderTransformOrigin="0.5,0.5">
+                                    <Canvas.RenderTransform>
+                                        <RotateTransform x:Name="RadarSweepRotate" Angle="0"/>
+                                    </Canvas.RenderTransform>
+                                    <Canvas.Triggers>
+                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetName="RadarSweepRotate"
+                                                                     Storyboard.TargetProperty="Angle"
+                                                                     From="0"
+                                                                     To="360"
+                                                                     Duration="0:0:1"
+                                                                     RepeatBehavior="Forever"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Canvas.Triggers>
+                                    <Path Data="M50,50 L6.7,25 A50,50 0 0 1 50,0 Z"
+                                          Opacity="0.62">
+                                        <Path.Fill>
+                                            <LinearGradientBrush StartPoint="0,0.5" EndPoint="0.5,0">
+                                                <GradientStop Color="#007DFF7D" Offset="0"/>
+                                                <GradientStop Color="#A87DFF7D" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Path.Fill>
+                                    </Path>
+                                    <Line X1="50" Y1="50" X2="50" Y2="0"
+                                          Stroke="#D9FFD9"
+                                          StrokeThickness="2.2"
+                                          Opacity="0.9"/>
+                                </Canvas>
                                 <Ellipse Canvas.Left="16.7" Canvas.Top="16.7" Width="66.6" Height="66.6"
                                          Fill="Transparent" Stroke="#B9EAB9" StrokeThickness="1.2"/>
                                 <Ellipse Canvas.Left="33.3" Canvas.Top="33.3" Width="33.4" Height="33.4"
@@ -276,6 +311,51 @@
                                     <TextBlock Text="{Binding Label}" FontSize="9" FontWeight="Bold"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="#101010"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ItemsControl ItemsSource="{Binding MapAircraftMarkers}" Canvas.Left="0" Canvas.Top="0" Width="620" Height="660">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas Width="620" Height="660"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Top}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="38" Height="38" RenderTransformOrigin="0.5,0.5">
+                                    <Grid.RenderTransform>
+                                        <RotateTransform Angle="{Binding Angle}"/>
+                                    </Grid.RenderTransform>
+                                    <Path Fill="{Binding Fill}"
+                                          Stroke="#F7F7F7"
+                                          StrokeThickness="1.6"
+                                          Data="M19,2 L23,15 L36,21 L36,26 L23,23 L23,31 L28,34 L28,37 L19,34 L10,37 L10,34 L15,31 L15,23 L2,26 L2,21 L15,15 Z">
+                                        <Path.Effect>
+                                            <DropShadowEffect BlurRadius="7" ShadowDepth="1" Opacity="0.65"/>
+                                        </Path.Effect>
+                                    </Path>
+                                    <Border Width="15" Height="15"
+                                            Background="#D8000000"
+                                            BorderBrush="#F7F7F7"
+                                            BorderThickness="1"
+                                            CornerRadius="7.5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Label}"
+                                                   Foreground="White"
+                                                   FontSize="8"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

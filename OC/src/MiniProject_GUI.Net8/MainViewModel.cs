@@ -71,7 +71,7 @@ namespace MiniProject_GUI
             Index = index;
             Name = $"공중위협 {index}";
             _isEnabled = true;
-            _targetId = index.ToString();
+            _targetId = (index - 1).ToString();
             _speed = "300";
 
             Points.Add(new OcScenarioPointInput("시작점", "120", "120", "10"));
@@ -159,10 +159,57 @@ namespace MiniProject_GUI
         public Brush Fill { get; set; } = Brushes.Lime;
     }
 
+    public class OcAircraftMarkerItem
+    {
+        public double Left { get; set; }
+        public double Top { get; set; }
+        public double Angle { get; set; }
+        public string Label { get; set; } = "";
+        public Brush Fill { get; set; } = Brushes.Gray;
+    }
+
     public class OcMapPathItem
     {
         public PointCollection Points { get; set; } = new();
         public Brush Stroke { get; set; } = Brushes.Lime;
+    }
+
+    internal readonly struct OcAtsStatusSlot
+    {
+        public OcAtsStatusSlot(
+            uint slotIndex,
+            bool hasTargetId,
+            uint rawTargetId,
+            double posX,
+            double posY,
+            double posZ,
+            uint speed,
+            uint atsStatus)
+        {
+            SlotIndex = slotIndex;
+            HasTargetId = hasTargetId;
+            RawTargetId = rawTargetId;
+            PosX = posX;
+            PosY = posY;
+            PosZ = posZ;
+            Speed = speed;
+            AtsStatus = atsStatus;
+        }
+
+        public uint SlotIndex { get; }
+        public bool HasTargetId { get; }
+        public uint RawTargetId { get; }
+        public double PosX { get; }
+        public double PosY { get; }
+        public double PosZ { get; }
+        public uint Speed { get; }
+        public uint AtsStatus { get; }
+        public bool HasSignal =>
+            Speed != 0 ||
+            AtsStatus != 0 ||
+            Math.Abs(PosX) > 0.000001 ||
+            Math.Abs(PosY) > 0.000001 ||
+            Math.Abs(PosZ) > 0.000001;
     }
 
     public partial class MainViewModel : ObservableObject
@@ -194,6 +241,7 @@ namespace MiniProject_GUI
         private readonly HashSet<uint> detectedTargetIds = new();
         private readonly HashSet<uint> destroyedTargetIds = new();
         private readonly Dictionary<uint, (double X, double Y, double Z)> latestTargetPositions = new();
+        private readonly Dictionary<uint, double> latestTargetHeadings = new();
         private readonly Dictionary<uint, OcMssMissileItem> missileDisplays = new();
 
         [ObservableProperty] private bool _isPlugInEnabled = false;
@@ -210,7 +258,7 @@ namespace MiniProject_GUI
         [ObservableProperty] private string _mlsPosY = "0";
         [ObservableProperty] private string _mlsPosZ = "0";
         [ObservableProperty] private string _targetCount = "0";
-        [ObservableProperty] private string _launchTargetId = "1";
+        [ObservableProperty] private string _launchTargetId = "0";
 
         [ObservableProperty] private string _atsStatusText = "ATS 미연결";
         [ObservableProperty] private string _rssStatusText = "RSS 미연결";
@@ -232,6 +280,7 @@ namespace MiniProject_GUI
         [ObservableProperty] private ObservableCollection<OcAirThreatInput> _scenarioThreats = new();
         [ObservableProperty] private ObservableCollection<OcAirThreatDisplay> _scenarioThreatDisplays = new();
         [ObservableProperty] private ObservableCollection<OcMapMarkerItem> _mapThreatMarkers = new();
+        [ObservableProperty] private ObservableCollection<OcAircraftMarkerItem> _mapAircraftMarkers = new();
         [ObservableProperty] private ObservableCollection<OcMapPathItem> _mapThreatPaths = new();
 
         [ObservableProperty] private double _radarRangeLeft;
@@ -380,42 +429,47 @@ namespace MiniProject_GUI
                 var count = (uint)threats.Count;
 
                 nom.setValue("Header.MessageID", new NUShort(0x01));
-                nom.setValue("Header.MessageLength", new NUShort(2));
-                nom.setValue("targetCount", new NUInteger(count));
+                nom.setValue("Header.MessageLength", new NUShort(452));
 
-                for (var i = 0; i < threats.Count; i++)
+                var threatsBySlot = new OcAirThreatInput?[4];
+                var slotSummary = new List<string>();
+                foreach (var threat in threats)
                 {
-                    var threat = threats[i];
-                    var prefix = $"scenarioInfo[{i}]";
-                    var targetId = ParseUInt(threat.TargetId, (uint)(i + 1));
-                    var speed = ParseUInt(threat.Speed, 300);
-                    var points = threat.Points.Take(4).ToList();
+                    var targetId = ParseUInt(threat.TargetId, (uint)(threat.Index - 1));
+                    var slot = GetScenarioTransportSlot(targetId);
+                    threatsBySlot[slot] = threat;
+                    slotSummary.Add($"{targetId}->sceneInfo[{slot}]");
+                }
 
-                    nom.setValue($"{prefix}.targetID", new NUInteger(targetId));
-                    nom.setValue($"{prefix}.speed", new NUInteger(speed));
-                    nom.setValue($"{prefix}.pointCount", new NUInteger((uint)points.Count));
+                for (var i = 0; i < 4; i++)
+                {
+                    var prefix = $"sceneInfo[{i}]";
+                    var threat = threatsBySlot[i];
+                    var points = threat?.Points.ToList() ?? new List<OcScenarioPointInput>();
+                    var speed = threat != null ? ParseUInt(threat.Speed, 300) : 0;
 
-                    for (var pointIndex = 0; pointIndex < points.Count; pointIndex++)
+                    for (var pointIndex = 0; pointIndex < 4; pointIndex++)
                     {
-                        var point = points[pointIndex];
-                        var pointPrefix = $"{prefix}.point[{pointIndex}]";
-                        nom.setValue($"{pointPrefix}.x", new NDouble(ParseDouble(point.X, 0)));
-                        nom.setValue($"{pointPrefix}.y", new NDouble(ParseDouble(point.Y, 0)));
-                        nom.setValue($"{pointPrefix}.z", new NDouble(ParseDouble(point.Z, 0)));
+                        var point = pointIndex < points.Count ? points[pointIndex] : points.LastOrDefault();
+                        nom.setValue($"{prefix}.ATSPos[{pointIndex}].x", new NDouble(ParseDouble(point?.X ?? "0", 0)));
+                        nom.setValue($"{prefix}.ATSPos[{pointIndex}].y", new NDouble(ParseDouble(point?.Y ?? "0", 0)));
+                        nom.setValue($"{prefix}.ATSPos[{pointIndex}].z", new NDouble(ParseDouble(point?.Z ?? "0", 0)));
                     }
+
+                    nom.setValue($"{prefix}.speed", new NUInteger(speed));
                 }
 
                 nom.setValue("rssPos.x", new NDouble(ParseDouble(RssPosX, 0)));
                 nom.setValue("rssPos.y", new NDouble(ParseDouble(RssPosY, 0)));
                 nom.setValue("rssPos.z", new NDouble(ParseDouble(RssPosZ, 0)));
-                nom.setValue("radius", new NDouble(ParseDouble(RssRadius, 50)));
+                nom.setValue("rssRadius", new NUInteger(ToUInt(ParseDouble(RssRadius, 50))));
 
                 nom.setValue("mlsPos.x", new NDouble(ParseDouble(MlsPosX, 0)));
                 nom.setValue("mlsPos.y", new NDouble(ParseDouble(MlsPosY, 0)));
                 nom.setValue("mlsPos.z", new NDouble(ParseDouble(MlsPosZ, 0)));
 
                 nomHandler.SendNOMMessage(nom);
-                AddLog($"[송신] Scenario 배포 완료. 공중위협 수={count}");
+                AddLog($"[송신] Scenario 배포 완료. 공중위협 수={count}, 슬롯={string.Join(", ", slotSummary)}");
             }
             catch (Exception ex)
             {
@@ -432,8 +486,8 @@ namespace MiniProject_GUI
                 if (nom == null) { AddLog("[오류] StartSimulation NOM 없음"); return; }
 
                 nom.setValue("Header.MessageID", new NUShort(0x06));
-                nom.setValue("Header.MessageLength", new NUShort(2));
-                nom.setValue("simulationStatus", new NBool(true));
+                nom.setValue("Header.MessageLength", new NUShort(4));
+                nom.setValue("startFlag", new NUInteger(1));
                 nomHandler.SendNOMMessage(nom);
 
                 IsStartEnabled = false;
@@ -458,8 +512,8 @@ namespace MiniProject_GUI
                 if (nom == null) { AddLog("[오류] Stop NOM 없음"); return; }
 
                 nom.setValue("Header.MessageID", new NUShort(0x10));
-                nom.setValue("Header.MessageLength", new NUShort(2));
-                nom.setValue("stopFlag", new NBool(true));
+                nom.setValue("Header.MessageLength", new NUShort(4));
+                nom.setValue("stopFlag", new NUInteger(1));
                 nomHandler.SendNOMMessage(nom);
 
                 IsStartEnabled = true;
@@ -550,6 +604,7 @@ namespace MiniProject_GUI
 
             ScenarioThreatDisplays.Clear();
             MapThreatMarkers.Clear();
+            MapAircraftMarkers.Clear();
             MapThreatPaths.Clear();
 
             var threatPanelHeight = GetThreatPanelHeight(activeThreats.Count);
@@ -559,9 +614,11 @@ namespace MiniProject_GUI
             foreach (var threat in activeThreats)
             {
                 var firstPoint = threat.Points.FirstOrDefault();
-                var targetId = ParseUInt(threat.TargetId, (uint)threat.Index);
+                var targetId = ParseUInt(threat.TargetId, (uint)(threat.Index - 1));
                 var position = GetThreatPosition(targetId, firstPoint);
+                var aircraftPoint = ToMapPoint(position.X, position.Y);
                 var brush = GetThreatStateBrush(targetId);
+                var aircraftHeading = GetThreatHeading(targetId, threat);
                 var pathBrush = ThreatBrushes[Math.Max(0, threat.Index - 1) % ThreatBrushes.Length];
 
                 ScenarioThreatDisplays.Add(new OcAirThreatDisplay
@@ -597,6 +654,15 @@ namespace MiniProject_GUI
                     Points = path,
                     Stroke = pathBrush
                 });
+
+                MapAircraftMarkers.Add(new OcAircraftMarkerItem
+                {
+                    Left = aircraftPoint.X - 19,
+                    Top = aircraftPoint.Y - 19,
+                    Angle = aircraftHeading,
+                    Label = threat.Index.ToString(),
+                    Fill = brush
+                });
             }
         }
 
@@ -607,7 +673,7 @@ namespace MiniProject_GUI
             ClearScenarioDisplay();
             DetectionEventList.Clear();
             EngagementResultList.Clear();
-            LaunchTargetId = "1";
+            LaunchTargetId = "0";
             InterceptionResultText = "대기중";
             InterceptionResultDetail = "모의 시작 및 표적 탐지 대기";
             InterceptionResultColor = new SolidColorBrush(Color.FromRgb(37, 40, 64));
@@ -618,6 +684,7 @@ namespace MiniProject_GUI
             TargetCount = "0";
             ScenarioThreatDisplays.Clear();
             MapThreatMarkers.Clear();
+            MapAircraftMarkers.Clear();
             MapThreatPaths.Clear();
         }
 
@@ -639,7 +706,56 @@ namespace MiniProject_GUI
             detectedTargetIds.Clear();
             destroyedTargetIds.Clear();
             latestTargetPositions.Clear();
+            latestTargetHeadings.Clear();
+            AtsTargetList.Clear();
             ResetMissileDisplays();
+        }
+
+        private bool ShouldApplyRuntimeUpdates()
+        {
+            return isScenarioApplied && isSimulationRunning;
+        }
+
+        private HashSet<uint> GetActiveScenarioTargetIds()
+        {
+            return ScenarioThreats
+                .Take(4)
+                .Select((threat, index) => ParseUInt(threat.TargetId, (uint)index))
+                .Where(targetId => targetId <= 3)
+                .ToHashSet();
+        }
+
+        private static int GetScenarioTransportSlot(uint targetId)
+        {
+            return Math.Clamp((int)targetId, 0, 3);
+        }
+
+        private static List<OcAtsStatusSlot> ReadAtsStatusSlots(NOM nom)
+        {
+            var slots = new List<OcAtsStatusSlot>(4);
+
+            for (uint i = 0; i < 4; i++)
+            {
+                var prefix = $"targetInfo[{i}]";
+                var id = nom.getValue($"{prefix}.targetId");
+                var px = nom.getValue($"{prefix}.ATSPos.x");
+                var py = nom.getValue($"{prefix}.ATSPos.y");
+                var pz = nom.getValue($"{prefix}.ATSPos.z");
+                var spd = nom.getValue($"{prefix}.speed");
+                var status = nom.getValue($"{prefix}.atsStatus");
+
+                slots.Add(new OcAtsStatusSlot(
+                    i,
+                    id != null,
+                    id != null ? id.toUInt() : 0,
+                    px != null ? px.toDouble() : 0,
+                    py != null ? py.toDouble() : 0,
+                    pz != null ? pz.toDouble() : 0,
+                    spd != null ? spd.toUInt() : 0,
+                    status != null ? status.toUInt() : 0));
+            }
+
+            return slots;
         }
 
         private (double X, double Y, double Z) GetThreatPosition(uint targetId, OcScenarioPointInput? fallbackPoint)
@@ -662,6 +778,39 @@ namespace MiniProject_GUI
             if (detectedTargetIds.Contains(targetId)) return Brushes.Lime;
             if (isSimulationRunning) return Brushes.Yellow;
             return Brushes.Gray;
+        }
+
+        private double GetThreatHeading(uint targetId, OcAirThreatInput threat)
+        {
+            if (latestTargetHeadings.TryGetValue(targetId, out var heading))
+            {
+                return heading;
+            }
+
+            if (threat.Points.Count >= 2)
+            {
+                var from = threat.Points[0];
+                var to = threat.Points[1];
+                return CalculateHeading(
+                    ParseDouble(from.X, 0),
+                    ParseDouble(from.Y, 0),
+                    ParseDouble(to.X, 0),
+                    ParseDouble(to.Y, 0));
+            }
+
+            return 0;
+        }
+
+        private static double CalculateHeading(double fromX, double fromY, double toX, double toY)
+        {
+            var dx = NormalizeCoordinate(toX) - NormalizeCoordinate(fromX);
+            var dy = NormalizeCoordinate(toY) - NormalizeCoordinate(fromY);
+            if (Math.Abs(dx) < 0.001 && Math.Abs(dy) < 0.001)
+            {
+                return 0;
+            }
+
+            return Math.Atan2(dx, dy) * 180.0 / Math.PI;
         }
 
         private static string FormatCoordinate(double value)
@@ -748,9 +897,9 @@ namespace MiniProject_GUI
                 var nom = nomHandler.GetNMessage("LaunchCommand")?.createNOMInstance();
                 if (nom == null) { AddLog("[오류] LaunchCommand NOM 없음"); return; }
 
-                var targetId = ParseUInt(targetIdText, 1);
+                var targetId = ParseUInt(targetIdText, 0);
                 nom.setValue("Header.MessageID", new NUShort(0x09));
-                nom.setValue("Header.MessageLength", new NUShort(2));
+                nom.setValue("Header.MessageLength", new NUShort(4));
                 nom.setValue("targetID", new NUInteger(targetId));
                 nomHandler.SendNOMMessage(nom);
 
@@ -805,27 +954,35 @@ namespace MiniProject_GUI
         {
             MarkSimulatorConnected("ATS");
 
-            uint count = 0;
-            var countVal = nom.getValue("targetCount");
-            if (countVal != null) count = countVal.toUInt();
+            if (!ShouldApplyRuntimeUpdates()) return;
+
+            var slots = ReadAtsStatusSlots(nom);
+            var activeTargetIds = GetActiveScenarioTargetIds();
 
             AtsTargetList.Clear();
-            for (uint i = 0; i < count && i < 20; i++)
+            foreach (var slot in slots)
             {
-                var id = nom.getValue("targetInfo.targetID", (int)i);
-                var px = nom.getValue("targetInfo.pos.x", (int)i);
-                var py = nom.getValue("targetInfo.pos.y", (int)i);
-                var pz = nom.getValue("targetInfo.pos.z", (int)i);
-                var spd = nom.getValue("targetInfo.speed", (int)i);
-                var flag = nom.getValue("targetInfo.interceptionFlag", (int)i);
-                var targetId = id != null ? id.toUInt() : i + 1;
-                var posX = px != null ? NormalizeCoordinate(px.toDouble()) : 0;
-                var posY = py != null ? NormalizeCoordinate(py.toDouble()) : 0;
-                var posZ = pz != null ? NormalizeCoordinate(pz.toDouble()) : 0;
-                var isDestroyed = flag != null && flag.toUInt() != 0;
+                var targetId = slot.HasTargetId ? slot.RawTargetId : slot.SlotIndex;
+                if (!slot.HasTargetId && !slot.HasSignal)
+                {
+                    continue;
+                }
+
+                if (targetId != slot.SlotIndex) continue;
+                if (!activeTargetIds.Contains(targetId)) continue;
+
+                var posX = NormalizeCoordinate(slot.PosX);
+                var posY = NormalizeCoordinate(slot.PosY);
+                var posZ = NormalizeCoordinate(slot.PosZ);
+                var atsStatus = slot.AtsStatus;
+                var isDestroyed = atsStatus == 2;
+
+                if (latestTargetPositions.TryGetValue(targetId, out var previousPosition))
+                {
+                    latestTargetHeadings[targetId] = CalculateHeading(previousPosition.X, previousPosition.Y, posX, posY);
+                }
 
                 latestTargetPositions[targetId] = (posX, posY, posZ);
-                isSimulationRunning = true;
                 if (isDestroyed)
                 {
                     destroyedTargetIds.Add(targetId);
@@ -837,8 +994,8 @@ namespace MiniProject_GUI
                     PosX = posX,
                     PosY = posY,
                     PosZ = posZ,
-                    Speed = spd != null ? spd.toUInt() : 0,
-                    StatusText = isDestroyed ? "격추" : "기동중"
+                    Speed = slot.Speed,
+                    StatusText = isDestroyed ? "격추" : atsStatus == 0 ? "대기" : "기동중"
                 });
             }
 
@@ -872,28 +1029,27 @@ namespace MiniProject_GUI
         {
             MarkSimulatorConnected("MSS");
 
-            uint count = 0;
-            var countVal = nom.getValue("missileCount");
-            if (countVal != null) count = countVal.toUInt();
+            if (!ShouldApplyRuntimeUpdates()) return;
 
-            for (uint i = 0; i < count && i < 4; i++)
+            for (uint i = 0; i < 4; i++)
             {
-                var mid = nom.getValue("missileInfo.missileID", (int)i);
-                var tid = nom.getValue("missileInfo.targetID", (int)i);
-                var px = nom.getValue("missileInfo.pos.x", (int)i);
-                var py = nom.getValue("missileInfo.pos.y", (int)i);
-                var pz = nom.getValue("missileInfo.pos.z", (int)i);
-                var st = nom.getValue("missileInfo.mssStatus", (int)i);
-                var flag = nom.getValue("missileInfo.isIntercepted", (int)i);
+                var prefix = $"missileInfo[{i}]";
+                var mid = nom.getValue($"{prefix}.missileId");
+                var tid = nom.getValue($"{prefix}.targetId");
+                var px = nom.getValue($"{prefix}.MSSPos.x");
+                var py = nom.getValue($"{prefix}.MSSPos.y");
+                var pz = nom.getValue($"{prefix}.MSSPos.z");
+                var st = nom.getValue($"{prefix}.mssStatus");
                 var missileId = mid != null ? mid.toUInt() : i + 1;
+                var mssStatus = st != null ? st.toUInt() : 0;
 
                 var missile = GetOrCreateMissileDisplay(missileId);
                 missile.TargetId = tid != null ? tid.toUInt() : 0;
                 missile.PosX = px != null ? NormalizeCoordinate(px.toDouble()) : 0;
                 missile.PosY = py != null ? NormalizeCoordinate(py.toDouble()) : 0;
                 missile.PosZ = pz != null ? NormalizeCoordinate(pz.toDouble()) : 0;
-                missile.StatusText = (flag != null && flag.toUInt() != 0) ? "요격성공" :
-                                     (st != null && st.toInt() > 0) ? "추적중" : "대기";
+                missile.StatusText = mssStatus == 2 ? "요격성공" :
+                                     mssStatus == 1 ? "추적중" : "대기";
             }
 
             RebuildMissileDisplayList();
@@ -951,8 +1107,10 @@ namespace MiniProject_GUI
 
         private void HandleTargetDetection(NOM nom)
         {
+            if (!ShouldApplyRuntimeUpdates()) return;
+
             var idVal = nom.getValue("targetID");
-            var sucVal = nom.getValue("targetDetectionSuccess");
+            var sucVal = nom.getValue("targetDetectonSuccess") ?? nom.getValue("targetDetectionSuccess");
 
             var targetId = idVal != null ? idVal.toUInt() : 0;
             var success = sucVal != null && sucVal.toUInt() != 0;
@@ -982,23 +1140,18 @@ namespace MiniProject_GUI
 
         private void HandleTargetDestroyed(NOM nom)
         {
-            var sucVal = nom.getValue("missionSuccess");
-            var success = sucVal != null && sucVal.toUInt() != 0;
+            if (!ShouldApplyRuntimeUpdates()) return;
+
+            var idVal = nom.getValue("targetID");
+            var flagVal = nom.getValue("missionFlag") ?? nom.getValue("missionSuccess");
+            var targetIdFromMessage = idVal != null ? idVal.toUInt() : 0;
+            var missionFlag = flagVal != null ? flagVal.toUInt() : 1;
+            var success = missionFlag == 0;
 
             if (success)
             {
-                var targetId = lastEngagedTargetId ?? ParseUInt(LaunchTargetId, 0);
-                if (targetId != 0)
-                {
-                    destroyedTargetIds.Add(targetId);
-                }
-                else
-                {
-                    foreach (var id in detectedTargetIds)
-                    {
-                        destroyedTargetIds.Add(id);
-                    }
-                }
+                var targetId = idVal != null ? targetIdFromMessage : lastEngagedTargetId ?? ParseUInt(LaunchTargetId, 0);
+                destroyedTargetIds.Add(targetId);
 
                 InterceptionResultText = "요격 성공!";
                 InterceptionResultDetail = DateTime.Now.ToString("HH:mm:ss") + " 임무 완료";
@@ -1017,7 +1170,7 @@ namespace MiniProject_GUI
                 Result = success ? "요격 성공" : "임무 실패"
             });
 
-            AddLog($"[수신] TargetDestroyed - missionSuccess={success}");
+            AddLog($"[수신] TargetDestroyed - targetID={targetIdFromMessage}, missionFlag={missionFlag}");
             RefreshScenarioPreview();
         }
 
@@ -1133,6 +1286,13 @@ namespace MiniProject_GUI
         private static uint ParseUInt(string value, uint fallback)
         {
             return uint.TryParse(value, out var parsed) ? parsed : fallback;
+        }
+
+        private static uint ToUInt(double value)
+        {
+            if (double.IsNaN(value) || value <= 0) return 0;
+            if (value >= uint.MaxValue) return uint.MaxValue;
+            return (uint)Math.Round(value);
         }
 
         private void AddLog(string message)

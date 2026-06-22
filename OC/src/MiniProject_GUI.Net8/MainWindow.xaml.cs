@@ -11,7 +11,6 @@ namespace MiniProject_GUI
         public MainWindow()
         {
             InitializeComponent();
-
             viewModel = new MainViewModel();
             DataContext = viewModel;
 
@@ -34,6 +33,7 @@ namespace MiniProject_GUI
         {
             viewModel.Cleanup();
         }
+
     }
 }
 

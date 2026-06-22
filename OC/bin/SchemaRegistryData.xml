@@ -238,29 +238,33 @@
 				<NOM:fieldType name="z" dataType="doubleBE"/>
 			</NOM:complexType>
 
-			<!-- 시나리오 표적 정보 구조체 (경로점 포함) -->
-			<NOM:complexType name="TargetInfoStruct" semantics="시나리오 배포 시 표적 정보">
-				<NOM:fieldType name="targetID" dataType="uintBE"/>
+			<NOM:complexType name="TargetScenarioStruct" semantics="SAMS scenario target path information">
+				<NOM:fieldType name="ATSPos" dataType="PosStruct" size="4"/>
 				<NOM:fieldType name="speed" dataType="uintBE"/>
-				<NOM:fieldType name="pointCount" dataType="uintBE"/>
-				<NOM:fieldType name="point" dataType="PosStruct" size="8"/>
+			</NOM:complexType>
+
+			<!-- 시나리오 표적 정보 구조체 (경로점 포함) -->
+			<NOM:complexType name="TargetInfoStruct" semantics="SAMS target information">
+				<NOM:fieldType name="ATSPos" dataType="PosStruct"/>
+				<NOM:fieldType name="speed" dataType="uintBE"/>
+				<NOM:fieldType name="targetId" dataType="uintBE"/>
+				<NOM:fieldType name="atsStatus" dataType="uintBE"/>
 			</NOM:complexType>
 
 			<!-- ATS 위치/상태 구조체 (주기 송신) -->
-			<NOM:complexType name="ATSInformationStruct" semantics="ATS 표적 위치/상태 정보">
-				<NOM:fieldType name="targetID" dataType="uintBE"/>
-				<NOM:fieldType name="pos" dataType="PosStruct"/>
+			<NOM:complexType name="ATSInformationStruct" semantics="SAMS ATS target information">
+				<NOM:fieldType name="ATSPos" dataType="PosStruct"/>
 				<NOM:fieldType name="speed" dataType="uintBE"/>
-				<NOM:fieldType name="interceptionFlag" dataType="boolean"/>
+				<NOM:fieldType name="targetId" dataType="uintBE"/>
+				<NOM:fieldType name="atsStatus" dataType="uintBE"/>
 			</NOM:complexType>
 
 			<!-- MSS 유도탄 상태 구조체 -->
-			<NOM:complexType name="MSSInformationStruct" semantics="MSS 유도탄 위치/상태 정보">
-				<NOM:fieldType name="missileID" dataType="uintBE"/>
-				<NOM:fieldType name="targetID" dataType="uintBE"/>
-				<NOM:fieldType name="pos" dataType="PosStruct"/>
-				<NOM:fieldType name="mssStatus" dataType="intBE"/>
-				<NOM:fieldType name="isIntercepted" dataType="boolean"/>
+			<NOM:complexType name="MSSInformationStruct" semantics="SAMS missile information">
+				<NOM:fieldType name="targetId" dataType="uintBE"/>
+				<NOM:fieldType name="missileId" dataType="uintBE"/>
+				<NOM:fieldType name="MSSPos" dataType="PosStruct"/>
+				<NOM:fieldType name="mssStatus" dataType="uintBE"/>
 			</NOM:complexType>
 
 			<!-- MLS 발사대 상태 구조체 -->

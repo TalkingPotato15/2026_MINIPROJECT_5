@@ -21,3 +21,8 @@ C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\src\MiniProject_GUI.Net8\ob
 C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\src\MiniProject_GUI.Net8\obj\x64\Debug\MiniProject_GUI.Net8.pdb
 C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\src\MiniProject_GUI.Net8\obj\x64\Debug\MiniProject_GUI.Net8.genruntimeconfig.cache
 C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\src\MiniProject_GUI.Net8\obj\x64\Debug\ref\MiniProject_GUI.Net8.dll
+C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\bin\MiniProject_GUI.Net8.exe
+C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\bin\MiniProject_GUI.Net8.deps.json
+C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\bin\MiniProject_GUI.Net8.runtimeconfig.json
+C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\bin\MiniProject_GUI.Net8.dll
+C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\bin\MiniProject_GUI.Net8.pdb

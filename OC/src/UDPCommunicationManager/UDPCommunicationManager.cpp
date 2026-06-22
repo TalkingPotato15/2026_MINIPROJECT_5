@@ -1,8 +1,63 @@
 #include "UDPCommunicationManager.h"
 #include <filesystem>
+#include <sstream>
 #include "UDPCommunicationManagerIntelliVal.h"
 
 using namespace std::filesystem;
+
+namespace
+{
+	std::wstring fieldName(const wchar_t* arrayName, int index, const wchar_t* childName)
+	{
+		std::wstringstream ss;
+		ss << arrayName << L"[" << index << L"]." << childName;
+		return ss.str();
+	}
+
+	uint32_t readUInt(const shared_ptr<NOM>& nomMsg, const std::wstring& name, uint32_t fallback = 0)
+	{
+		auto value = nomMsg->getValue(name);
+		return value != nullptr ? value->toUInt() : fallback;
+	}
+
+	double readDouble(const shared_ptr<NOM>& nomMsg, const std::wstring& name, double fallback = 0.0)
+	{
+		auto value = nomMsg->getValue(name);
+		return value != nullptr ? value->toDouble() : fallback;
+	}
+
+	uint32_t readArrayUInt(
+		const shared_ptr<NOM>& nomMsg,
+		const wchar_t* arrayName,
+		int index,
+		const wchar_t* childName,
+		uint32_t fallback = 0)
+	{
+		auto value = nomMsg->getValue(fieldName(arrayName, index, childName));
+		return value != nullptr ? value->toUInt() : fallback;
+	}
+
+	double readArrayDouble(
+		const shared_ptr<NOM>& nomMsg,
+		const wchar_t* arrayName,
+		int index,
+		const wchar_t* childName,
+		double fallback = 0.0)
+	{
+		auto value = nomMsg->getValue(fieldName(arrayName, index, childName));
+		return value != nullptr ? value->toDouble() : fallback;
+	}
+
+	bool setArrayValue(
+		const shared_ptr<NOM>& nomMsg,
+		const wchar_t* arrayName,
+		int index,
+		const wchar_t* childName,
+		NValueType* value)
+	{
+		return nomMsg->setValue(fieldName(arrayName, index, childName), value);
+	}
+}
 
 /************************************************************************
 	Constructor / Destructor
@@ -272,6 +327,7 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 			auto nomMsgCP = nomMsg->clone();
 			nomMsgCP->deserialize(data, size);
 			nomMsgCP->setOwner(name);
+			interpretReceivedNom(nomMsgCP);
 			this->sendMsg(nomMsgCP);
 		}
 	}
@@ -280,6 +336,246 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 		std::wstringstream s; s << L"undefined message" ;
 		l.info(s);
 	}
+}
+
+void
+UDPCommunicationManager::interpretReceivedNom(const shared_ptr<NOM>& nomMsg)
+{
+	if (!nomMsg)
+	{
+		return;
+	}
+
+	const auto msgName = nomMsg->getName();
+	if (msgName == L"Scenario")
+	{
+		interpretScenario(nomMsg);
+	}
+	else if (msgName == L"ATSStatus")
+	{
+		interpretATSStatus(nomMsg);
+		relayATSInformationToRSS(nomMsg);
+	}
+	else if (msgName == L"RSSStatus")
+	{
+		interpretRSSStatus(nomMsg);
+	}
+	else if (msgName == L"MSSStatus")
+	{
+		interpretMSSStatus(nomMsg);
+	}
+	else if (msgName == L"MLSStatus")
+	{
+		interpretMLSStatus(nomMsg);
+	}
+	else if (msgName == L"TargetDetection")
+	{
+		interpretTargetDetection(nomMsg);
+	}
+	else if (msgName == L"TargetDestroyed")
+	{
+		interpretTargetDestroyed(nomMsg);
+	}
+	else
+	{
+		std::wstringstream s;
+		s << L"[UDPCommunicationManager::interpretReceivedNom] pass-through message=" << msgName;
+		l.info(s);
+	}
+}
+
+void
+UDPCommunicationManager::interpretScenario(const shared_ptr<NOM>& nomMsg)
+{
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::interpretScenario] rssPos=("
+		<< readDouble(nomMsg, L"rssPos.x") << L","
+		<< readDouble(nomMsg, L"rssPos.y") << L","
+		<< readDouble(nomMsg, L"rssPos.z") << L"), rssRadius="
+		<< readUInt(nomMsg, L"rssRadius")
+		<< L", mlsPos=("
+		<< readDouble(nomMsg, L"mlsPos.x") << L","
+		<< readDouble(nomMsg, L"mlsPos.y") << L","
+		<< readDouble(nomMsg, L"mlsPos.z") << L")";
+	l.info(s);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		std::wstringstream row;
+		row << L"[UDPCommunicationManager::interpretScenario] sceneInfo[" << i << L"] speed="
+			<< readUInt(nomMsg, fieldName(L"sceneInfo", i, L"speed"));
+		for (int point = 0; point < 4; ++point)
+		{
+			std::wstringstream prefix;
+			prefix << L"sceneInfo[" << i << L"].ATSPos[" << point << L"]";
+			row << L", p" << point << L"=("
+				<< readDouble(nomMsg, prefix.str() + L".x") << L","
+				<< readDouble(nomMsg, prefix.str() + L".y") << L","
+				<< readDouble(nomMsg, prefix.str() + L".z") << L")";
+		}
+		l.info(row);
+	}
+}
+
+void
+UDPCommunicationManager::interpretATSStatus(const shared_ptr<NOM>& nomMsg)
+{
+	std::wstringstream summary;
+	summary << L"[UDPCommunicationManager::interpretATSStatus] status="
+		<< readUInt(nomMsg, L"status");
+	l.info(summary);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		std::wstringstream row;
+		row << L"[UDPCommunicationManager::interpretATSStatus] targetInfo[" << i << L"] targetId="
+			<< readArrayUInt(nomMsg, L"targetInfo", i, L"targetId")
+			<< L", pos=("
+			<< readArrayDouble(nomMsg, L"targetInfo", i, L"ATSPos.x") << L","
+			<< readArrayDouble(nomMsg, L"targetInfo", i, L"ATSPos.y") << L","
+			<< readArrayDouble(nomMsg, L"targetInfo", i, L"ATSPos.z") << L")"
+			<< L", speed=" << readArrayUInt(nomMsg, L"targetInfo", i, L"speed")
+			<< L", atsStatus=" << readArrayUInt(nomMsg, L"targetInfo", i, L"atsStatus");
+		l.info(row);
+	}
+}
+
+void
+UDPCommunicationManager::interpretRSSStatus(const shared_ptr<NOM>& nomMsg)
+{
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::interpretRSSStatus] status=" << readUInt(nomMsg, L"status");
+	l.info(s);
+}
+
+void
+UDPCommunicationManager::relayATSInformationToRSS(const shared_ptr<NOM>& atsStatusMsg)
+{
+	if (!atsStatusMsg || !meb || !commInterface)
+	{
+		return;
+	}
+
+	auto relayMsg = meb->getNOMInstance(name, L"ATSInformationToRSS");
+	if (!relayMsg)
+	{
+		std::wstringstream s;
+		s << L"[UDPCommunicationManager::relayATSInformationToRSS] ATSInformationToRSS NOM instance not found";
+		l.info(s);
+		return;
+	}
+
+	relayMsg->setOwner(name);
+
+	NUShort messageId(0x07);
+	NUShort messageLength(144);
+	relayMsg->setValue(L"Header.MessageID", &messageId);
+	relayMsg->setValue(L"Header.MessageLength", &messageLength);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		const auto posX = readArrayDouble(atsStatusMsg, L"targetInfo", i, L"ATSPos.x");
+		const auto posY = readArrayDouble(atsStatusMsg, L"targetInfo", i, L"ATSPos.y");
+		const auto posZ = readArrayDouble(atsStatusMsg, L"targetInfo", i, L"ATSPos.z");
+		const auto speed = readArrayUInt(atsStatusMsg, L"targetInfo", i, L"speed");
+		const auto rawTargetId = readArrayUInt(atsStatusMsg, L"targetInfo", i, L"targetId", static_cast<uint32_t>(i));
+		const auto targetId = static_cast<uint32_t>(i);
+		const auto atsStatus = readArrayUInt(atsStatusMsg, L"targetInfo", i, L"atsStatus");
+
+		NDouble relayX(posX);
+		NDouble relayY(posY);
+		NDouble relayZ(posZ);
+		NUInteger relaySpeed(speed);
+		NUInteger relayTargetId(targetId);
+		NUInteger relayAtsStatus(atsStatus);
+
+		auto setOk = true;
+		setOk &= setArrayValue(relayMsg, L"targetInfo", i, L"ATSPos.x", &relayX);
+		setOk &= setArrayValue(relayMsg, L"targetInfo", i, L"ATSPos.y", &relayY);
+		setOk &= setArrayValue(relayMsg, L"targetInfo", i, L"ATSPos.z", &relayZ);
+		setOk &= setArrayValue(relayMsg, L"targetInfo", i, L"speed", &relaySpeed);
+		setOk &= setArrayValue(relayMsg, L"targetInfo", i, L"targetId", &relayTargetId);
+		setOk &= setArrayValue(relayMsg, L"targetInfo", i, L"atsStatus", &relayAtsStatus);
+
+		std::wstringstream row;
+		row << L"[UDPCommunicationManager::relayATSInformationToRSS] targetInfo[" << i
+			<< L"] rawTargetId=" << rawTargetId
+			<< L", relayTargetId=" << targetId
+			<< L", verifiedTargetId=" << readArrayUInt(relayMsg, L"targetInfo", i, L"targetId")
+			<< L", setOk=" << setOk
+			<< L", pos=(" << posX << L"," << posY << L"," << posZ << L")";
+		l.info(row);
+	}
+
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::relayATSInformationToRSS] send ATSInformationToRSS, length="
+		<< relayMsg->getLength();
+	l.info(s);
+
+	commInterface->sendCommMsg(relayMsg);
+}
+
+void
+UDPCommunicationManager::interpretMSSStatus(const shared_ptr<NOM>& nomMsg)
+{
+	std::wstringstream summary;
+	summary << L"[UDPCommunicationManager::interpretMSSStatus] status="
+		<< readUInt(nomMsg, L"status");
+	l.info(summary);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		const auto missileId = readUInt(nomMsg, fieldName(L"missileInfo", i, L"missileId"), static_cast<uint32_t>(i + 1));
+		const auto targetId = readUInt(nomMsg, fieldName(L"missileInfo", i, L"targetId"));
+		const auto mssStatus = readUInt(nomMsg, fieldName(L"missileInfo", i, L"mssStatus"));
+
+		std::wstringstream row;
+		row << L"[UDPCommunicationManager::interpretMSSStatus] missileInfo[" << i << L"] missileId="
+			<< missileId
+			<< L", targetId=" << targetId
+			<< L", pos=("
+			<< readDouble(nomMsg, fieldName(L"missileInfo", i, L"MSSPos.x")) << L","
+			<< readDouble(nomMsg, fieldName(L"missileInfo", i, L"MSSPos.y")) << L","
+			<< readDouble(nomMsg, fieldName(L"missileInfo", i, L"MSSPos.z")) << L")"
+			<< L", mssStatus=" << mssStatus;
+		l.info(row);
+	}
+}
+
+void
+UDPCommunicationManager::interpretMLSStatus(const shared_ptr<NOM>& nomMsg)
+{
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::interpretMLSStatus] status=" << readUInt(nomMsg, L"status")
+		<< L", missileStatus=("
+		<< readUInt(nomMsg, L"launcherInfo.missileStatus1") << L","
+		<< readUInt(nomMsg, L"launcherInfo.missileStatus2") << L","
+		<< readUInt(nomMsg, L"launcherInfo.missileStatus3") << L","
+		<< readUInt(nomMsg, L"launcherInfo.missileStatus4") << L")"
+		<< L", missileStock=" << readUInt(nomMsg, L"launcherInfo.missileStock");
+	l.info(s);
+}
+
+void
+UDPCommunicationManager::interpretTargetDetection(const shared_ptr<NOM>& nomMsg)
+{
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::interpretTargetDetection] targetID="
+		<< readUInt(nomMsg, L"targetID")
+		<< L", targetDetectonSuccess="
+		<< readUInt(nomMsg, L"targetDetectonSuccess");
+	l.info(s);
+}
+
+void
+UDPCommunicationManager::interpretTargetDestroyed(const shared_ptr<NOM>& nomMsg)
+{
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::interpretTargetDestroyed] targetID="
+		<< readUInt(nomMsg, L"targetID")
+		<< L", missionFlag="
+		<< readUInt(nomMsg, L"missionFlag");
+	l.info(s);
 }
 
 unsigned int

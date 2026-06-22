@@ -40,6 +40,15 @@ public:
 private:
 	void init();
 	void release();
+	void interpretReceivedNom(const shared_ptr<NOM>& nomMsg);
+	void interpretScenario(const shared_ptr<NOM>& nomMsg);
+	void interpretATSStatus(const shared_ptr<NOM>& nomMsg);
+	void interpretRSSStatus(const shared_ptr<NOM>& nomMsg);
+	void interpretMSSStatus(const shared_ptr<NOM>& nomMsg);
+	void interpretMLSStatus(const shared_ptr<NOM>& nomMsg);
+	void interpretTargetDetection(const shared_ptr<NOM>& nomMsg);
+	void interpretTargetDestroyed(const shared_ptr<NOM>& nomMsg);
+	void relayATSInformationToRSS(const shared_ptr<NOM>& atsStatusMsg);
 	
 public:
 	std::unique_ptr<NOMParser> nomParser;
