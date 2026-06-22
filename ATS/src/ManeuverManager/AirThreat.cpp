@@ -6,6 +6,7 @@
 namespace
 {
 constexpr double kPositionEpsilon = 1.0e-6;
+constexpr double kMovementSpeedScale = 0.01;
 }
 
 void AirThreat::reset(std::uint32_t targetId)
@@ -67,7 +68,8 @@ void AirThreat::advance(double deltaSeconds)
         return;
     }
 
-    double remainingDistance = static_cast<double>(speed_) * deltaSeconds;
+    const double effectiveSpeed = static_cast<double>(speed_) * kMovementSpeedScale;
+    double remainingDistance = effectiveSpeed * deltaSeconds;
 
     while (remainingDistance > kPositionEpsilon && nextPointIndex_ < route_.size())
     {
@@ -88,9 +90,9 @@ void AirThreat::advance(double deltaSeconds)
         const double uy = dy / distance;
         const double uz = dz / distance;
         velocity_ = {
-            ux * static_cast<double>(speed_),
-            uy * static_cast<double>(speed_),
-            uz * static_cast<double>(speed_)
+            ux * effectiveSpeed,
+            uy * effectiveSpeed,
+            uz * effectiveSpeed
         };
 
         const double travelDistance = std::min(remainingDistance, distance);
