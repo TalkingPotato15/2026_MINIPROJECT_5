@@ -80,11 +80,11 @@ void RSSManager::sendRSSStatus()
 	rssStatusNOM = meb->getNOMInstance(name, _T("InnerRSSStatusToComm"));
 	if (!rssStatusNOM.get())
 	{
-		ntcout << _T("[RSSManager] InnerRSSStatusToComm NOM is undefined.") << std::endl;
+		//ntcout << _T("[RSSManager] InnerRSSStatusToComm NOM is undefined.") << std::endl;
 		return;
 	}
 
-	NInteger status(1);
+	NUInteger status(1);
 	rssStatusNOM->setValue(_T("status"), &status);
 
 	sendMsg(rssStatusNOM);
@@ -241,24 +241,33 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		if (atsInfo.targetId == 0 || atsInfo.atsStatus == 0)
-		{
-			continue;
-		}
-
 		bool inRange = isInRSSRange(atsInfo);
+		double distance = hasRSSDetectionArea ? getDistanceToRSS(atsInfo) : 0.0;
+		ntcout << _T("[RSSManager] ATSInformation received: index=") << i
+			<< _T(", targetId=") << atsInfo.targetId
+			<< _T(", atsStatus=") << atsInfo.atsStatus
+			<< _T(", pos=(") << atsInfo.x << _T(", ") << atsInfo.y << _T(", ") << atsInfo.z << _T(")")
+			<< _T(", speed=") << atsInfo.speed;
 		if (hasRSSDetectionArea)
 		{
-			ntcout << _T("[RSSManager] ATS target received: targetId=") << atsInfo.targetId
-				<< _T(", distance=") << getDistanceToRSS(atsInfo)
-				<< _T(", inRange=") << (inRange ? 1 : 0) << std::endl;
+			ntcout << _T(", distance=") << distance
+				<< _T(", inRange=") << (inRange ? 1 : 0);
 		}
 		else
 		{
-			ntcout << _T("[RSSManager] ATS target received before RSS detection area: targetId=")
-				<< atsInfo.targetId << std::endl;
+			ntcout << _T(", rssAreaReady=0");
 		}
+		ntcout << std::endl;
 
+		if (atsInfo.atsStatus != 1)
+		{
+			if (atsInfo.atsStatus == 2)
+			{
+				destroyedTargetIds.insert(atsInfo.targetId);
+				detectedTargetInfoMap.erase(atsInfo.targetId);
+			}
+			continue;
+		}
 		auto detectedTarget = detectedTargetIds.find(atsInfo.targetId);
 		if (detectedTarget == detectedTargetIds.end())
 		{
@@ -460,7 +469,10 @@ void RSSManager::sendATSInformationUplink(const CachedATSInfo& atsInfo)
 	uplinkMsg->setValue(_T("matchedTarget.speed"), &speed);
 	uplinkMsg->setValue(_T("matchedTarget.targetId"), &targetId);
 	uplinkMsg->setValue(_T("matchedTarget.atsStatus"), &atsStatus);
-	ntcout << _T("[RSSManager] ATSInformationUplink sent: targetId=") << atsInfo.targetId << std::endl;
+	ntcout << _T("[RSSManager] ATSInformationUplink sent: targetId=") << atsInfo.targetId
+		<< _T(", atsStatus=") << atsInfo.atsStatus
+		<< _T(", pos=(") << atsInfo.x << _T(", ") << atsInfo.y << _T(", ") << atsInfo.z << _T(")")
+		<< _T(", speed=") << atsInfo.speed << std::endl;
 	sendMsg(uplinkMsg);
 }
 

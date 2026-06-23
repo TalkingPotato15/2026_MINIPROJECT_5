@@ -23,6 +23,15 @@ namespace
 		}
 	}
 
+	void copyBoolValue(const shared_ptr<NOM>& src, const tstring& srcName, const shared_ptr<NOM>& dst, const tstring& dstName)
+	{
+		if (auto value = src->getValue(srcName))
+		{
+			NBool v(value->toUInt() != 0);
+			dst->setValue(dstName, &v);
+		}
+	}
+
 	void copyATSInformation(const shared_ptr<NOM>& src, const tstring& srcPrefix, const shared_ptr<NOM>& dst, const tstring& dstPrefix)
 	{
 		copyDoubleValue(src, srcPrefix + _T(".ATSPos.x"), dst, dstPrefix + _T(".ATSPos.x"));
@@ -619,7 +628,7 @@ void UDPCommunicationManager::recvATSInformationToRSS(shared_ptr<NOM> nomMsg)
 		return;
 	}
 
-	for (int i = 0; i < 4; ++i)
+	for (unsigned int i = 0; i < 4; ++i)
 	{
 		tstring index = _T("[") + to_tstring(i) + _T("]");
 		copyATSInformation(nomMsg, _T("targetInfo") + index, nomMsg_new, _T("targetInfo") + index);

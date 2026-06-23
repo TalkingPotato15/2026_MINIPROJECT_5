@@ -3,7 +3,7 @@
 	<NOM:objects/>
 	<NOM:interactions>
 		<NOM:interaction name="InnerRSSStatusToComm" id="0x30" sharing="Publish" orderType="Receive" alignment="false">
-			<NOM:parameter name="status" dataType="intBE"/>
+			<NOM:parameter name="status" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="InnerATSInformationToRSS" id="0x31" sharing="Subscribe" orderType="Receive" alignment="false">

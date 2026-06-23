@@ -116,15 +116,34 @@
 			<NOM:parameter name="stopFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
-
-
-
 		<NOM:interaction name="SimulatorStateToComm" id="0x20" sharing="Subscribe" orderType="Receive" alignment="false">
 			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
 		</NOM:interaction>
 
+		<NOM:interaction name="InnerSendScenario" id="0x21" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerSendScenarioAck" id="0x22" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStartSimulation" id="0x24" sharing="Publish" orderType="Receive" alignment="false">
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStartSimulationAck" id="0x25" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStopSimulation" id="0x27" sharing="Publish" orderType="Receive" alignment="false">
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStopSimulationAck" id="0x28" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+		</NOM:interaction>
+
 		<NOM:interaction name="InnerRSSStatusToComm" id="0x30" sharing="Subscribe" orderType="Receive" alignment="false">
-			<NOM:parameter name="status" dataType="intBE"/>
+			<NOM:parameter name="status" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="InnerATSInformationToRSS" id="0x31" sharing="Publish" orderType="Receive" alignment="false">
@@ -152,28 +171,6 @@
 		<NOM:interaction name="InnerRSSDetectionAreaToRSS" id="0x36" sharing="Publish" orderType="Receive" alignment="false">
 			<NOM:parameter name="rssPos" dataType="PosStruct"/>
 			<NOM:parameter name="rssRadius" dataType="uintBE"/>
-		</NOM:interaction>
-
-		<NOM:interaction name="InnerSendScenario" id="0x21" sharing="Publish" orderType="Receive" alignment="false">
-			<NOM:parameter name="Scenario" dataType="ScenarioStruct"/>
-		</NOM:interaction>
-
-		<NOM:interaction name="InnerSendScenarioAck" id="0x22" sharing="Subscribe" orderType="Receive" alignment="false">
-			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
-		</NOM:interaction>
-
-		<NOM:interaction name="InnerStartSimulation" id="0x24" sharing="Publish" orderType="Receive" alignment="false">
-		</NOM:interaction>
-
-		<NOM:interaction name="InnerStartSimulationAck" id="0x25" sharing="Subscribe" orderType="Receive" alignment="false">
-			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
-		</NOM:interaction>
-
-		<NOM:interaction name="InnerStopSimulation" id="0x27" sharing="Publish" orderType="Receive" alignment="false">
-		</NOM:interaction>
-
-		<NOM:interaction name="InnerStopSimulationAck" id="0x28" sharing="Subscribe" orderType="Receive" alignment="false">
-			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="InnerAirThreatDetonationToATM" id="0x40" sharing="Publish" orderType="Receive" alignment="false">
