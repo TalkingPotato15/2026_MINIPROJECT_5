@@ -130,3 +130,8 @@ MLS_STATUS VerticalLauncherModel::mlsStatus()
 
 	return mlsStatus;
 }
+
+POSITION VerticalLauncherModel::currentPosition()
+{
+	return currentPos;
+}

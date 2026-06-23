@@ -52,7 +52,7 @@ private:
 	void startMLS(std::shared_ptr<NOM>);
 	void stopMLS(std::shared_ptr<NOM>);
 	void launchMLS(std::shared_ptr<NOM>);
-	void ignitionMSS();
+	void sendInnerIgnitionCommand(unsigned int, unsigned int);
 
 
 private:

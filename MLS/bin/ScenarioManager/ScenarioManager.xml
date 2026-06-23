@@ -15,12 +15,6 @@
       <NOM:parameter name="rssRadius" dataType="uintBE"/>
       <NOM:parameter name="mlsPos" dataType="PosStruct"/>
     </NOM:interaction>
-    <NOM:interaction name="MSSStatus" id="0x04" sharing="PublishSubscribe" orderType="Receive" alignment="false" semantics="SAMS MSS status">
-      <NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-      <NOM:parameter name="status" dataType="uintBE"/>
-      <NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
-    </NOM:interaction>
-    
     <NOM:interaction name="StartSimulation" id="0x06" sharing="PublishSubscribe" orderType="Receive" alignment="false" semantics="SAMS start simulation command">
       <NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
       <NOM:parameter name="startFlag" dataType="uintBE"/>

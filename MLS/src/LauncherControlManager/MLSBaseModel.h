@@ -15,6 +15,7 @@ public:
 	virtual void update(double tick) = 0;
 	virtual int fireMissile(unsigned int targetID) = 0;
 	virtual MLS_STATUS mlsStatus() = 0;
+	virtual POSITION currentPosition() = 0;
 
 protected:
 	MLS_INFOMATION launcherInfo;

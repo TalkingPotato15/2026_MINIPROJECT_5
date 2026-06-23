@@ -1,1 +1,0 @@
-[{"seq":"0","name":"SimulatorStateToComm","id":"32","uuid":"13855540018355030675","owner":"StateManager","date":"20260619","time":"10:29:13.808","elapsed_time":"1429","instance_id":"0","alignment":"false","omt":"false","type":"interaction","operation":"send","data":{"SimulatorID":{"values":["102"]}},"length":"2","serialized":"0066"}

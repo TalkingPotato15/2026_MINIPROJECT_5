@@ -171,6 +171,9 @@ LauncherControlManager::start()
 	msgProcessor = std::bind(&LauncherControlManager::stopMLS, this, std::placeholders::_1);
 	msgFuncMap.insert_or_assign(_T("InnerStopMLS"), msgProcessor);
 
+	msgProcessor = std::bind(&LauncherControlManager::launchMLS, this, std::placeholders::_1);
+	msgFuncMap.insert_or_assign(_T("InnerLaunchCommand"), msgProcessor);
+
 	tcout << "[" << __FUNCTIONT__ << "] " << std::endl;
 	return true;
 }
@@ -212,9 +215,9 @@ void LauncherControlManager::inputScenario(std::shared_ptr<NOM> nomMsg)
 	}
 
 	POSITION position;
-	position.x = nomMsg->getValue(_T("position.x"))->toDouble();
-	position.y = nomMsg->getValue(_T("position.y"))->toDouble();
-	position.z = nomMsg->getValue(_T("position.z"))->toDouble();
+	position.x = nomMsg->getValue(_T("mlsPos.x"))->toDouble();
+	position.y = nomMsg->getValue(_T("mlsPos.y"))->toDouble();
+	position.z = nomMsg->getValue(_T("mlsPos.z"))->toDouble();
 
 	launcherModel->setting(position);
 }
@@ -229,19 +232,53 @@ void LauncherControlManager::stopMLS(std::shared_ptr<NOM> nomMsg)
 	launcherModel->stop();
 }
 
-void LauncherControlManager::ignitionMSS()
+void LauncherControlManager::launchMLS(std::shared_ptr<NOM> nomMsg)
 {
+	unsigned int targetID;
+	targetID = nomMsg->getValue(_T("targetID"))->toUInt();
+
+	unsigned int missileID = launcherModel->fireMissile(targetID);
+	sendInnerIgnitionCommand(missileID, targetID);
+}
+
+void LauncherControlManager::sendInnerIgnitionCommand(unsigned int missileID, unsigned int targetID)
+{
+	// CommunicationManager로 IgnitionCommand 전송
+	std::shared_ptr<NOM> sendNewMsg = meb->getNOMInstance(name, _T("InnerIgnitionCommand"));
+	POSITION launchPos = launcherModel->currentPosition();
+
+	NUInteger missileIDValue(missileID);
+	NUInteger targetIDValue(targetID);
+	NDouble launchPosX(launchPos.x);
+	NDouble launchPosY(launchPos.y);
+	NDouble launchPosZ(launchPos.z);
+
+	sendNewMsg->setValue(_T("missileID"), &missileIDValue);
+	sendNewMsg->setValue(_T("targetID"), &targetIDValue);
+	sendNewMsg->setValue(_T("launchPos.x"), &launchPosX);
+	sendNewMsg->setValue(_T("launchPos.y"), &launchPosY);
+	sendNewMsg->setValue(_T("launchPos.z"), &launchPosZ);
+
+	tcout << _T("[LauncherControlManager] Publishing InnerIgnitionCommand: missileID=")
+		<< missileID
+		<< _T(", targetID=")
+		<< targetID
+		<< _T(", launchPos=(")
+		<< launchPos.x
+		<< _T(", ")
+		<< launchPos.y
+		<< _T(", ")
+		<< launchPos.z
+		<< _T(")")
+		<< std::endl;
+
+	sendMsg(sendNewMsg);
 }
 
 void LauncherControlManager::simulatePeriodic()
 {
 	// CommunicationManager로 MLSSTATUS 전송
 	std::shared_ptr<NOM> msg = meb->getNOMInstance(name, _T("InnerMLSStatus"));
-	if (!msg)
-	{
-		tcerr << _T("[LauncherControlManager] InnerMLSStatus NOM is undefined.") << std::endl;
-		return;
-	}
 
 	MLS_STATUS mlsStatus;
 	mlsStatus = launcherModel->mlsStatus();

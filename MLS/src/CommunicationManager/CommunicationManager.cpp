@@ -288,14 +288,21 @@ void CommunicationManager::recvInnerIgnitionCommand(shared_ptr<NOM> nomMsg)
 {
 	auto sendNewMsg = meb->getNOMInstance(name, _T("IgnitionCommand"));
 
-	sendNewMsg->setValue(_T("Header.MessageID"), &NUShort(0x0a));
-	sendNewMsg->setValue(_T("Header.MessageLength"), &NUShort(36));
+	NUShort messageID(0x0a);
+	NUShort messageLength(36);
+	NUInteger missileID(nomMsg->getValue(_T("missileID"))->toUInt());
+	NUInteger targetID(nomMsg->getValue(_T("targetID"))->toUInt());
+	NDouble launchPosX(nomMsg->getValue(_T("launchPos.x"))->toDouble());
+	NDouble launchPosY(nomMsg->getValue(_T("launchPos.y"))->toDouble());
+	NDouble launchPosZ(nomMsg->getValue(_T("launchPos.z"))->toDouble());
 
-	sendNewMsg->setValue(_T("missileID"), &(NUInteger)(nomMsg->getValue(_T("launcherInfo.missileStatus1"))->toUInt()));
-	sendNewMsg->setValue(_T("targetID"), &(NUInteger)(nomMsg->getValue(_T("launcherInfo.missileStatus2"))->toUInt()));
-	sendNewMsg->setValue(_T("launchPos.x"), &(NDouble)(nomMsg->getValue(_T("launchPos.x"))->toDouble()));
-	sendNewMsg->setValue(_T("launchPos.y"), &(NDouble)(nomMsg->getValue(_T("launchPos.y"))->toDouble()));
-	sendNewMsg->setValue(_T("launchPos.z"), &(NDouble)(nomMsg->getValue(_T("launchPos.z"))->toDouble()));
+	sendNewMsg->setValue(_T("Header.MessageID"), &messageID);
+	sendNewMsg->setValue(_T("Header.MessageLength"), &messageLength);
+	sendNewMsg->setValue(_T("missileID"), &missileID);
+	sendNewMsg->setValue(_T("targetID"), &targetID);
+	sendNewMsg->setValue(_T("launchPos.x"), &launchPosX);
+	sendNewMsg->setValue(_T("launchPos.y"), &launchPosY);
+	sendNewMsg->setValue(_T("launchPos.z"), &launchPosZ);
 
 	tcout << _T("[CommunicationManager] Sending IgnitionCommand to network\n");
 	commInterface->sendCommMsg(sendNewMsg);
@@ -359,7 +366,16 @@ CommunicationManager::processRecvMessage(unsigned char* data, int size)
 	//memcpy(&tmpMsgID, data + IDPos, IDPos);
 	//auto msgID = ntohs(tmpMsgID);
 
-	auto nomMsg = meb->getNOMInstance(name, commMsgHandler.getMsgName(msgID));
+	tstring msgName = commMsgHandler.getMsgName(msgID);
+	if (msgName.empty())
+	{
+		/*tcout << _T("[CommunicationManager] Ignoring undefined message id: 0x")
+			<< std::hex << msgID << std::dec
+			<< _T(", size=") << size << std::endl;*/
+		return;
+	}
+
+	auto nomMsg = meb->getNOMInstance(name, msgName);
 
 	if (nomMsg.get())
 	{
