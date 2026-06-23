@@ -1,5 +1,6 @@
 #include <nFramework/util/IniHandler.h>
 #include "MSSManager.h"
+#include <cmath>
 
 MSSManager::MSSManager(void)
 {
@@ -20,11 +21,19 @@ void MSSManager::initialize(void)
 	mec = new MECComponent;
 	mec->setUser(this);
 
-	periodicFunc = [this](void*) { this->sendMSSStatus(); };
+	periodicFunc = [this](void*)
+	{
+		this->updateMissilePaths();
+		this->sendMSSStatus();
+	};
 	nTimer = &(NTimer::getInstance());
 	timerHandle = -1;
 	simulatorStatus = 0;
+	updateIntervalMs = 1000;
+	missileSpeedMultiplier = 1.8;
+	interceptDistance = 50.0;
 	resetMissiles();
+	resetTargets();
 }
 
 void MSSManager::release()
@@ -49,6 +58,14 @@ void MSSManager::resetMissiles()
 	}
 }
 
+void MSSManager::resetTargets()
+{
+	for (auto& target : targetStates)
+	{
+		target = TargetState();
+	}
+}
+
 void MSSManager::sendMSSStatus()
 {
 	auto statusNOM = meb->getNOMInstance(name, _T("InnerMSSStatusToComm"));
@@ -58,18 +75,26 @@ void MSSManager::sendMSSStatus()
 		return;
 	}
 
-	NUInteger status(simulatorStatus);
+	std::array<MissileState, 4> missileSnapshot;
+	unsigned int statusSnapshot = 0;
+	{
+		std::lock_guard<std::mutex> lock(stateMutex);
+		missileSnapshot = missileStates;
+		statusSnapshot = simulatorStatus;
+	}
+
+	NUInteger status(statusSnapshot);
 	statusNOM->setValue(_T("status"), &status);
 
-	for (unsigned int i = 0; i < missileStates.size(); ++i)
+	for (unsigned int i = 0; i < missileSnapshot.size(); ++i)
 	{
 		const tstring prefix = _T("missileInfo[") + std::to_wstring(i) + _T("].");
-		NUInteger targetId(missileStates[i].targetId);
-		NUInteger missileId(missileStates[i].missileId);
-		NDouble x(missileStates[i].x);
-		NDouble y(missileStates[i].y);
-		NDouble z(missileStates[i].z);
-		NUInteger missileStatus(missileStates[i].status);
+		NUInteger targetId(missileSnapshot[i].targetId);
+		NUInteger missileId(missileSnapshot[i].missileId);
+		NDouble x(missileSnapshot[i].x);
+		NDouble y(missileSnapshot[i].y);
+		NDouble z(missileSnapshot[i].z);
+		NUInteger missileStatus(missileSnapshot[i].status);
 
 		statusNOM->setValue(prefix + _T("targetId"), &targetId);
 		statusNOM->setValue(prefix + _T("missileId"), &missileId);
@@ -85,12 +110,54 @@ void MSSManager::sendMSSStatus()
 void MSSManager::recvATSInformation(std::shared_ptr<NOM> nomMsg)
 {
 	auto targetValue = nomMsg->getValue(_T("matchedTarget.targetId"));
-	if (!targetValue)
+	auto xValue = nomMsg->getValue(_T("matchedTarget.ATSPos.x"));
+	auto yValue = nomMsg->getValue(_T("matchedTarget.ATSPos.y"));
+	auto zValue = nomMsg->getValue(_T("matchedTarget.ATSPos.z"));
+	auto speedValue = nomMsg->getValue(_T("matchedTarget.speed"));
+	if (!targetValue || !xValue || !yValue || !zValue)
 	{
 		return;
 	}
 
 	const unsigned int targetId = targetValue->toUInt();
+	const double targetX = xValue->toDouble();
+	const double targetY = yValue->toDouble();
+	const double targetZ = zValue->toDouble();
+	const double targetSpeed = speedValue ? speedValue->toDouble() : 0.0;
+	std::lock_guard<std::mutex> lock(stateMutex);
+
+	TargetState* target = nullptr;
+	for (auto& candidate : targetStates)
+	{
+		if (candidate.valid && candidate.targetId == targetId)
+		{
+			target = &candidate;
+			break;
+		}
+	}
+	if (target == nullptr)
+	{
+		for (auto& candidate : targetStates)
+		{
+			if (!candidate.valid)
+			{
+				target = &candidate;
+				break;
+			}
+		}
+	}
+	if (target == nullptr)
+	{
+		target = &targetStates[targetId % targetStates.size()];
+	}
+
+	target->targetId = targetId;
+	target->x = targetX;
+	target->y = targetY;
+	target->z = targetZ;
+	target->speed = targetSpeed;
+	target->valid = true;
+
 	for (auto& missile : missileStates)
 	{
 		if (missile.status == 1 && (missile.targetId == 0 || missile.targetId == targetId))
@@ -98,6 +165,10 @@ void MSSManager::recvATSInformation(std::shared_ptr<NOM> nomMsg)
 			missile.targetId = targetId;
 		}
 	}
+
+	ntcout << _T("[MSS][RX] targetID=") << targetId
+		<< _T(" pos=(") << targetX << _T(",") << targetY
+		<< _T(",") << targetZ << _T(") speed=") << targetSpeed << std::endl;
 }
 
 void MSSManager::recvIgnitionCommand(std::shared_ptr<NOM> nomMsg)
@@ -109,6 +180,7 @@ void MSSManager::recvIgnitionCommand(std::shared_ptr<NOM> nomMsg)
 	}
 
 	const unsigned int missileId = missileIdValue->toUInt();
+	std::lock_guard<std::mutex> lock(stateMutex);
 	const unsigned int index = (missileId >= 1 && missileId <= missileStates.size())
 		? missileId - 1 : missileId % missileStates.size();
 	auto& missile = missileStates[index];
@@ -121,6 +193,57 @@ void MSSManager::recvIgnitionCommand(std::shared_ptr<NOM> nomMsg)
 
 	missile.status = 1; // LAUNCHED
 	simulatorStatus = 2; // RUNNING
+}
+
+void MSSManager::updateMissilePaths()
+{
+	std::lock_guard<std::mutex> lock(stateMutex);
+	const double deltaTime = static_cast<double>(updateIntervalMs) / 1000.0;
+
+	for (auto& missile : missileStates)
+	{
+		if (missile.status != 1)
+		{
+			continue;
+		}
+
+		const TargetState* target = nullptr;
+		for (const auto& candidate : targetStates)
+		{
+			if (candidate.valid && candidate.targetId == missile.targetId)
+			{
+				target = &candidate;
+				break;
+			}
+		}
+		if (target == nullptr)
+		{
+			continue;
+		}
+		const double moveDistance = target->speed * missileSpeedMultiplier * deltaTime;
+		if (moveDistance <= 0.0)
+		{
+			continue;
+		}
+
+		const double dx = target->x - missile.x;
+		const double dy = target->y - missile.y;
+		const double dz = target->z - missile.z;
+		const double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+		if (distance <= interceptDistance || distance <= moveDistance)
+		{
+			missile.x = target->x;
+			missile.y = target->y;
+			missile.z = target->z;
+			missile.status = 2; // DESTROYED
+			continue;
+		}
+
+		const double ratio = moveDistance / distance;
+		missile.x += dx * ratio;
+		missile.y += dy * ratio;
+		missile.z += dz * ratio;
+	}
 }
 
 std::shared_ptr<NOM> MSSManager::registerMsg(tstring msgName)
@@ -163,14 +286,11 @@ void MSSManager::removeMsg(std::shared_ptr<NOM> nomMsg)
 
 void MSSManager::sendMsg(std::shared_ptr<NOM> nomMsg)
 {
-	ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
 	mec->sendMsg(nomMsg);
 }
 
 void MSSManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 {
-	ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
-
 	if (nomMsg->getName() == _T("InnerATSInformationToMSS"))
 	{
 		recvATSInformation(nomMsg);
@@ -181,12 +301,15 @@ void MSSManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 	}
 	else if (nomMsg->getName() == _T("InnerStartSimulationToModel"))
 	{
+		std::lock_guard<std::mutex> lock(stateMutex);
 		simulatorStatus = 1; // READY
 	}
 	else if (nomMsg->getName() == _T("InnerStopSimulationToModel"))
 	{
+		std::lock_guard<std::mutex> lock(stateMutex);
 		simulatorStatus = 0; // IDLE
 		resetMissiles();
+		resetTargets();
 	}
 }
 
@@ -209,10 +332,16 @@ bool MSSManager::start()
 {
 	IniHandler iniHandler;
 	iniHandler.readIni(_T("MSSManager/MSSManager.ini"));
+	const unsigned int configuredInterval = iniHandler.readUInteger(_T("MSSManager"), _T("UPDATE_INTERVAL_MS"));
+	const double configuredMultiplier = iniHandler.readDouble(_T("MSSManager"), _T("MISSILE_SPEED_MULTIPLIER"));
+	const double configuredDistance = iniHandler.readDouble(_T("MSSManager"), _T("INTERCEPT_DISTANCE"));
+	if (configuredInterval > 0) updateIntervalMs = configuredInterval;
+	if (configuredMultiplier > 0.0) missileSpeedMultiplier = configuredMultiplier;
+	if (configuredDistance > 0.0) interceptDistance = configuredDistance;
 
 	if (timerHandle == -1)
 	{
-		timerHandle = nTimer->addPeriodicTask(1000, periodicFunc);
+		timerHandle = nTimer->addPeriodicTask(updateIntervalMs, periodicFunc);
 	}
 
 	ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << std::endl;

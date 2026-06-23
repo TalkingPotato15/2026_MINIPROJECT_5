@@ -5,6 +5,7 @@
 #include <nFramework/nLineStream/NLineStreamMain.h>
 #include <nFramework/nTimer/NTimer.h>
 #include <array>
+#include <mutex>
 
 using namespace nframework;
 using namespace nom;
@@ -37,7 +38,9 @@ private:
 	void sendMSSStatus();
 	void recvATSInformation(std::shared_ptr<NOM> nomMsg);
 	void recvIgnitionCommand(std::shared_ptr<NOM> nomMsg);
+	void updateMissilePaths();
 	void resetMissiles();
+	void resetTargets();
 
 	IMEBComponent* meb;
 	MECComponent* mec;
@@ -59,8 +62,23 @@ private:
 		unsigned int status = 0;
 	};
 
+	struct TargetState
+	{
+		unsigned int targetId = 0;
+		double x = 0.0;
+		double y = 0.0;
+		double z = 0.0;
+		double speed = 0.0;
+		bool valid = false;
+	};
+
 	std::array<MissileState, 4> missileStates;
+	std::array<TargetState, 4> targetStates;
 	unsigned int simulatorStatus;
+	unsigned int updateIntervalMs;
+	double missileSpeedMultiplier;
+	double interceptDistance;
+	std::mutex stateMutex;
 
 	NLineTstream ntcout{ Level::COUT };
 };

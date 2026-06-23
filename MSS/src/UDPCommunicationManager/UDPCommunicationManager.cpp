@@ -364,7 +364,7 @@ void UDPCommunicationManager::funcMapInit()
 
 void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 {
-	tcout << _T("[COMM][**BRIDGE**] Scenario -> InnerSendScenario") << endl;
+	tcout << _T("[COMM][****BRIDGE****] Scenario -> InnerSendScenario") << endl;
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerSendScenario"));
 	if (!nomMsg_new.get())
 	{
@@ -420,7 +420,7 @@ void UDPCommunicationManager::recvATSInformationUplink(shared_ptr<NOM> nomMsg)
 {
 	auto targetId = nomMsg->getValue(_T("matchedTarget.targetId"));
 	auto atsStatus = nomMsg->getValue(_T("matchedTarget.atsStatus"));
-	tcout << _T("[COMM][**BRIDGE**] ATSInformationUplink -> InnerATSInformationToMSS targetId=")
+	tcout << _T("[COMM][****BRIDGE****] ATSInformationUplink -> InnerATSInformationToMSS targetId=")
 		<< (targetId ? targetId->toUInt() : 0)
 		<< _T(" atsStatus=") << (atsStatus ? atsStatus->toUInt() : 0) << endl;
 
@@ -448,7 +448,7 @@ void UDPCommunicationManager::recvIgnitionCommand(shared_ptr<NOM> nomMsg)
 {
 	auto missileId = nomMsg->getValue(_T("missileID"));
 	auto targetId = nomMsg->getValue(_T("targetID"));
-	tcout << _T("[COMM][**BRIDGE**] IgnitionCommand -> InnerIgnitionCommandToMSS missileID=")
+	tcout << _T("[COMM][****BRIDGE****] IgnitionCommand -> InnerIgnitionCommandToMSS missileID=")
 		<< (missileId ? missileId->toUInt() : 0)
 		<< _T(" targetID=") << (targetId ? targetId->toUInt() : 0) << endl;
 
@@ -572,12 +572,12 @@ void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
 
 	if (value && value->toUInt() == 0)
 	{
-		tcout << _T("[COMM][**BRIDGE**] StartSimulation flag=0 -> InnerStopSimulation") << endl;
+		tcout << _T("[COMM][****BRIDGE****] StartSimulation flag=0 -> InnerStopSimulation") << endl;
 		recvStopSimulation(nomMsg);
 		return;
 	}
 
-	tcout << _T("[COMM][**BRIDGE**] StartSimulation -> InnerStartSimulation flag=")
+	tcout << _T("[COMM][****BRIDGE****] StartSimulation -> InnerStartSimulation flag=")
 		<< (value ? value->toUInt() : 1) << endl;
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStartSimulation"));
 
@@ -590,12 +590,12 @@ void UDPCommunicationManager::recvStop(shared_ptr<NOM> nomMsg)
 	{
 		if (value->toUInt() == 0)
 		{
-			tcout << _T("[COMM][**BRIDGE**] Stop ignored because stopFlag=0") << endl;
+			tcout << _T("[COMM][****BRIDGE****] Stop ignored because stopFlag=0") << endl;
 			return;
 		}
 	}
 
-	tcout << _T("[COMM][**BRIDGE**] Stop -> InnerStopSimulation") << endl;
+	tcout << _T("[COMM][****BRIDGE****] Stop -> InnerStopSimulation") << endl;
 	recvStopSimulation(nomMsg);
 }
 
