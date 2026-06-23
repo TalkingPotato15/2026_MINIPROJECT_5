@@ -11,7 +11,7 @@
 		<NOM:interaction name="Scenario" id="0x01" sharing="PublishSubscribe"
 			orderType="Receive" alignment="false" semantics="SAMS scenario distribution">
 			<NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-			<NOM:parameter name="targetInfo" dataType="TargetInfoStruct" size="4"/>
+			<NOM:parameter name="sceneInfo" dataType="TargetScenarioStruct" size="4"/>
 			<NOM:parameter name="rssPos" dataType="PosStruct"/>
 			<NOM:parameter name="rssRadius" dataType="uintBE"/>
 			<NOM:parameter name="mlsPos" dataType="PosStruct"/>
@@ -116,14 +116,8 @@
 			<NOM:parameter name="stopFlag" dataType="uintBE"/>
 		</NOM:interaction>
 
-
-
 		<NOM:interaction name="SimulatorStateToComm" id="0x20" sharing="Subscribe" orderType="Receive" alignment="false">
 			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
-		</NOM:interaction>
-
-		<NOM:interaction name="InnerRSSStatusToComm" id="0x30" sharing="Subscribe" orderType="Receive" alignment="false">
-			<NOM:parameter name="status" dataType="intBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="InnerSendScenario" id="0x21" sharing="Publish" orderType="Receive" alignment="false">
@@ -146,6 +140,37 @@
 
 		<NOM:interaction name="InnerStopSimulationAck" id="0x28" sharing="Subscribe" orderType="Receive" alignment="false">
 			<NOM:parameter name="SimulatorID" dataType="ushortBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerRSSStatusToComm" id="0x30" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="status" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerATSInformationToRSS" id="0x31" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerMSSInformationToRSS" id="0x32" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerTargetDetectionToComm" id="0x33" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="targetDetectonSuccess" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerTargetDestroyedToComm" id="0x34" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerATSInformationUplinkToComm" id="0x35" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerRSSDetectionAreaToRSS" id="0x36" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="rssPos" dataType="PosStruct"/>
+			<NOM:parameter name="rssRadius" dataType="uintBE"/>
 		</NOM:interaction>
 
 		<NOM:interaction name="InnerAirThreatDetonationToATM" id="0x40" sharing="Publish" orderType="Receive" alignment="false">

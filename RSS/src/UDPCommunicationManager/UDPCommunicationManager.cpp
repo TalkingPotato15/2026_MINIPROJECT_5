@@ -3,6 +3,101 @@
 #include <cmath>
 using namespace std::filesystem;
 
+namespace
+{
+	void copyUIntValue(const shared_ptr<NOM>& src, const tstring& srcName, const shared_ptr<NOM>& dst, const tstring& dstName)
+	{
+		if (auto value = src->getValue(srcName))
+		{
+			NUInteger v(value->toUInt());
+			dst->setValue(dstName, &v);
+		}
+	}
+
+	void copyDoubleValue(const shared_ptr<NOM>& src, const tstring& srcName, const shared_ptr<NOM>& dst, const tstring& dstName)
+	{
+		if (auto value = src->getValue(srcName))
+		{
+			NDouble v(value->toDouble());
+			dst->setValue(dstName, &v);
+		}
+	}
+
+	void copyBoolValue(const shared_ptr<NOM>& src, const tstring& srcName, const shared_ptr<NOM>& dst, const tstring& dstName)
+	{
+		if (auto value = src->getValue(srcName))
+		{
+			NBool v(value->toUInt() != 0);
+			dst->setValue(dstName, &v);
+		}
+	}
+
+	void copyATSInformation(const shared_ptr<NOM>& src, const tstring& srcPrefix, const shared_ptr<NOM>& dst, const tstring& dstPrefix)
+	{
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.x"), dst, dstPrefix + _T(".ATSPos.x"));
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.y"), dst, dstPrefix + _T(".ATSPos.y"));
+		copyDoubleValue(src, srcPrefix + _T(".ATSPos.z"), dst, dstPrefix + _T(".ATSPos.z"));
+		copyUIntValue(src, srcPrefix + _T(".speed"), dst, dstPrefix + _T(".speed"));
+		copyUIntValue(src, srcPrefix + _T(".targetId"), dst, dstPrefix + _T(".targetId"));
+		copyUIntValue(src, srcPrefix + _T(".atsStatus"), dst, dstPrefix + _T(".atsStatus"));
+	}
+
+	void copyMSSInformation(const shared_ptr<NOM>& src, const tstring& srcPrefix, const shared_ptr<NOM>& dst, const tstring& dstPrefix)
+	{
+		copyUIntValue(src, srcPrefix + _T(".targetId"), dst, dstPrefix + _T(".targetId"));
+		copyUIntValue(src, srcPrefix + _T(".missileId"), dst, dstPrefix + _T(".missileId"));
+		copyDoubleValue(src, srcPrefix + _T(".MSSPos.x"), dst, dstPrefix + _T(".MSSPos.x"));
+		copyDoubleValue(src, srcPrefix + _T(".MSSPos.y"), dst, dstPrefix + _T(".MSSPos.y"));
+		copyDoubleValue(src, srcPrefix + _T(".MSSPos.z"), dst, dstPrefix + _T(".MSSPos.z"));
+		copyUIntValue(src, srcPrefix + _T(".mssStatus"), dst, dstPrefix + _T(".mssStatus"));
+	}
+	void logATSInformation(const tstring& label, const shared_ptr<NOM>& msg, const tstring& prefix, unsigned int index)
+	{
+		auto targetId = msg->getValue(prefix + _T(".targetId"));
+		auto atsStatus = msg->getValue(prefix + _T(".atsStatus"));
+		auto x = msg->getValue(prefix + _T(".ATSPos.x"));
+		auto y = msg->getValue(prefix + _T(".ATSPos.y"));
+		auto z = msg->getValue(prefix + _T(".ATSPos.z"));
+		auto speed = msg->getValue(prefix + _T(".speed"));
+		if (!targetId && !atsStatus && !x && !y && !z && !speed)
+		{
+			return;
+		}
+
+		tcout << _T("[UDPCommunicationManager] ") << label
+			<< _T(": index=") << index
+			<< _T(", targetId=") << (targetId ? targetId->toUInt() : 0)
+			<< _T(", atsStatus=") << (atsStatus ? atsStatus->toUInt() : 0)
+			<< _T(", pos=(") << (x ? x->toDouble() : 0.0)
+			<< _T(", ") << (y ? y->toDouble() : 0.0)
+			<< _T(", ") << (z ? z->toDouble() : 0.0) << _T(")")
+			<< _T(", speed=") << (speed ? speed->toUInt() : 0) << endl;
+	}
+
+	void logMSSInformation(const tstring& label, const shared_ptr<NOM>& msg, const tstring& prefix, int index)
+	{
+		auto targetId = msg->getValue(prefix + _T(".targetId"));
+		auto missileId = msg->getValue(prefix + _T(".missileId"));
+		auto x = msg->getValue(prefix + _T(".MSSPos.x"));
+		auto y = msg->getValue(prefix + _T(".MSSPos.y"));
+		auto z = msg->getValue(prefix + _T(".MSSPos.z"));
+		auto status = msg->getValue(prefix + _T(".mssStatus"));
+		if (!targetId && !missileId && !x && !y && !z && !status)
+		{
+			return;
+		}
+
+		tcout << _T("[UDPCommunicationManager] ") << label
+			<< _T(": index=") << index
+			<< _T(", targetId=") << (targetId ? targetId->toUInt() : 0)
+			<< _T(", missileId=") << (missileId ? missileId->toUInt() : 0)
+			<< _T(", mssStatus=") << (status ? status->toUInt() : 0)
+			<< _T(", pos=(") << (x ? x->toDouble() : 0.0)
+			<< _T(", ") << (y ? y->toDouble() : 0.0)
+			<< _T(", ") << (z ? z->toDouble() : 0.0) << _T(")") << endl;
+	}
+}
+
 /************************************************************************
 	Constructor / Destructor
 ************************************************************************/
@@ -265,6 +360,21 @@ void UDPCommunicationManager::funcMapInit()
 	msgProc = bind(&UDPCommunicationManager::recvInnerRSSStatusToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerRSSStatusToComm"), msgProc });
 
+	msgProc = bind(&UDPCommunicationManager::recvATSInformationToRSS, this, placeholders::_1);
+	funcMap.insert({ _T("ATSInformationToRSS"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvMSSInformationDownlinkToRSS, this, placeholders::_1);
+	funcMap.insert({ _T("MSSInformationDownlinkToRSS"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerTargetDetectionToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerTargetDetectionToComm"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerTargetDestroyedToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerTargetDestroyedToComm"), msgProc });
+
+	msgProc = bind(&UDPCommunicationManager::recvInnerATSInformationUplinkToComm, this, placeholders::_1);
+	funcMap.insert({ _T("InnerATSInformationUplinkToComm"), msgProc });
+
 	msgProc = bind(&UDPCommunicationManager::recvInnerRouteToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerRouteToComm"), msgProc });
 
@@ -325,6 +435,20 @@ void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 		nomMsg_new->setValue(_T("Scenario.LauncherPositionY"), &v);
 	}
 
+	auto detectionAreaMsg = meb->getNOMInstance(name, _T("InnerRSSDetectionAreaToRSS"));
+	if (detectionAreaMsg.get())
+	{
+		copyDoubleValue(nomMsg, _T("rssPos.x"), detectionAreaMsg, _T("rssPos.x"));
+		copyDoubleValue(nomMsg, _T("rssPos.y"), detectionAreaMsg, _T("rssPos.y"));
+		copyDoubleValue(nomMsg, _T("rssPos.z"), detectionAreaMsg, _T("rssPos.z"));
+		copyUIntValue(nomMsg, _T("rssRadius"), detectionAreaMsg, _T("rssRadius"));
+		this->sendMsg(detectionAreaMsg);
+	}
+	else
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerRSSDetectionAreaToRSS NOM is undefined.") << endl;
+	}
+
 	this->sendMsg(nomMsg_new);
 }
 
@@ -374,6 +498,7 @@ void UDPCommunicationManager::recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg)
 	}
 	nomMsg_new->setValue(_T("targetInfo[0].atsStatus"), &atsStatus);
 
+	logATSInformation(_T("Sending ATSStatus"), nomMsg_new, _T("targetInfo[0]"), 0);
 	commInterface->sendCommMsg(nomMsg_new);
 }
 
@@ -513,7 +638,7 @@ void UDPCommunicationManager::recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg)
 
 void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg)
 {
-	tcout << _T("[UDPCommunicationManager] OC ICD has no ATSInformationUplink bridge yet. Skip external send.") << endl;
+	(void)nomMsg;
 }
 
 void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
@@ -534,6 +659,107 @@ void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
 
 	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
 	nomMsg_new->setValue(_T("status"), &status);
+
+	auto statusValue = nomMsg_new->getValue(_T("status"));
+	tcout << _T("[UDPCommunicationManager] Sending RSSStatus: status=") << (statusValue ? statusValue->toUInt() : 0) << endl;
+	commInterface->sendCommMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvATSInformationToRSS(shared_ptr<NOM> nomMsg)
+{
+	tcout << _T("[UDPCommunicationManager] ATSInformationToRSS received.") << endl;
+
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerATSInformationToRSS"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerATSInformationToRSS NOM is undefined.") << endl;
+		return;
+	}
+
+	for (unsigned int i = 0; i < 4; ++i)
+	{
+		tstring index = _T("[") + to_tstring(i) + _T("]");
+		copyATSInformation(nomMsg, _T("targetInfo") + index, nomMsg_new, _T("targetInfo") + index);
+		logATSInformation(_T("Publishing InnerATSInformationToRSS"), nomMsg_new, _T("targetInfo") + index, i);
+	}
+
+	this->sendMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvMSSInformationDownlinkToRSS(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerMSSInformationToRSS"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerMSSInformationToRSS NOM is undefined.") << endl;
+		return;
+	}
+
+	for (int i = 0; i < 4; ++i)
+	{
+		tstring index = _T("[") + to_tstring(i) + _T("]");
+		copyMSSInformation(nomMsg, _T("missileInfo") + index, nomMsg_new, _T("missileInfo") + index);
+		logMSSInformation(_T("Publishing InnerMSSInformationToRSS"), nomMsg_new, _T("missileInfo") + index, i);
+	}
+
+	this->sendMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvInnerTargetDetectionToComm(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("TargetDetection"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] TargetDetection NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort msgID((ushort)ICD_MessageID::TargetDetection);
+	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
+	copyUIntValue(nomMsg, _T("targetID"), nomMsg_new, _T("targetID"));
+	copyUIntValue(nomMsg, _T("targetDetectonSuccess"), nomMsg_new, _T("targetDetectonSuccess"));
+
+	auto targetId = nomMsg_new->getValue(_T("targetID"));
+	auto success = nomMsg_new->getValue(_T("targetDetectonSuccess"));
+	tcout << _T("[UDPCommunicationManager] Sending TargetDetection: targetID=") << (targetId ? targetId->toUInt() : 0)
+		<< _T(", targetDetectonSuccess=") << (success ? success->toUInt() : 0) << endl;
+	commInterface->sendCommMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvInnerTargetDestroyedToComm(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("TargetDestroyed"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] TargetDestroyed NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort msgID((ushort)ICD_MessageID::TargetDestroyed);
+	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
+	copyUIntValue(nomMsg, _T("targetID"), nomMsg_new, _T("targetID"));
+	copyUIntValue(nomMsg, _T("missionFlag"), nomMsg_new, _T("missionFlag"));
+
+	auto targetId = nomMsg_new->getValue(_T("targetID"));
+	auto missionFlag = nomMsg_new->getValue(_T("missionFlag"));
+	tcout << _T("[UDPCommunicationManager] Sending TargetDestroyed: targetID=") << (targetId ? targetId->toUInt() : 0)
+		<< _T(", missionFlag=") << (missionFlag ? missionFlag->toUInt() : 0) << endl;
+	commInterface->sendCommMsg(nomMsg_new);
+}
+
+void UDPCommunicationManager::recvInnerATSInformationUplinkToComm(shared_ptr<NOM> nomMsg)
+{
+	auto nomMsg_new = meb->getNOMInstance(name, _T("ATSInformationUplink"));
+	if (!nomMsg_new.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] ATSInformationUplink NOM is undefined.") << endl;
+		return;
+	}
+
+	NUShort msgID((ushort)ICD_MessageID::ATSInformationUplink);
+	nomMsg_new->setValue(_T("Header.MessageID"), &msgID);
+	copyATSInformation(nomMsg, _T("matchedTarget"), nomMsg_new, _T("matchedTarget"));
+	logATSInformation(_T("Sending ATSInformationUplink"), nomMsg_new, _T("matchedTarget"), 0);
 
 	commInterface->sendCommMsg(nomMsg_new);
 }
