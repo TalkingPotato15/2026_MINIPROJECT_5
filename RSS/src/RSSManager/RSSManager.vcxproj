@@ -145,9 +145,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DetectionManager.h" />
+    <ClInclude Include="DetonationManager.h" />
+    <ClInclude Include="RSSInfoTypes.h" />
     <ClInclude Include="RSSManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DetectionManager.cpp" />
+    <ClCompile Include="DetonationManager.cpp" />
     <ClCompile Include="RSSManager.cpp" />
   </ItemGroup>
   <ItemGroup>
