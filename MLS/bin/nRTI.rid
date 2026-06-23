@@ -1,0 +1,56 @@
+(option RTI )
+	;;
+	(option RTIEXEC 127.0.0.1 7777)
+
+	(option FILE_LOG OFF)		;; ON or OFF, default value = OFF
+	(option MEMORY_LOG OFF)		;; ON or OFF, default value = OFF
+
+	;; RtiExec's RID Info0
+	(option CONF_FILE nRTI.rid)
+
+	(option COMM_METHOD 1)
+
+	(option MULTICAST 229.229.229.228 8989 4)
+
+	;; Socket buffer size order: send, receive.
+	(option SOCK_BUFF_SIZE 200000 300000)
+	(option BUNDLE_SIZE 500000)
+
+	;; Options order: Large size message, Compression, TCP no delay. 
+	(option OPTIONS 1 1 1)
+
+	;; select() time out(millisecond), multiple core: >=0, single core: >=1
+	(option SELECT_TIME_OUT 1)
+
+	;; peformance, default=1ms, 0보다 큰 값(ms), 0=> windows default state, turn off this option.
+	(option TIMER_ACCURACY 1)
+
+	(option MAX_UDP_SIZE 600000)
+
+	;; Congestion order: Send Retries, Send Retry Wait Usec. 
+	(option CONGESTION 3 700000)
+
+	;;Fault Tolerance
+	;;DeleteOrphans(ON(1),OFF(0)) 
+	(option DELETE_ORPHANS 1)
+
+	;;Heartbeat(ON(1),OFF(0))
+	(option HEARTBEAT 1)
+
+	;;HeartbeatInterval(ms) 
+	(option HEARTBEAT_INTERVAL 100)
+
+	;;TimeoutInterval(ms)
+	(option HEARTBEAT_TIMEOUT_INTERVAL 1000)
+
+	;;TimeoutSendRetries (ms)
+	(option HEARTBEAT_TIMEOUT_SEND_RETRIES 3)
+
+	;;
+	;;Service On(1)/Off(0)
+	;;Time Service
+	(option USE_TM OFF)	;; ON or OFF, default value = OFF
+	;;Data Distribution Service
+	(option USE_DDM OFF)	;; ON or OFF, default value = OFF
+	;;MOM Service
+	(option USE_MOM OFF)	;; ON or OFF, default value = OFF
