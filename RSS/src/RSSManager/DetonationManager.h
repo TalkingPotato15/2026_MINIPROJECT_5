@@ -14,6 +14,6 @@ public:
 	bool isIntercepted(const CachedATSInfo& atsInfo, const CachedMSSInfo& mssInfo) const;
 
 private:
-	static constexpr double INTERCEPT_DISTANCE_THRESHOLD = 10.0;
+	static constexpr double INTERCEPT_DISTANCE_THRESHOLD = 1.0;
 	std::set<uint32_t> destroyedTargetIds;
 };
