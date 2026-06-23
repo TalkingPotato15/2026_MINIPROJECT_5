@@ -661,7 +661,7 @@ void UDPCommunicationManager::recvInnerRSSStatusToComm(shared_ptr<NOM> nomMsg)
 	nomMsg_new->setValue(_T("status"), &status);
 
 	auto statusValue = nomMsg_new->getValue(_T("status"));
-	tcout << _T("[UDPCommunicationManager] Sending RSSStatus: status=") << (statusValue ? statusValue->toUInt() : 0) << endl;
+	//tcout << _T("[UDPCommunicationManager] Sending RSSStatus: status=") << (statusValue ? statusValue->toUInt() : 0) << endl;
 	commInterface->sendCommMsg(nomMsg_new);
 }
 
