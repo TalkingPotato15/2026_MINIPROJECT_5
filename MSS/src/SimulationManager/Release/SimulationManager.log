@@ -1,0 +1,125 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(516,5): warning MSB8004: Intermediate 디렉터리가 슬래시로 끝나지 않습니다. Intermediate 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8004: Output 디렉터리가 슬래시로 끝나지 않습니다. Output 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
+  SimulationManager.cpp
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\BaseManager.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 'SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(85,38): warning C4275: DLL 인터페이스가 아닌 class 'nframework::log4nf::IAppender'이(가) DLL 인터페이스 class 'nframework::log4nf::FileAppender'의 기본으로 사용되었습니다.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\IAppender.h(59,8):
+      'nframework::log4nf::IAppender' 선언을 참조하십시오.
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(85,17):
+      'nframework::log4nf::FileAppender' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(101,33): warning C4251: 'nframework::log4nf::FileAppender::fileSizeStatus_': 'std::pair<uint64_t,uint64_t>'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\utility(235,8):
+      'std::pair<uint64_t,uint64_t>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(103,14): warning C4251: 'nframework::log4nf::FileAppender::config_': 'nframework::log4nf::FileConfig'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(18,9):
+      'nframework::log4nf::FileConfig' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(105,13): warning C4251: 'nframework::log4nf::FileAppender::outputFile_': 'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\fstream(177,7):
+      'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(106,14): warning C4251: 'nframework::log4nf::FileAppender::mutex_': 'std::mutex'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\mutex(98,19):
+      'std::mutex' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(88,42): warning C4275: DLL 인터페이스가 아닌 class 'nframework::log4nf::IAppender'이(가) DLL 인터페이스 class 'nframework::log4nf::HTMLFileAppender'의 기본으로 사용되었습니다.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\IAppender.h(59,8):
+      'nframework::log4nf::IAppender' 선언을 참조하십시오.
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(88,17):
+      'nframework::log4nf::HTMLFileAppender' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(106,33): warning C4251: 'nframework::log4nf::HTMLFileAppender::fileSizeStatus_': 'std::pair<uint64_t,uint64_t>'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\utility(235,8):
+      'std::pair<uint64_t,uint64_t>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(109,18): warning C4251: 'nframework::log4nf::HTMLFileAppender::config_': 'nframework::log4nf::HTMLFileConfig'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(18,9):
+      'nframework::log4nf::HTMLFileConfig' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(111,13): warning C4251: 'nframework::log4nf::HTMLFileAppender::outputFile_': 'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\fstream(177,7):
+      'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(112,14): warning C4251: 'nframework::log4nf::HTMLFileAppender::mutex_': 'std::mutex'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\mutex(98,19):
+      'std::mutex' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Logger\LogConfiguration.h(33,30): warning C4251: 'nframework::log4nf::LogConfiguration::sections_': 'std::map<tstring,nframework::log4nf::LogConfiguration::SECTION,std::less<tstring>,std::allocator<std::pair<const tstring,nframework::log4nf::LogConfiguration::SECTION>>>'에서는 'nframework::log4nf::LogConfiguration'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\map(72,7):
+      'std::map<tstring,nframework::log4nf::LogConfiguration::SECTION,std::less<tstring>,std::allocator<std::pair<const tstring,nframework::log4nf::LogConfiguration::SECTION>>>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Loggable.h(123,33): warning C4251: 'nframework::log4nf::Loggable::adapter_': 'std::shared_ptr<nframework::log4nf::LoggerAdapter>'에서는 'nframework::log4nf::Loggable'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\memory(1560,7):
+      'std::shared_ptr<nframework::log4nf::LoggerAdapter>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\NOM\NOMCommon.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\ucrt\tchar.h(2320,9): warning C4005: '_T': 매크로 재정의
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Values\LogLevel.hpp(24,9):
+      '_T'의 이전 정의를 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\nom\NMessage.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\NOM\NException.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\util\util.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\NOM\NMessageProcessor.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\mec\IMECComponent.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\nLineStream\NLineStream.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\nLineStream\NBuffer.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\nLineLog\NLineLog.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\NLineLog\INLineLog.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\nLineLog\NLineLog.h(16,42): warning C4275: DLL 인터페이스가 아닌 class 'nframework::nlinelog::INLineLog'이(가) DLL 인터페이스 class 'nframework::nlinelog::NLineLog'의 기본으로 사용되었습니다.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\NLineLog\INLineLog.h(47,8):
+      'nframework::nlinelog::INLineLog' 선언을 참조하십시오.
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\nLineLog\NLineLog.h(16,24):
+      'nframework::nlinelog::NLineLog' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\nLineStream\NLineTstream.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\util\IniHandler.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 '../SimulationManager/SimulationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1392,5): warning MSB8012: TargetPath(C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\lib\SimulationManager.dll)이(가) Linker의 OutputFile 속성 값(C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\bin\SimulationManager\SimulationManager.dll)과 일치하지 않습니다. 이로 인해 프로젝트가 잘못 빌드될 수 있습니다. 이를 수정하려면 $(OutDir), $(TargetName) 및 $(TargetExt) 속성 값이 %(Link.OutputFile)에 지정된 값과 일치해야 합니다.
+     C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\/lib\SimulationManager.lib 라이브러리 및 C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\/lib\SimulationManager.exp 개체를 생성하고 있습니다.
+  코드를 생성하고 있습니다.
+  Previous IPDB not found, fall back to full compilation.
+  All 528 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  코드를 생성했습니다.
+  SimulationManager.vcxproj -> C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\lib\SimulationManager.dll

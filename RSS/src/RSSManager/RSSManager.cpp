@@ -23,6 +23,8 @@ void RSSManager::initialize(void)
 	periodicFunc = [this](void*) { this->sendRSSStatus(); };
 	nTimer = &(NTimer::getInstance());
 	timerHandle = -1;
+
+	funcMapInit();
 }
 
 void RSSManager::release()
@@ -36,6 +38,34 @@ void RSSManager::release()
 	delete mec;
 	mec = nullptr;
 	meb = nullptr;
+	funcMap.clear();
+	resetDetectionState();
+}
+
+void RSSManager::funcMapInit()
+{
+	std::function<void(std::shared_ptr<NOM>)> msgProc;
+
+	msgProc = std::bind(&RSSManager::recvInnerATSInformationToRSS, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerATSInformationToRSS"), msgProc });
+
+	msgProc = std::bind(&RSSManager::recvInnerMSSInformationToRSS, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerMSSInformationToRSS"), msgProc });
+
+	msgProc = std::bind(&RSSManager::recvInnerRSSDetectionAreaToRSS, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerRSSDetectionAreaToRSS"), msgProc });
+
+	msgProc = std::bind(&RSSManager::recvInnerStartSimulation, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerStartSimulation"), msgProc });
+
+	msgProc = std::bind(&RSSManager::recvInnerStopSimulation, this, std::placeholders::_1);
+	funcMap.insert({ _T("InnerStopSimulation"), msgProc });
+}
+
+void RSSManager::resetDetectionState()
+{
+	detectionManager.reset();
+	detonationManager.reset();
 }
 
 void RSSManager::sendRSSStatus()
@@ -43,11 +73,11 @@ void RSSManager::sendRSSStatus()
 	rssStatusNOM = meb->getNOMInstance(name, _T("InnerRSSStatusToComm"));
 	if (!rssStatusNOM.get())
 	{
-		ntcout << _T("[RSSManager] InnerRSSStatusToComm NOM is undefined.") << std::endl;
+		//ntcout << _T("[RSSManager] InnerRSSStatusToComm NOM is undefined.") << std::endl;
 		return;
 	}
 
-	NInteger status(1);
+	NUInteger status(1);
 	rssStatusNOM->setValue(_T("status"), &status);
 
 	sendMsg(rssStatusNOM);
@@ -100,6 +130,11 @@ void RSSManager::sendMsg(std::shared_ptr<NOM> nomMsg)
 void RSSManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 {
 	ntcout << _T("[") << _T(__FUNCTION__) << _T("] ") << nomMsg->getName() << std::endl;
+
+	if (auto iter = funcMap.find(nomMsg->getName()); iter != funcMap.end())
+	{
+		iter->second(nomMsg);
+	}
 }
 
 void RSSManager::setUserName(tstring userName)
@@ -146,6 +181,258 @@ void RSSManager::setMEBComponent(IMEBComponent* realMEB)
 {
 	meb = realMEB;
 	mec->setMEB(meb);
+}
+
+void RSSManager::recvInnerStartSimulation(std::shared_ptr<NOM> nomMsg)
+{
+	(void)nomMsg;
+	detectionActive = true;
+	ntcout << _T("[RSSManager] Detection started.") << std::endl;
+}
+
+void RSSManager::recvInnerStopSimulation(std::shared_ptr<NOM> nomMsg)
+{
+	(void)nomMsg;
+	detectionActive = false;
+	resetDetectionState();
+	ntcout << _T("[RSSManager] Detection stopped. Detection/interception cache cleared.") << std::endl;
+}
+
+void RSSManager::recvInnerRSSDetectionAreaToRSS(std::shared_ptr<NOM> nomMsg)
+{
+	auto xValue = nomMsg->getValue(_T("rssPos.x"));
+	auto yValue = nomMsg->getValue(_T("rssPos.y"));
+	auto zValue = nomMsg->getValue(_T("rssPos.z"));
+	auto radiusValue = nomMsg->getValue(_T("rssRadius"));
+	if (!xValue || !yValue || !zValue || !radiusValue)
+	{
+		ntcout << _T("[RSSManager] RSS detection area is incomplete.") << std::endl;
+		return;
+	}
+
+	detectionManager.setDetectionArea(
+		xValue->toDouble(),
+		yValue->toDouble(),
+		zValue->toDouble(),
+		static_cast<double>(radiusValue->toUInt()));
+	detonationManager.reset();
+}
+
+void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
+{
+	if (!detectionActive)
+	{
+		return;
+	}
+
+	for (int i = 0; i < 4; ++i)
+	{
+		tstring prefix = _T("targetInfo[") + to_tstring(i) + _T("]");
+		CachedATSInfo atsInfo;
+		if (!tryReadATSInfo(nomMsg, prefix, atsInfo))
+		{
+			continue;
+		}
+
+		bool inRange = detectionManager.isInRange(atsInfo);
+		double distance = detectionManager.hasDetectionArea() ? detectionManager.getDistanceToRSS(atsInfo) : 0.0;
+		ntcout << _T("[RSSManager] ATSInformation received: index=") << i
+			<< _T(", targetId=") << atsInfo.targetId
+			<< _T(", atsStatus=") << atsInfo.atsStatus
+			<< _T(", pos=(") << atsInfo.x << _T(", ") << atsInfo.y << _T(", ") << atsInfo.z << _T(")")
+			<< _T(", speed=") << atsInfo.speed;
+		if (detectionManager.hasDetectionArea())
+		{
+			ntcout << _T(", distance=") << distance
+				<< _T(", inRange=") << (inRange ? 1 : 0);
+		}
+		else
+		{
+			ntcout << _T(", rssAreaReady=0");
+		}
+		ntcout << std::endl;
+
+		if (atsInfo.atsStatus != 1)
+		{
+			if (atsInfo.atsStatus == 2)
+			{
+				detonationManager.markDestroyed(atsInfo.targetId);
+				detectionManager.removeDetectedTarget(atsInfo.targetId);
+			}
+			continue;
+		}
+
+		if (!detectionManager.isDetected(atsInfo.targetId))
+		{
+			if (!inRange)
+			{
+				continue;
+			}
+
+			detectionManager.markDetected(atsInfo);
+			ntcout << _T("[RSSManager] Target detected: targetId=") << atsInfo.targetId << std::endl;
+			sendTargetDetection(atsInfo.targetId, 1);
+			sendATSInformationUplink(atsInfo);
+			continue;
+		}
+
+		if (inRange)
+		{
+			detectionManager.updateDetectedTarget(atsInfo);
+		}
+
+		auto cachedTarget = detectionManager.findDetectedTarget(atsInfo.targetId);
+		if (cachedTarget != nullptr)
+		{
+			sendATSInformationUplink(*cachedTarget);
+		}
+	}
+}
+
+void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
+{
+	if (!detectionActive)
+	{
+		return;
+	}
+
+	for (int i = 0; i < 4; ++i)
+	{
+		tstring prefix = _T("missileInfo[") + to_tstring(i) + _T("]");
+		CachedMSSInfo mssInfo;
+		if (!tryReadMSSInfo(nomMsg, prefix, mssInfo))
+		{
+			continue;
+		}
+
+		if (mssInfo.targetId == 0 || detonationManager.isDestroyed(mssInfo.targetId))
+		{
+			continue;
+		}
+
+		auto atsInfo = detectionManager.findDetectedTarget(mssInfo.targetId);
+		if (atsInfo == nullptr)
+		{
+			continue;
+		}
+
+		if (detonationManager.isIntercepted(*atsInfo, mssInfo))
+		{
+			ntcout << _T("[RSSManager] Target intercepted: targetId=") << mssInfo.targetId
+				<< _T(", missileId=") << mssInfo.missileId
+				<< _T(", distance=") << detonationManager.getDistance(*atsInfo, mssInfo) << std::endl;
+			sendTargetDestroyed(mssInfo.targetId, 1);
+			detonationManager.markDestroyed(mssInfo.targetId);
+			continue;
+		}
+
+		sendATSInformationUplink(*atsInfo);
+	}
+}
+
+bool RSSManager::tryReadATSInfo(std::shared_ptr<NOM> nomMsg, const tstring& targetPrefix, CachedATSInfo& atsInfo) const
+{
+	auto xValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.x"));
+	auto yValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.y"));
+	auto zValue = nomMsg->getValue(targetPrefix + _T(".ATSPos.z"));
+	auto speedValue = nomMsg->getValue(targetPrefix + _T(".speed"));
+	auto targetIDValue = nomMsg->getValue(targetPrefix + _T(".targetId"));
+	auto atsStatusValue = nomMsg->getValue(targetPrefix + _T(".atsStatus"));
+	if (!xValue || !yValue || !zValue || !speedValue || !targetIDValue || !atsStatusValue)
+	{
+		return false;
+	}
+
+	atsInfo.x = xValue->toDouble();
+	atsInfo.y = yValue->toDouble();
+	atsInfo.z = zValue->toDouble();
+	atsInfo.speed = speedValue->toUInt();
+	atsInfo.targetId = targetIDValue->toUInt();
+	atsInfo.atsStatus = atsStatusValue->toUInt();
+
+	return true;
+}
+
+bool RSSManager::tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, const tstring& missilePrefix, CachedMSSInfo& mssInfo) const
+{
+	auto targetIDValue = nomMsg->getValue(missilePrefix + _T(".targetId"));
+	auto missileIDValue = nomMsg->getValue(missilePrefix + _T(".missileId"));
+	auto xValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.x"));
+	auto yValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.y"));
+	auto zValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.z"));
+	if (!targetIDValue || !missileIDValue || !xValue || !yValue || !zValue)
+	{
+		return false;
+	}
+
+	mssInfo.targetId = targetIDValue->toUInt();
+	mssInfo.missileId = missileIDValue->toUInt();
+	mssInfo.x = xValue->toDouble();
+	mssInfo.y = yValue->toDouble();
+	mssInfo.z = zValue->toDouble();
+
+	return true;
+}
+
+void RSSManager::sendTargetDetection(uint32_t targetID, uint32_t success)
+{
+	auto nomMsg = meb->getNOMInstance(name, _T("InnerTargetDetectionToComm"));
+	if (!nomMsg.get())
+	{
+		ntcout << _T("[RSSManager] InnerTargetDetectionToComm NOM is undefined.") << std::endl;
+		return;
+	}
+
+	NUInteger target(targetID);
+	NUInteger result(success);
+	nomMsg->setValue(_T("targetID"), &target);
+	nomMsg->setValue(_T("targetDetectonSuccess"), &result);
+	sendMsg(nomMsg);
+}
+
+void RSSManager::sendTargetDestroyed(uint32_t targetID, uint32_t missionFlag)
+{
+	auto nomMsg = meb->getNOMInstance(name, _T("InnerTargetDestroyedToComm"));
+	if (!nomMsg.get())
+	{
+		ntcout << _T("[RSSManager] InnerTargetDestroyedToComm NOM is undefined.") << std::endl;
+		return;
+	}
+
+	NUInteger target(targetID);
+	NUInteger result(missionFlag);
+	nomMsg->setValue(_T("targetID"), &target);
+	nomMsg->setValue(_T("missionFlag"), &result);
+	sendMsg(nomMsg);
+}
+
+void RSSManager::sendATSInformationUplink(const CachedATSInfo& atsInfo)
+{
+	auto uplinkMsg = meb->getNOMInstance(name, _T("InnerATSInformationUplinkToComm"));
+	if (!uplinkMsg.get())
+	{
+		ntcout << _T("[RSSManager] InnerATSInformationUplinkToComm NOM is undefined.") << std::endl;
+		return;
+	}
+
+	NDouble x(atsInfo.x);
+	NDouble y(atsInfo.y);
+	NDouble z(atsInfo.z);
+	NUInteger speed(atsInfo.speed);
+	NUInteger targetId(atsInfo.targetId);
+	NUInteger atsStatus(atsInfo.atsStatus);
+
+	uplinkMsg->setValue(_T("matchedTarget.ATSPos.x"), &x);
+	uplinkMsg->setValue(_T("matchedTarget.ATSPos.y"), &y);
+	uplinkMsg->setValue(_T("matchedTarget.ATSPos.z"), &z);
+	uplinkMsg->setValue(_T("matchedTarget.speed"), &speed);
+	uplinkMsg->setValue(_T("matchedTarget.targetId"), &targetId);
+	uplinkMsg->setValue(_T("matchedTarget.atsStatus"), &atsStatus);
+	ntcout << _T("[RSSManager] ATSInformationUplink sent: targetId=") << atsInfo.targetId
+		<< _T(", atsStatus=") << atsInfo.atsStatus
+		<< _T(", pos=(") << atsInfo.x << _T(", ") << atsInfo.y << _T(", ") << atsInfo.z << _T(")")
+		<< _T(", speed=") << atsInfo.speed << std::endl;
+	sendMsg(uplinkMsg);
 }
 
 extern "C" BASEMGRDLL_API

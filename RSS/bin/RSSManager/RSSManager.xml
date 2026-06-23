@@ -3,7 +3,40 @@
 	<NOM:objects/>
 	<NOM:interactions>
 		<NOM:interaction name="InnerRSSStatusToComm" id="0x30" sharing="Publish" orderType="Receive" alignment="false">
-			<NOM:parameter name="status" dataType="intBE"/>
+			<NOM:parameter name="status" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerATSInformationToRSS" id="0x31" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetInfo" dataType="ATSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerMSSInformationToRSS" id="0x32" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="missileInfo" dataType="MSSInformationStruct" size="4"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerTargetDetectionToComm" id="0x33" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="targetDetectonSuccess" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerTargetDestroyedToComm" id="0x34" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="targetID" dataType="uintBE"/>
+			<NOM:parameter name="missionFlag" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerATSInformationUplinkToComm" id="0x35" sharing="Publish" orderType="Receive" alignment="false">
+			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerRSSDetectionAreaToRSS" id="0x36" sharing="Subscribe" orderType="Receive" alignment="false">
+			<NOM:parameter name="rssPos" dataType="PosStruct"/>
+			<NOM:parameter name="rssRadius" dataType="uintBE"/>
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStartSimulation" id="0x24" sharing="Subscribe" orderType="Receive" alignment="false">
+		</NOM:interaction>
+
+		<NOM:interaction name="InnerStopSimulation" id="0x27" sharing="Subscribe" orderType="Receive" alignment="false">
 		</NOM:interaction>
 	</NOM:interactions>
 	<NOM:dataTypes>

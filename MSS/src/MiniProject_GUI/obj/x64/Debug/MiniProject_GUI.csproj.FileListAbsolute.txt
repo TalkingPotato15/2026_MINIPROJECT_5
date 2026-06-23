@@ -1,0 +1,144 @@
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\bin\MiniProject_GUI.exe.config
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\bin\MiniProject_GUI.exe
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\bin\MiniProject_GUI.pdb
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\Users\worl6\Desktop\ATS\bin\MiniProject_GUI.exe.config
+C:\Users\worl6\Desktop\ATS\bin\MiniProject_GUI.exe
+C:\Users\worl6\Desktop\ATS\bin\MiniProject_GUI.pdb
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\Users\worl6\Desktop\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\LIG\MINIPROJECT_Example\ATS\bin\MiniProject_GUI.exe.config
+C:\LIG\MINIPROJECT_Example\ATS\bin\MiniProject_GUI.exe
+C:\LIG\MINIPROJECT_Example\ATS\bin\MiniProject_GUI.pdb
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\LIG\MINIPROJECT_Example\ATS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\LIG\2026_MINIPROJECT_5\RSS\bin\MiniProject_GUI.exe.config
+C:\LIG\2026_MINIPROJECT_5\RSS\bin\MiniProject_GUI.exe
+C:\LIG\2026_MINIPROJECT_5\RSS\bin\MiniProject_GUI.pdb
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\LIG\2026_MINIPROJECT_5\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\Users\User\Desktop\RSS\bin\MiniProject_GUI.exe.config
+C:\Users\User\Desktop\RSS\bin\MiniProject_GUI.exe
+C:\Users\User\Desktop\RSS\bin\MiniProject_GUI.pdb
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\Users\User\Desktop\RSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS\bin\MiniProject_GUI.exe.config
+C:\Users\User\Desktop\MSSS\bin\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS\bin\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS - 복사본\bin\MiniProject_GUI.exe.config
+C:\Users\User\Desktop\MSSS - 복사본\bin\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS - 복사본\bin\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\bin\MiniProject_GUI.exe.config
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\bin\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\bin\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS - 복사본 - 복사본 - 복사본\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS_v3\bin\MiniProject_GUI.exe.config
+C:\Users\User\Desktop\MSSS_v3\bin\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS_v3\bin\MiniProject_GUI.pdb
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MainWindow.g.cs
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\App.g.cs
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.cache
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI_MarkupCompile.lref
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MainWindow.baml
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.g.resources
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.Properties.Resources.resources
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.GenerateResource.cache
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProj.FD7D13ED.Up2Date
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.exe
+C:\Users\User\Desktop\MSSS_v3\src\MiniProject_GUI\obj\x64\Debug\MiniProject_GUI.pdb

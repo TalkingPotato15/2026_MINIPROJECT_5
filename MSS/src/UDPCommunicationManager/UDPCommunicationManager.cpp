@@ -192,6 +192,10 @@ void UDPCommunicationManager::sendExternalMsg(shared_ptr<NOM> nomMsg, const tstr
 		tcerr << _T("[COMM][TX][ERROR] null NOM, reason=") << reason << endl;
 		return;
 	}
+	if (nomMsg->getName() != _T("MSSStatus"))
+	{
+		return;
+	}
 
 	unsigned int payloadLength = 0;
 	if (auto value = nomMsg->getValue(_T("Header.MessageLength")))
@@ -360,7 +364,7 @@ void UDPCommunicationManager::funcMapInit()
 
 void UDPCommunicationManager::recvScenario(shared_ptr<NOM> nomMsg)
 {
-	tcout << _T("[COMM][BRIDGE] Scenario -> InnerSendScenario") << endl;
+	tcout << _T("[COMM][****BRIDGE****] Scenario -> InnerSendScenario") << endl;
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerSendScenario"));
 	if (!nomMsg_new.get())
 	{
@@ -416,7 +420,7 @@ void UDPCommunicationManager::recvATSInformationUplink(shared_ptr<NOM> nomMsg)
 {
 	auto targetId = nomMsg->getValue(_T("matchedTarget.targetId"));
 	auto atsStatus = nomMsg->getValue(_T("matchedTarget.atsStatus"));
-	tcout << _T("[COMM][BRIDGE] ATSInformationUplink -> InnerATSInformationToMSS targetId=")
+	tcout << _T("[COMM][****BRIDGE****] ATSInformationUplink -> InnerATSInformationToMSS targetId=")
 		<< (targetId ? targetId->toUInt() : 0)
 		<< _T(" atsStatus=") << (atsStatus ? atsStatus->toUInt() : 0) << endl;
 
@@ -444,7 +448,7 @@ void UDPCommunicationManager::recvIgnitionCommand(shared_ptr<NOM> nomMsg)
 {
 	auto missileId = nomMsg->getValue(_T("missileID"));
 	auto targetId = nomMsg->getValue(_T("targetID"));
-	tcout << _T("[COMM][BRIDGE] IgnitionCommand -> InnerIgnitionCommandToMSS missileID=")
+	tcout << _T("[COMM][****BRIDGE****] IgnitionCommand -> InnerIgnitionCommandToMSS missileID=")
 		<< (missileId ? missileId->toUInt() : 0)
 		<< _T(" targetID=") << (targetId ? targetId->toUInt() : 0) << endl;
 
@@ -568,12 +572,12 @@ void UDPCommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
 
 	if (value && value->toUInt() == 0)
 	{
-		tcout << _T("[COMM][BRIDGE] StartSimulation flag=0 -> InnerStopSimulation") << endl;
+		tcout << _T("[COMM][****BRIDGE****] StartSimulation flag=0 -> InnerStopSimulation") << endl;
 		recvStopSimulation(nomMsg);
 		return;
 	}
 
-	tcout << _T("[COMM][BRIDGE] StartSimulation -> InnerStartSimulation flag=")
+	tcout << _T("[COMM][****BRIDGE****] StartSimulation -> InnerStartSimulation flag=")
 		<< (value ? value->toUInt() : 1) << endl;
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStartSimulation"));
 
@@ -586,12 +590,12 @@ void UDPCommunicationManager::recvStop(shared_ptr<NOM> nomMsg)
 	{
 		if (value->toUInt() == 0)
 		{
-			tcout << _T("[COMM][BRIDGE] Stop ignored because stopFlag=0") << endl;
+			tcout << _T("[COMM][****BRIDGE****] Stop ignored because stopFlag=0") << endl;
 			return;
 		}
 	}
 
-	tcout << _T("[COMM][BRIDGE] Stop -> InnerStopSimulation") << endl;
+	tcout << _T("[COMM][****BRIDGE****] Stop -> InnerStopSimulation") << endl;
 	recvStopSimulation(nomMsg);
 }
 
@@ -661,8 +665,7 @@ void UDPCommunicationManager::recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg
 void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 {
 	auto statusMsg = meb->getNOMInstance(name, _T("MSSStatus"));
-	auto downlinkMsg = meb->getNOMInstance(name, _T("MSSInformationDownlinkToRSS"));
-	if (!statusMsg.get() || !downlinkMsg.get())
+	if (!statusMsg.get())
 	{
 		tcerr << _T("[UDPCommunicationManager] MSS output NOM is undefined.") << endl;
 		return;
@@ -713,38 +716,11 @@ void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 
 	copyMissileInfo(statusMsg);
 	sendExternalMsg(statusMsg, _T("periodic MSS status"));
-
-	NUShort downlinkMsgID((ushort)ICD_MessageID::MSSInformationDownlinkToRSS);
-	NUShort downlinkMsgLength(144);
-	downlinkMsg->setValue(_T("Header.MessageID"), &downlinkMsgID);
-	downlinkMsg->setValue(_T("Header.MessageLength"), &downlinkMsgLength);
-	copyMissileInfo(downlinkMsg);
-	sendExternalMsg(downlinkMsg, _T("periodic MSS downlink"));
 }
 
 void UDPCommunicationManager::recvInnerMSSInterceptionResultToComm(shared_ptr<NOM> nomMsg)
 {
-	auto resultMsg = meb->getNOMInstance(name, _T("MSSInterceptionResult"));
-	if (!resultMsg.get())
-	{
-		tcerr << _T("[UDPCommunicationManager] MSSInterceptionResult NOM is undefined.") << endl;
-		return;
-	}
-
-	NUShort msgID((ushort)ICD_MessageID::MSSInterceptionResult);
-	NUShort msgLength(8);
-	auto targetId = nomMsg->getValue(_T("targetID"));
-	auto missionFlag = nomMsg->getValue(_T("missionFlag"));
-	tcout << _T("[COMM][MSS] interception targetID=")
-		<< (targetId ? targetId->toUInt() : 0)
-		<< _T(" missionFlag=") << (missionFlag ? missionFlag->toUInt() : 0) << endl;
-	resultMsg->setValue(_T("Header.MessageID"), &msgID);
-	resultMsg->setValue(_T("Header.MessageLength"), &msgLength);
-
-	if (auto value = nomMsg->getValue(_T("targetID"))) resultMsg->setValue(_T("targetID"), value);
-	if (auto value = nomMsg->getValue(_T("missionFlag"))) resultMsg->setValue(_T("missionFlag"), value);
-
-	sendExternalMsg(resultMsg, _T("MSS interception result"));
+	(void)nomMsg;
 }
 
 void UDPCommunicationManager::sendInnerMsg(shared_ptr<NOM> nomMsg)
@@ -764,31 +740,6 @@ void UDPCommunicationManager::sendInnerMsg(shared_ptr<NOM> nomMsg)
 	{
 		tcerr << _T("[COMM][DISPATCH][WARN] no handler for ") << nomMsg->getName() << endl;
 	}
-}
-
-void UDPCommunicationManager::logPacketPreview(const unsigned char* data, int size)
-{
-	if (data == nullptr || size <= 0)
-	{
-		return;
-	}
-
-	const int previewSize = std::min(size, 32);
-	std::wostringstream preview;
-	preview << std::uppercase << std::hex << std::setfill(_T('0'));
-	for (int i = 0; i < previewSize; ++i)
-	{
-		if (i > 0) preview << _T(' ');
-		preview << std::setw(2) << static_cast<unsigned int>(data[i]);
-	}
-
-	tcout << _T("[COMM][RX][HEX] first=") << previewSize
-		<< _T(" bytes: ") << preview.str();
-	if (size > previewSize)
-	{
-		tcout << _T(" ...");
-	}
-	tcout << endl;
 }
 
 void
@@ -812,14 +763,12 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 	{
 		tcerr << _T("[COMM][RX][ERROR] packet shorter than header packetBytes=")
 			<< size << _T(" headerBytes=") << headerSize << endl;
-		logPacketPreview(data, size);
 		return;
 	}
 	if (IDPos + IDSize > static_cast<unsigned int>(size))
 	{
 		tcerr << _T("[COMM][RX][ERROR] message ID is outside packet idPos=")
 			<< IDPos << _T(" idSize=") << IDSize << _T(" packetBytes=") << size << endl;
-		logPacketPreview(data, size);
 		return;
 	}
 
@@ -835,7 +784,6 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 	else
 	{
 		tcerr << _T("[COMM][RX][ERROR] unsupported ID_SIZE=") << IDSize << endl;
-		logPacketPreview(data, size);
 		return;
 	}
 
@@ -865,8 +813,6 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 		<< _T(" packetBytes=") << size
 		<< _T(" declaredPayloadLength=") << declaredPayloadLength
 		<< _T(" expectedPacketBytes=") << (headerSize + declaredPayloadLength) << endl;
-	logPacketPreview(data, size);
-
 	if (declaredPayloadLength > 0 && headerSize + declaredPayloadLength != static_cast<unsigned int>(size))
 	{
 		tcerr << _T("[COMM][RX][WARN] header length mismatch: actual=") << size
