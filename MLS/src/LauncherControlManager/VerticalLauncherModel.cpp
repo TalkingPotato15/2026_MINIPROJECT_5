@@ -4,8 +4,6 @@
 
 void VerticalLauncherModel::init()
 {
-	std::cout << "[VerticalLauncherModel - init]\n";
-
 	simulationStatus = SIMULATION_STATUS::IDLE;
 
 	launcherInfo.missileStatus1 = MSS_STATUS::READY;
@@ -24,8 +22,6 @@ void VerticalLauncherModel::init()
 
 void VerticalLauncherModel::setting(POSITION pos)
 {
-	std::cout << std::format("[VerticalLauncherModel - setting] : {} {} {}\n", pos.x, pos.y, pos.z);
-
 	simulationStatus = SIMULATION_STATUS::READY;
 
 	launcherInfo.missileStatus1 = MSS_STATUS::READY;
@@ -42,13 +38,11 @@ void VerticalLauncherModel::setting(POSITION pos)
 
 void VerticalLauncherModel::start()
 {
-	std::cout << "[VerticalLauncherModel - start]\n";
 	simulationStatus = SIMULATION_STATUS::RUNNING;
 }
 
 void VerticalLauncherModel::stop()
 {
-	std::cout << "[VerticalLauncherModel - stop]\n";
 	init();
 }
 
@@ -67,8 +61,6 @@ int VerticalLauncherModel::fireMissile(unsigned int targetID)
 
 	if (launcherInfo.missileStatus1 == MSS_STATUS::READY)
 	{
-		std::cout << "[VerticalLauncherModel - fireMissile] : missileID = 1\n";
-
 		launcherInfo.missileStatus1 = MSS_STATUS::LAUNCHED;
 		currentStock -= 1;
 
@@ -76,8 +68,6 @@ int VerticalLauncherModel::fireMissile(unsigned int targetID)
 	}
 	else if (launcherInfo.missileStatus2 == MSS_STATUS::READY)
 	{
-		std::cout << "[VerticalLauncherModel - fireMissile] : currentID = 2\n";
-
 		launcherInfo.missileStatus2 = MSS_STATUS::LAUNCHED;
 		currentStock -= 1;
 
@@ -85,8 +75,6 @@ int VerticalLauncherModel::fireMissile(unsigned int targetID)
 	}
 	else if (launcherInfo.missileStatus3 == MSS_STATUS::READY)
 	{
-		std::cout << "[VerticalLauncherModel - fireMissile] : currentID = 3\n";
-
 		launcherInfo.missileStatus3 = MSS_STATUS::LAUNCHED;
 		currentStock -= 1;
 
@@ -94,8 +82,6 @@ int VerticalLauncherModel::fireMissile(unsigned int targetID)
 	}
 	else if (launcherInfo.missileStatus4 == MSS_STATUS::READY)
 	{
-		std::cout << "[VerticalLauncherModel - fireMissile] : currentID = 4\n";
-
 		launcherInfo.missileStatus4 = MSS_STATUS::LAUNCHED;
 		currentStock -= 1;
 

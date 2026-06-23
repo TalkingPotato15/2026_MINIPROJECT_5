@@ -7,19 +7,19 @@
 	<NOM:objects/>
 
 	<NOM:interactions>
-    <NOM:interaction name="InnerScenario" id="0x41" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Internal scenario distribution">
+    <NOM:interaction name="InnerScenario" id="0x41" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Receive Internal scenario(CommunicationManager to ScenarioManager)">
       <NOM:parameter name="mlsPos" dataType="PosStruct"/>
     </NOM:interaction>
-    <NOM:interaction name="InnerStartSimulation" id="0x42" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Internal start simulation command">
+    <NOM:interaction name="InnerStartSimulation" id="0x42" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Receive Internal start simulation command(CommunicationManager to ScenarioManager)">
     </NOM:interaction>
-    <NOM:interaction name="InnerStop" id="0x43" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Internal stop simulation command">
+    <NOM:interaction name="InnerStop" id="0x43" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Receive Internal stop simulation command(CommunicationManager to ScenarioManager)">
     </NOM:interaction>
-    <NOM:interaction name="InnerSettingScenario" id="0x45" sharing="Publish" orderType="Receive" alignment="false" semantics="Internal scenario distribution">
+    <NOM:interaction name="InnerSettingScenario" id="0x45" sharing="Publish" orderType="Receive" alignment="false" semantics="Send Internal scenario(ScenarioManager to LauncherControlManager)">
       <NOM:parameter name="mlsPos" dataType="PosStruct"/>
     </NOM:interaction>
-    <NOM:interaction name="InnerStartMLS" id="0x46" sharing="Publish" orderType="Receive" alignment="false" semantics="Internal start simulation command">
+    <NOM:interaction name="InnerStartMLS" id="0x46" sharing="Publish" orderType="Receive" alignment="false" semantics="Send Internal start simulation command(ScenarioManager to LauncherControlManager)">
     </NOM:interaction>
-    <NOM:interaction name="InnerStopMLS" id="0x47" sharing="Publish" orderType="Receive" alignment="false" semantics="Internal stop simulation command">
+    <NOM:interaction name="InnerStopMLS" id="0x47" sharing="Publish" orderType="Receive" alignment="false" semantics="Send Internal stop simulation command(ScenarioManager to LauncherControlManager)">
     </NOM:interaction>
 	</NOM:interactions>
 

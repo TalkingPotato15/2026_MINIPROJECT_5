@@ -7,21 +7,21 @@
 	<NOM:objects/>
 
 	<NOM:interactions>
-    <NOM:interaction name="InnerMLSStatus" id="0x40" sharing="Publish" orderType="Receive" alignment="false" semantics="Internal MLS status">
+    <NOM:interaction name="InnerMLSStatus" id="0x40" sharing="Publish" orderType="Receive" alignment="false" semantics="Send Internal MLS status(LauncherControlManager to CommunicationManager)">
       <NOM:parameter name="status" dataType="uintBE"/>
       <NOM:parameter name="launcherInfo" dataType="MLSInformationStruct"/>
     </NOM:interaction>
-    <NOM:interaction name="InnerLaunchCommand" id="0x44" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Internal launch command">
+    <NOM:interaction name="InnerLaunchCommand" id="0x44" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Receive Internal launch command(CommunicationManager to LauncherControlManager)">
       <NOM:parameter name="targetID" dataType="uintBE"/>
     </NOM:interaction>
-    <NOM:interaction name="InnerSettingScenario" id="0x45" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Internal scenario distribution">
+    <NOM:interaction name="InnerSettingScenario" id="0x45" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Receive Internal scenario(ScenarioManager to LauncherControlManager)">
       <NOM:parameter name="mlsPos" dataType="PosStruct"/>
     </NOM:interaction>
-    <NOM:interaction name="InnerStartMLS" id="0x46" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Internal start simulation command">
+    <NOM:interaction name="InnerStartMLS" id="0x46" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Receive Internal start simulation command(ScenarioManager to LauncherControlManager)">
     </NOM:interaction>
-    <NOM:interaction name="InnerStopMLS" id="0x47" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Internal stop simulation command">
+    <NOM:interaction name="InnerStopMLS" id="0x47" sharing="Subscribe" orderType="Receive" alignment="false" semantics="Receive Internal stop simulation command(ScenarioManager to LauncherControlManager)">
     </NOM:interaction>
-    <NOM:interaction name="InnerIgnitionCommand" id="0x48" sharing="Publish" orderType="Receive" alignment="false" semantics="Internal ignition command">
+    <NOM:interaction name="InnerIgnitionCommand" id="0x48" sharing="Publish" orderType="Receive" alignment="false" semantics="Send Internal ignition command(LauncherControlManager to CommunicationManager)">
       <NOM:parameter name="missileID" dataType="uintBE"/>
       <NOM:parameter name="targetID" dataType="uintBE"/>
       <NOM:parameter name="launchPos" dataType="PosStruct"/>
