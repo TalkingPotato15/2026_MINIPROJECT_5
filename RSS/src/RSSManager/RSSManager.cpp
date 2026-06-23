@@ -84,7 +84,7 @@ void RSSManager::sendRSSStatus()
 		return;
 	}
 
-	NUInteger status(1);
+	NInteger status(1);
 	rssStatusNOM->setValue(_T("status"), &status);
 
 	sendMsg(rssStatusNOM);
