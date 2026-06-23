@@ -44,7 +44,6 @@ private:
 	void release();
 	void sendInnerMsg(shared_ptr<NOM> nomMsg);
 	void sendExternalMsg(shared_ptr<NOM> nomMsg, const tstring& reason);
-	void logPacketPreview(const unsigned char* data, int size);
 	void funcMapInit();
 
 private:

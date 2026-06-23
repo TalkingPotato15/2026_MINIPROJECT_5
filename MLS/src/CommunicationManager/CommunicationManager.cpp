@@ -1,5 +1,8 @@
 #include "CommunicationManager.h"
 #include <filesystem>
+#include <format>
+#include <iostream>
+
 using namespace std::filesystem;
 
 /************************************************************************
@@ -232,9 +235,15 @@ CommunicationManager::recvSendScenario(shared_ptr<NOM> nomMsg)
 {
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerScenario"));
 
-	nomMsg_new->setValue(_T("mlsPos.x"), &(NDouble)(nomMsg->getValue(_T("mlsPos.x"))->toDouble()));
-	nomMsg_new->setValue(_T("mlsPos.y"), &(NDouble)(nomMsg->getValue(_T("mlsPos.y"))->toDouble()));
-	nomMsg_new->setValue(_T("mlsPos.z"), &(NDouble)(nomMsg->getValue(_T("mlsPos.z"))->toDouble()));
+	double mlsPosX = nomMsg->getValue(_T("mlsPos.x"))->toDouble();
+	double mlsPosY = nomMsg->getValue(_T("mlsPos.y"))->toDouble();
+	double mlsPosZ = nomMsg->getValue(_T("mlsPos.z"))->toDouble();
+
+	nomMsg_new->setValue(_T("mlsPos.x"), &(NDouble)mlsPosX);
+	nomMsg_new->setValue(_T("mlsPos.y"), &(NDouble)mlsPosY);
+	nomMsg_new->setValue(_T("mlsPos.z"), &(NDouble)mlsPosZ);
+
+	std::cout << std::format("[recvSendScenario] x = {}, y = {}, z = {}\n", mlsPosX, mlsPosY, mlsPosZ);
 
 	this->sendMsg(nomMsg_new);
 }
@@ -244,6 +253,9 @@ CommunicationManager::recvStartSimulation(shared_ptr<NOM> nomMsg)
 {
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStartSimulation"));
 
+	unsigned int startFlag = nomMsg->getValue(_T("startFlag"))->toUInt();
+	std::cout << std::format("[recvStartSimulation] startFlag = {}\n", startFlag);
+
 	this->sendMsg(nomMsg_new);
 }
 
@@ -251,6 +263,9 @@ void
 CommunicationManager::recvStopSimulation(shared_ptr<NOM> nomMsg)
 {
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerStop"));
+
+	unsigned int stopFlag = nomMsg->getValue(_T("stopFlag"))->toUInt();
+	std::cout << std::format("[recvStopSimulation] stopFlag = {}\n", stopFlag);
 
 	this->sendMsg(nomMsg_new);
 }
@@ -260,7 +275,10 @@ CommunicationManager::recvLaunchCommand(shared_ptr<NOM> nomMsg)
 {
 	auto nomMsg_new = meb->getNOMInstance(name, _T("InnerLaunchCommand"));
 
-	nomMsg_new->setValue(_T("targetID"), &(NUInteger)(nomMsg->getValue(_T("targetID"))->toUInt()));
+	unsigned int targetID = nomMsg->getValue(_T("targetID"))->toUInt();
+	nomMsg_new->setValue(_T("targetID"), &(NUInteger)targetID);
+
+	std::cout << std::format("[recvLaunchCommand] targetID = {}\n", targetID);
 	
 	this->sendMsg(nomMsg_new);
 }
@@ -270,17 +288,30 @@ CommunicationManager::recvInnerMLSStatus(shared_ptr<NOM> nomMsg)
 {
 	auto sendNewMsg = meb->getNOMInstance(name, _T("MLSStatus"));
 
+	unsigned int status = nomMsg->getValue(_T("status"))->toUInt();
+	unsigned int missileStatus1 = nomMsg->getValue(_T("launcherInfo.missileStatus1"))->toUInt();
+	unsigned int missileStatus2 = nomMsg->getValue(_T("launcherInfo.missileStatus2"))->toUInt();
+	unsigned int missileStatus3 = nomMsg->getValue(_T("launcherInfo.missileStatus3"))->toUInt();
+	unsigned int missileStatus4 = nomMsg->getValue(_T("launcherInfo.missileStatus4"))->toUInt();
+	unsigned int missileStock = nomMsg->getValue(_T("launcherInfo.missileStock"))->toUInt();
+
 	sendNewMsg->setValue(_T("Header.MessageID"), &NUShort(0x05));
 	sendNewMsg->setValue(_T("Header.MessageLength"), &NUShort(28));
 
-	sendNewMsg->setValue(_T("status"), &NUInteger(nomMsg->getValue(_T("status"))->toUInt()));
-	sendNewMsg->setValue(_T("launcherInfo.missileStatus1"), &(NUInteger)(nomMsg->getValue(_T("launcherInfo.missileStatus1"))->toUInt()));
-	sendNewMsg->setValue(_T("launcherInfo.missileStatus2"), &(NUInteger)(nomMsg->getValue(_T("launcherInfo.missileStatus2"))->toUInt()));
-	sendNewMsg->setValue(_T("launcherInfo.missileStatus3"), &(NUInteger)(nomMsg->getValue(_T("launcherInfo.missileStatus3"))->toUInt()));
-	sendNewMsg->setValue(_T("launcherInfo.missileStatus4"), &(NUInteger)(nomMsg->getValue(_T("launcherInfo.missileStatus4"))->toUInt()));
-	sendNewMsg->setValue(_T("launcherInfo.missileStock"), &(NUInteger)(nomMsg->getValue(_T("launcherInfo.missileStock"))->toUInt()));
+	sendNewMsg->setValue(_T("status"), &(NUInteger)status);
+	sendNewMsg->setValue(_T("launcherInfo.missileStatus1"), &(NUInteger)missileStatus1);
+	sendNewMsg->setValue(_T("launcherInfo.missileStatus2"), &(NUInteger)missileStatus2);
+	sendNewMsg->setValue(_T("launcherInfo.missileStatus3"), &(NUInteger)missileStatus3);
+	sendNewMsg->setValue(_T("launcherInfo.missileStatus4"), &(NUInteger)missileStatus4);
+	sendNewMsg->setValue(_T("launcherInfo.missileStock"), &(NUInteger)missileStock);
 
-	tcout << _T("[CommunicationManager] Sending MLSStatus to network\n");
+	std::cout << std::format("[MLSStatus] status = {}, missileStatus1 = {}, missileStatus2 = {}, missileStatus3 = {}, missileStatus4 = {}, missileStock = {}\n",
+		status,
+		missileStatus1,
+		missileStatus2,
+		missileStatus3,
+		missileStatus4,
+		missileStock);
 	commInterface->sendCommMsg(sendNewMsg);
 }
 
@@ -288,23 +319,27 @@ void CommunicationManager::recvInnerIgnitionCommand(shared_ptr<NOM> nomMsg)
 {
 	auto sendNewMsg = meb->getNOMInstance(name, _T("IgnitionCommand"));
 
-	NUShort messageID(0x0a);
-	NUShort messageLength(36);
-	NUInteger missileID(nomMsg->getValue(_T("missileID"))->toUInt());
-	NUInteger targetID(nomMsg->getValue(_T("targetID"))->toUInt());
-	NDouble launchPosX(nomMsg->getValue(_T("launchPos.x"))->toDouble());
-	NDouble launchPosY(nomMsg->getValue(_T("launchPos.y"))->toDouble());
-	NDouble launchPosZ(nomMsg->getValue(_T("launchPos.z"))->toDouble());
+	unsigned int missileID = nomMsg->getValue(_T("missileID"))->toUInt();
+	unsigned int targetID = nomMsg->getValue(_T("targetID"))->toUInt();
+	double launchPosX = nomMsg->getValue(_T("launchPos.x"))->toDouble();
+	double launchPosY = nomMsg->getValue(_T("launchPos.y"))->toDouble();
+	double launchPosZ = nomMsg->getValue(_T("launchPos.z"))->toDouble();
 
-	sendNewMsg->setValue(_T("Header.MessageID"), &messageID);
-	sendNewMsg->setValue(_T("Header.MessageLength"), &messageLength);
-	sendNewMsg->setValue(_T("missileID"), &missileID);
-	sendNewMsg->setValue(_T("targetID"), &targetID);
-	sendNewMsg->setValue(_T("launchPos.x"), &launchPosX);
-	sendNewMsg->setValue(_T("launchPos.y"), &launchPosY);
-	sendNewMsg->setValue(_T("launchPos.z"), &launchPosZ);
+	sendNewMsg->setValue(_T("Header.MessageID"), &NUShort(0x0a));
+	sendNewMsg->setValue(_T("Header.MessageLength"), &NUShort(36));
 
-	tcout << _T("[CommunicationManager] Sending IgnitionCommand to network\n");
+	sendNewMsg->setValue(_T("missileID"), &(NUInteger)missileID);
+	sendNewMsg->setValue(_T("targetID"), &(NUInteger)targetID);
+	sendNewMsg->setValue(_T("launchPos.x"), &(NDouble)launchPosX);
+	sendNewMsg->setValue(_T("launchPos.y"), &(NDouble)launchPosY);
+	sendNewMsg->setValue(_T("launchPos.z"), &(NDouble)launchPosZ);
+
+	std::cout << std::format("[IgnitionCommand] missileID = {}, targetID = {}, x = {}, y = {}, z = {}\n",
+		missileID,
+		targetID,
+		launchPosX,
+		launchPosY,
+		launchPosZ);
 	commInterface->sendCommMsg(sendNewMsg);
 }
 

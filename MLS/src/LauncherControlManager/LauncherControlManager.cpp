@@ -109,7 +109,7 @@ LauncherControlManager::sendMsg(std::shared_ptr < NOM > nomMsg)
 void
 LauncherControlManager::recvMsg(std::shared_ptr < NOM > nomMsg)
 {
-	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
+	//tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
 
 	if (auto iter = msgFuncMap.find(nomMsg->getName()); iter != msgFuncMap.end())
 	{
@@ -247,30 +247,11 @@ void LauncherControlManager::sendInnerIgnitionCommand(unsigned int missileID, un
 	std::shared_ptr<NOM> sendNewMsg = meb->getNOMInstance(name, _T("InnerIgnitionCommand"));
 	POSITION launchPos = launcherModel->currentPosition();
 
-	NUInteger missileIDValue(missileID);
-	NUInteger targetIDValue(targetID);
-	NDouble launchPosX(launchPos.x);
-	NDouble launchPosY(launchPos.y);
-	NDouble launchPosZ(launchPos.z);
-
-	sendNewMsg->setValue(_T("missileID"), &missileIDValue);
-	sendNewMsg->setValue(_T("targetID"), &targetIDValue);
-	sendNewMsg->setValue(_T("launchPos.x"), &launchPosX);
-	sendNewMsg->setValue(_T("launchPos.y"), &launchPosY);
-	sendNewMsg->setValue(_T("launchPos.z"), &launchPosZ);
-
-	tcout << _T("[LauncherControlManager] Publishing InnerIgnitionCommand: missileID=")
-		<< missileID
-		<< _T(", targetID=")
-		<< targetID
-		<< _T(", launchPos=(")
-		<< launchPos.x
-		<< _T(", ")
-		<< launchPos.y
-		<< _T(", ")
-		<< launchPos.z
-		<< _T(")")
-		<< std::endl;
+	sendNewMsg->setValue(_T("missileID"), &(NUInteger)missileID);
+	sendNewMsg->setValue(_T("targetID"), &(NUInteger)targetID);
+	sendNewMsg->setValue(_T("launchPos.x"), &(NDouble)launchPos.x);
+	sendNewMsg->setValue(_T("launchPos.y"), &(NDouble)launchPos.y);
+	sendNewMsg->setValue(_T("launchPos.z"), &(NDouble)launchPos.z);
 
 	sendMsg(sendNewMsg);
 }
@@ -289,21 +270,12 @@ void LauncherControlManager::simulatePeriodic()
 
 	SIMULATION_STATUS simulationStatus = mlsStatus.simulationStatus;
 
-	NUInteger status(static_cast<unsigned int>(simulationStatus));
-	NUInteger missileStatus1(static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus1));
-	NUInteger missileStatus2(static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus2));
-	NUInteger missileStatus3(static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus3));
-	NUInteger missileStatus4(static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus4));
-	NUInteger missileStock(mlsStatus.missileStock);
-	msg->setValue(_T("status"), &status);
-	msg->setValue(_T("launcherInfo.missileStatus1"), &missileStatus1);
-	msg->setValue(_T("launcherInfo.missileStatus2"), &missileStatus2);
-	msg->setValue(_T("launcherInfo.missileStatus3"), &missileStatus3);
-	msg->setValue(_T("launcherInfo.missileStatus4"), &missileStatus4);
-	msg->setValue(_T("launcherInfo.missileStock"), &missileStock);
-
-	tcout << _T("[LauncherControlManager] Publishing InnerMLSStatus: status=")
-		<< static_cast<unsigned int>(simulationStatus) << std::endl;
+	msg->setValue(_T("status"), &(NUInteger)(static_cast<unsigned int>(simulationStatus)));
+	msg->setValue(_T("launcherInfo.missileStatus1"), &(NUInteger)static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus1));
+	msg->setValue(_T("launcherInfo.missileStatus2"), &(NUInteger)static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus2));
+	msg->setValue(_T("launcherInfo.missileStatus3"), &(NUInteger)static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus3));
+	msg->setValue(_T("launcherInfo.missileStatus4"), &(NUInteger)static_cast<unsigned int>(mlsStatus.launcherInfo.missileStatus4));
+	msg->setValue(_T("launcherInfo.missileStock"), &(NUInteger)mlsStatus.missileStock);
 
 	sendMsg(msg);
 }

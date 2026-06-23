@@ -1,0 +1,717 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(516,5): warning MSB8004: Intermediate 디렉터리가 슬래시로 끝나지 않습니다. Intermediate 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8004: Output 디렉터리가 슬래시로 끝나지 않습니다. Output 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
+  RTICommunicationManager.cpp
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(85,38): warning C4275: DLL 인터페이스가 아닌 class 'nframework::log4nf::IAppender'이(가) DLL 인터페이스 class 'nframework::log4nf::FileAppender'의 기본으로 사용되었습니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\IAppender.h(59,8):
+      'nframework::log4nf::IAppender' 선언을 참조하십시오.
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(85,17):
+      'nframework::log4nf::FileAppender' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(101,33): warning C4251: 'nframework::log4nf::FileAppender::fileSizeStatus_': 'std::pair<uint64_t,uint64_t>'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\utility(235,8):
+      'std::pair<uint64_t,uint64_t>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(103,14): warning C4251: 'nframework::log4nf::FileAppender::config_': 'nframework::log4nf::FileConfig'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(18,9):
+      'nframework::log4nf::FileConfig' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(105,13): warning C4251: 'nframework::log4nf::FileAppender::outputFile_': 'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\fstream(177,7):
+      'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\FileAppender.h(106,14): warning C4251: 'nframework::log4nf::FileAppender::mutex_': 'std::mutex'에서는 'nframework::log4nf::FileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\mutex(98,19):
+      'std::mutex' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(88,42): warning C4275: DLL 인터페이스가 아닌 class 'nframework::log4nf::IAppender'이(가) DLL 인터페이스 class 'nframework::log4nf::HTMLFileAppender'의 기본으로 사용되었습니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\IAppender.h(59,8):
+      'nframework::log4nf::IAppender' 선언을 참조하십시오.
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(88,17):
+      'nframework::log4nf::HTMLFileAppender' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(106,33): warning C4251: 'nframework::log4nf::HTMLFileAppender::fileSizeStatus_': 'std::pair<uint64_t,uint64_t>'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\utility(235,8):
+      'std::pair<uint64_t,uint64_t>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(109,18): warning C4251: 'nframework::log4nf::HTMLFileAppender::config_': 'nframework::log4nf::HTMLFileConfig'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(18,9):
+      'nframework::log4nf::HTMLFileConfig' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(111,13): warning C4251: 'nframework::log4nf::HTMLFileAppender::outputFile_': 'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\fstream(177,7):
+      'std::basic_ofstream<wchar_t,std::char_traits<wchar_t>>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(112,14): warning C4251: 'nframework::log4nf::HTMLFileAppender::mutex_': 'std::mutex'에서는 'nframework::log4nf::HTMLFileAppender'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\mutex(98,19):
+      'std::mutex' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Logger\LogConfiguration.h(33,30): warning C4251: 'nframework::log4nf::LogConfiguration::sections_': 'std::map<tstring,nframework::log4nf::LogConfiguration::SECTION,std::less<tstring>,std::allocator<std::pair<const tstring,nframework::log4nf::LogConfiguration::SECTION>>>'에서는 'nframework::log4nf::LogConfiguration'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\map(72,7):
+      'std::map<tstring,nframework::log4nf::LogConfiguration::SECTION,std::less<tstring>,std::allocator<std::pair<const tstring,nframework::log4nf::LogConfiguration::SECTION>>>' 선언을 참조하십시오.
+  
+C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Loggable.h(123,33): warning C4251: 'nframework::log4nf::Loggable::adapter_': 'std::shared_ptr<nframework::log4nf::LoggerAdapter>'에서는 'nframework::log4nf::Loggable'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\memory(1560,7):
+      'std::shared_ptr<nframework::log4nf::LoggerAdapter>' 선언을 참조하십시오.
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\ucrt\tchar.h(2320,9): warning C4005: '_T': 매크로 재정의
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+      C:\Nex1\nFrameworkv1.8.3\include\nFramework\Log4nF\Values\LogLevel.hpp(24,9):
+      '_T'의 이전 정의를 참조하십시오.
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(98,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(99,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(100,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(101,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(102,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(103,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(104,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(105,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\Handle.h(106,1): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(53,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(58,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(63,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(68,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(73,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(78,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(83,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(88,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(97,15): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(101,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTime.h(106,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeFactory.h(49,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeFactory.h(55,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(53,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(60,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(65,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(70,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(75,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(80,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(85,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(90,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(95,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(104,15): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(108,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\LogicalTimeInterval.h(113,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(28,15): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(39,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(45,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(52,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(58,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(64,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(71,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(79,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(84,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(93,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(99,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(104,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(110,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(117,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(125,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(130,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(138,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(148,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(155,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(162,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(169,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(181,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(188,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(198,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(211,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(225,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(240,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(256,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(272,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(290,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(305,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(319,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(334,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(350,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(366,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(384,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(396,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(406,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(417,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(427,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(438,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(450,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(461,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(472,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(488,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(500,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(513,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(526,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(539,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(550,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(562,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(570,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(578,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(590,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(598,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(606,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\FederateAmbassador.h(614,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(43,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(52,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(61,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(71,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(80,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(89,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(97,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(106,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(114,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(124,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(131,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(137,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(144,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(151,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(158,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(164,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(171,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(183,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(193,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(203,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(214,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(223,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(234,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(244,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(253,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(264,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(274,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(287,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(296,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(306,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(320,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(333,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(347,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(360,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(373,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(384,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(395,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(408,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(420,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(432,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(443,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(457,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(470,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(484,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(499,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(513,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(529,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(541,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(554,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(567,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(578,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(592,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(603,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(611,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(621,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(630,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(643,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(656,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(669,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(682,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(694,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(702,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(710,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(717,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(724,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(732,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(742,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(751,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(764,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(776,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(790,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(799,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(809,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(822,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(839,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(858,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(873,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(888,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(903,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(917,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(931,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(945,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(962,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(979,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(996,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1003,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1011,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1020,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1029,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1036,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1044,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1053,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1062,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1069,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1076,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1083,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1090,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1098,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1107,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1114,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1121,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1128,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1135,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1142,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1148,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1156,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1164,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1172,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1180,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1188,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1196,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1204,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1214,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1225,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1237,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1249,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1256,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1275,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1281,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1286,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassador.h(1293,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+C:\Nex1\nRTI\include\RTI\RTIambassadorFactory.h(38,14): warning C5040: 동적 예외 사양은 C++14 및 이전 버전에서만 유효합니다. noexcept(false)로 취급합니다.
+  (소스 파일 'RTICommunicationManager.cpp'을(를) 컴파일하는 중)
+  
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1392,5): warning MSB8012: TargetPath(C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\lib\RTICommunicationManager.dll)이(가) Linker의 OutputFile 속성 값(C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\bin\RTICommunicationManager\RTICommunicationManagerd.dll)과 일치하지 않습니다. 이로 인해 프로젝트가 잘못 빌드될 수 있습니다. 이를 수정하려면 $(OutDir), $(TargetName) 및 $(TargetExt) 속성 값이 %(Link.OutputFile)에 지정된 값과 일치해야 합니다.
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1394,5): warning MSB8012: TargetName(RTICommunicationManager)이(가) Linker의 OutputFile 속성 값(RTICommunicationManagerd)과 일치하지 않습니다. 이로 인해 프로젝트가 잘못 빌드될 수 있습니다. 이를 수정하려면 $(OutDir), $(TargetName) 및 $(TargetExt) 속성 값이 %(Link.OutputFile)에 지정된 값과 일치해야 합니다.
+RTICommunicationManager.obj : warning LNK4075: '/EDITANDCONTINUE'이(가) '/INCREMENTAL:NO' 사양으로 인해 무시됩니다.
+     C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\lib\RTICommunicationManagerd.lib 라이브러리 및 C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\lib\RTICommunicationManagerd.exp 개체를 생성하고 있습니다.
+  RTICommunicationManager.vcxproj -> C:\Nex1\nFrameworkv1.8.3\examples\MiniProject_x64_vc143\lib\RTICommunicationManager.dll

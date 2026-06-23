@@ -99,14 +99,14 @@ ScenarioManager::removeMsg(std::shared_ptr < NOM > nomMsg)
 void
 ScenarioManager::sendMsg(std::shared_ptr < NOM > nomMsg)
 {
-	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
+	//tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
 	mec->sendMsg(nomMsg);
 }
 
 void
 ScenarioManager::recvMsg(std::shared_ptr < NOM > nomMsg)
 {
-	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
+	//tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
 
 	if (auto iter = msgFuncMap.find(nomMsg->getName()); iter != msgFuncMap.end())
 	{
@@ -185,9 +185,7 @@ ScenarioManager::inputScenario(std::shared_ptr<NOM> nomMsg)
 	msg->setValue(_T("mlsPos.x"), &NDouble(scenarioPos.x));
 	msg->setValue(_T("mlsPos.y"), &NDouble(scenarioPos.y));
 	msg->setValue(_T("mlsPos.z"), &NDouble(scenarioPos.z));
-
-	std::cout << std::format("[ScenarioManager::inputScenario] : {} {} {}\n", scenarioPos.x, scenarioPos.y, scenarioPos.z);
-
+	
 	sendMsg(msg);
 }
 
@@ -197,8 +195,6 @@ ScenarioManager::startScenario(std::shared_ptr<NOM> nomMsg)
 	// LauncherControlManager로 전송
 	std::shared_ptr<NOM> msg = meb->getNOMInstance(name, _T("InnerStartMLS"));
 
-	std::cout << "[ScenarioManager::startScenario]\n";
-
 	sendMsg(msg);
 }
 
@@ -207,8 +203,6 @@ ScenarioManager::stopScenario(std::shared_ptr<NOM> nomMsg)
 {
 	// LauncherControlManager로 전송
 	std::shared_ptr<NOM> msg = meb->getNOMInstance(name, _T("InnerStopMLS"));
-
-	std::cout << "[ScenarioManager::stopScenario]\n";
 
 	sendMsg(msg);
 }
