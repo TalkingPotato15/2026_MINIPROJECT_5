@@ -2,26 +2,11 @@
 <NOM:Nex1ObjectModel xmlns:NOM="lignex1.sw.nframework.NOM"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="lignex1.sw.nframework.NOM NOM.xsd"
-   version="0.1" name="LauncherControlManager" date="2026-06-18" author="SAMS OC">
+   version="0.1" name="LauncherControlManager" date="2026-06-18" author="SAMS MLS">
 
 	<NOM:objects/>
 
 	<NOM:interactions>
-    <NOM:interaction name="LaunchCommand" id="0x09" sharing="PublishSubscribe" orderType="Receive" alignment="false" semantics="SAMS launch command">
-      <NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-      <NOM:parameter name="targetID" dataType="uintBE"/>
-    </NOM:interaction>
-    <NOM:interaction name="IgnitionCommand" id="0x0a" sharing="PublishSubscribe" orderType="Receive" alignment="false" semantics="SAMS ignition command">
-      <NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-      <NOM:parameter name="missileID" dataType="uintBE"/>
-      <NOM:parameter name="targetID" dataType="uintBE"/>
-      <NOM:parameter name="launchPos" dataType="PosStruct"/>
-    </NOM:interaction>
-    <NOM:interaction name="Stop" id="0x10" sharing="PublishSubscribe" orderType="Receive" alignment="false" semantics="SAMS stop simulation command">
-      <NOM:parameter name="Header" dataType="MessageHeaderStruct"/>
-      <NOM:parameter name="stopFlag" dataType="uintBE"/>
-    </NOM:interaction>
-
     <NOM:interaction name="InnerMLSStatus" id="0x40" sharing="Publish" orderType="Receive" alignment="false" semantics="Internal MLS status">
       <NOM:parameter name="status" dataType="uintBE"/>
       <NOM:parameter name="launcherInfo" dataType="MLSInformationStruct"/>
@@ -41,7 +26,6 @@
       <NOM:parameter name="targetID" dataType="uintBE"/>
       <NOM:parameter name="launchPos" dataType="PosStruct"/>
     </NOM:interaction>
-    
   </NOM:interactions>
 
 	<NOM:dataTypes>
