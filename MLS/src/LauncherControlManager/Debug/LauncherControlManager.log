@@ -2,22 +2,22 @@
 C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8004: Output 디렉터리가 슬래시로 끝나지 않습니다. Output 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
   LauncherControlManager.cpp
 C:\LIG\nFrameworkv1.8.2\include\nFramework\util\IniHandler.h(251,12): warning C4251: 'IniHandler::m_strIniFilePath': 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>'에서는 'IniHandler'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
-  (소스 파일 'LauncherControlManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../LauncherControlManager/LauncherControlManager.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\xstring(527,7):
       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>' 선언을 참조하십시오.
   
 C:\LIG\nFrameworkv1.8.2\include\nFramework\util\IniHandler.h(252,12): warning C4251: 'IniHandler::m_iniEncodingType': 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>'에서는 'IniHandler'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
-  (소스 파일 'LauncherControlManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../LauncherControlManager/LauncherControlManager.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\xstring(527,7):
       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>' 선언을 참조하십시오.
   
 C:\LIG\nFrameworkv1.8.2\include\nFramework\util\IniHandler.h(261,23): warning C4251: 'IniHandler::m_iniContentList': 'std::list<IniHandler::STContent,std::allocator<IniHandler::STContent>>'에서는 'IniHandler'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
-  (소스 파일 'LauncherControlManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../LauncherControlManager/LauncherControlManager.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\list(755,7):
       'std::list<IniHandler::STContent,std::allocator<IniHandler::STContent>>' 선언을 참조하십시오.
   
 C:\LIG\nFrameworkv1.8.2\include\nFramework\util\IniHandler.h(281,14): warning C4251: 'IniHandler::m_mapSection': 'std::map<tstring,IniHandler::STSection,std::less<tstring>,std::allocator<std::pair<const tstring,IniHandler::STSection>>>'에서는 'IniHandler'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
-  (소스 파일 'LauncherControlManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../LauncherControlManager/LauncherControlManager.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\map(72,7):
       'std::map<tstring,IniHandler::STSection,std::less<tstring>,std::allocator<std::pair<const tstring,IniHandler::STSection>>>' 선언을 참조하십시오.
   

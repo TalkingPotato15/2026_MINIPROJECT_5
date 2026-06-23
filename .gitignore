@@ -27,3 +27,5 @@ ATS/bin/UIManager/GUIToUser.ini
 ATS/bin/UIManager/NOM.xsd
 ATS/bin/UIManager/UIManager.xml
 ATS/bin/UIManager/UserToGUI.ini
+
+*.bmp
