@@ -276,10 +276,23 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		if (inRange)
+		if (!inRange)
 		{
-			detectionManager.updateDetectedTarget(atsInfo);
+			auto cachedTarget = detectionManager.findDetectedTarget(atsInfo.targetId);
+			if (cachedTarget != nullptr)
+			{
+				CachedATSInfo lastDetectedTarget = *cachedTarget;
+				ntcout << _T("[RSSManager] Target left RSS range: targetId=") << atsInfo.targetId
+					<< _T(", lastPos=(") << lastDetectedTarget.x << _T(", ")
+					<< lastDetectedTarget.y << _T(", ") << lastDetectedTarget.z << _T(")") << std::endl;
+				detectionManager.removeDetectedTarget(atsInfo.targetId);
+				sendTargetDetection(atsInfo.targetId, 0);
+				sendATSInformationUplink(lastDetectedTarget);
+			}
+			continue;
 		}
+
+		detectionManager.updateDetectedTarget(atsInfo);
 
 		auto cachedTarget = detectionManager.findDetectedTarget(atsInfo.targetId);
 		if (cachedTarget != nullptr)
@@ -306,6 +319,11 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 		}
 
 		if (mssInfo.targetId == 0 || detonationManager.isDestroyed(mssInfo.targetId))
+		{
+			continue;
+		}
+
+		if (!detectionManager.isDetected(mssInfo.targetId))
 		{
 			continue;
 		}
