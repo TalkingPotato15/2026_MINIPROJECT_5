@@ -348,7 +348,7 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			ntcout << _T("[RSSManager] Target intercepted: targetId=") << mssInfo.targetId
 				<< _T(", missileId=") << mssInfo.missileId
 				<< _T(", distance=") << distance << std::endl;
-			sendTargetDestroyed(mssInfo.targetId, 1);
+			sendTargetDestroyed(mssInfo.targetId, 0);
 			detonationManager.markDestroyed(mssInfo.targetId);
 			continue;
 		}
