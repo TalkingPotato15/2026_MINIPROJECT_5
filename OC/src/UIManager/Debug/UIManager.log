@@ -310,6 +310,7 @@ C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\src\UIManager\ATSMessagePro
   (소스 파일 'NOMMessageHandler.cpp'을(를) 컴파일하는 중)
   
   UIManager.cpp
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
   코드를 생성하고 있습니다...
 C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1392,5): warning MSB8012: TargetPath(C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\lib\UIManager.dll)이(가) Linker의 OutputFile 속성 값(C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\bin\UIManager\UIManagerd.dll)과 일치하지 않습니다. 이로 인해 프로젝트가 잘못 빌드될 수 있습니다. 이를 수정하려면 $(OutDir), $(TargetName) 및 $(TargetExt) 속성 값이 %(Link.OutputFile)에 지정된 값과 일치해야 합니다.
 C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1394,5): warning MSB8012: TargetName(UIManager)이(가) Linker의 OutputFile 속성 값(UIManagerd)과 일치하지 않습니다. 이로 인해 프로젝트가 잘못 빌드될 수 있습니다. 이를 수정하려면 $(OutDir), $(TargetName) 및 $(TargetExt) 속성 값이 %(Link.OutputFile)에 지정된 값과 일치해야 합니다.

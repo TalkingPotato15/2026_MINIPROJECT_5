@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace MiniProject_GUI
 {
@@ -25,6 +26,8 @@ namespace MiniProject_GUI
                 typeof(string),
                 typeof(ScenarioWindow),
                 new PropertyMetadata("0"));
+
+        private bool isRestoringText;
 
         public ScenarioWindow()
         {
@@ -54,11 +57,17 @@ namespace MiniProject_GUI
         private void ScenarioNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (sender is not TextBox textBox || !HasValidationTag(textBox)) return;
+            if (isRestoringText) return;
 
             if (ValidateInput(textBox, textBox.Text, allowIntermediate: false, showWarning: false))
             {
                 textBox.SetValue(LastValidTextProperty, textBox.Text);
+                return;
             }
+
+            if (IsIntermediateNumber(textBox.Text)) return;
+
+            RestoreLastValidText(textBox);
         }
 
         private void ScenarioNumberTextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -67,9 +76,7 @@ namespace MiniProject_GUI
 
             if (ValidateInput(textBox, textBox.Text, allowIntermediate: false, showWarning: true)) return;
 
-            var lastValidText = (string)textBox.GetValue(LastValidTextProperty);
-            textBox.Text = string.IsNullOrWhiteSpace(lastValidText) ? "0" : lastValidText;
-            textBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+            RestoreLastValidText(textBox);
         }
 
         private void ScenarioNumberTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
@@ -92,6 +99,11 @@ namespace MiniProject_GUI
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            if (!ValidateAllInputs(this))
+            {
+                return;
+            }
+
             if (DataContext is MainViewModel viewModel)
             {
                 viewModel.ApplyScenarioPreview();
@@ -147,11 +159,18 @@ namespace MiniProject_GUI
                 return false;
             }
 
-            var normalizedValue = NormalizeCoordinate(value);
+            if (tag == "AltitudeZ")
+            {
+                if (value >= 0 && value <= 20) return true;
+
+                if (showWarning) ShowInputWarning("Z 값은 0 ~ 20 범위로 입력하세요.");
+                return false;
+            }
+
             switch (tag)
             {
                 case "MapX":
-                    if (normalizedValue >= MinMapX && normalizedValue <= MaxMapX) return true;
+                    if (value >= MinMapX && value <= MaxMapX) return true;
                     if (showWarning)
                     {
                         ShowInputWarning($"지도 화면 범위 밖입니다.\nX는 {MinMapX:F0} ~ {MaxMapX:F0} 범위 안으로 입력하십시오.");
@@ -159,7 +178,7 @@ namespace MiniProject_GUI
                     return false;
 
                 case "MapY":
-                    if (normalizedValue >= MinMapY && normalizedValue <= MaxMapY) return true;
+                    if (value >= MinMapY && value <= MaxMapY) return true;
                     if (showWarning)
                     {
                         ShowInputWarning($"지도 화면 범위 밖입니다.\nY는 {MinMapY:F0} ~ {MaxMapY:F0} 범위 안으로 입력하십시오.");
@@ -187,9 +206,38 @@ namespace MiniProject_GUI
                    text == "+.";
         }
 
-        private static double NormalizeCoordinate(double value)
+        private bool ValidateAllInputs(DependencyObject parent)
         {
-            return Math.Abs(value) >= 1000 ? value / 1000.0 : value;
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is TextBox textBox && HasValidationTag(textBox))
+                {
+                    if (!ValidateInput(textBox, textBox.Text, allowIntermediate: false, showWarning: true))
+                    {
+                        textBox.Focus();
+                        textBox.SelectAll();
+                        return false;
+                    }
+                }
+
+                if (!ValidateAllInputs(child))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void RestoreLastValidText(TextBox textBox)
+        {
+            var lastValidText = (string)textBox.GetValue(LastValidTextProperty);
+            isRestoringText = true;
+            textBox.Text = string.IsNullOrWhiteSpace(lastValidText) ? "0" : lastValidText;
+            textBox.SelectionStart = textBox.Text.Length;
+            isRestoringText = false;
+            textBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
         }
 
         private void ShowInputWarning(string message)

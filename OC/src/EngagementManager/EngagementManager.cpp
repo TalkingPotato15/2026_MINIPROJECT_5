@@ -167,21 +167,15 @@ void EngagementManager::onTargetDestroyed(std::shared_ptr<NOM> nomMsg)
 {
 	tcout << "[EngagementManager] TargetDestroyed received." << std::endl;
 
-	NValueType* successVal = nomMsg->getValue(_T("missionSuccess"));
-	bool success = successVal ? (successVal->toUInt() != 0) : false;
+	NValueType* idVal = nomMsg->getValue(_T("targetID"));
+	unsigned int targetID = idVal ? static_cast<unsigned int>(idVal->toUInt()) : 0;
+
+	NValueType* missionFlagVal = nomMsg->getValue(_T("missionFlag"));
+	unsigned int missionFlag = missionFlagVal ? static_cast<unsigned int>(missionFlagVal->toUInt()) : 1;
+	bool success = (missionFlag == 0);
 
 	missionInProgress = false;
-
-	if (success)
-	{
-		// 요격 성공
-		sendInterceptionResult(0, true);
-	}
-	else
-	{
-		// 임무 실패
-		sendMissionFailed();
-	}
+	sendInterceptionResult(targetID, success);
 }
 
 /************************************************************************
@@ -306,20 +300,6 @@ void EngagementManager::sendInterceptionResult(unsigned int targetID, bool succe
 	tcout << "[EngagementManager] InterceptionResult sent. success=" << success << std::endl;
 }
 
-void EngagementManager::sendMissionFailed()
-{
-	if (!meb) return;
-
-	auto msg = meb->getNOMInstance(name, _T("MissionFailed"));
-	if (!msg) return;
-
-	msg->setValue(_T("Header.MessageID"), &NUShort(0x11));
-	msg->setValue(_T("Header.MessageLength"), &NUShort(2));
-	msg->setValue(_T("missionFlag"),      &NBool(true));   // NBoolean → NBool
-	mec->sendMsg(msg);
-
-	tcout << "[EngagementManager] MissionFailed sent." << std::endl;
-}
 
 /************************************************************************
 	Export Function

@@ -125,7 +125,8 @@ void UIManager::sendMsg(std::shared_ptr<NOM> nomMsg)
 
 void UIManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 {
-	tcout << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() << std::endl;
+	tcout << "[UIManager::recvMsg] internal MEB delivered for GUI update: "
+		<< nomMsg->getName() << std::endl;
 
 	auto iter = funcMap.find(nomMsg->getName());
 	if (iter != funcMap.end())
@@ -175,32 +176,32 @@ void UIManager::setMEBComponent(IMEBComponent* realMEB)
 ************************************************************************/
 void UIManager::onATSStatus(std::shared_ptr<NOM> nomMsg)
 {
-	tcout << "[UIManager] ATSStatus received. name=" << nomMsg->getName() << std::endl;
+	tcout << "[UIManager] ATSStatus delivered to GUI. name=" << nomMsg->getName() << std::endl;
 }
 
 void UIManager::onRSSStatus(std::shared_ptr<NOM> nomMsg)
 {
-	tcout << "[UIManager] RSSStatus received." << std::endl;
+	tcout << "[UIManager] RSSStatus delivered to GUI." << std::endl;
 }
 
 void UIManager::onMSSStatus(std::shared_ptr<NOM> nomMsg)
 {
-	tcout << "[UIManager] MSSStatus received." << std::endl;
+	tcout << "[UIManager] MSSStatus delivered to GUI." << std::endl;
 }
 
 void UIManager::onMLSStatus(std::shared_ptr<NOM> nomMsg)
 {
-	tcout << "[UIManager] MLSStatus received." << std::endl;
+	tcout << "[UIManager] MLSStatus delivered to GUI." << std::endl;
 }
 
 void UIManager::onTargetDetection(std::shared_ptr<NOM> nomMsg)
 {
-	tcout << "[UIManager] TargetDetection received." << std::endl;
+	tcout << "[UIManager] TargetDetection delivered to GUI." << std::endl;
 }
 
 void UIManager::onTargetDestroyed(std::shared_ptr<NOM> nomMsg)
 {
-	tcout << "[UIManager] TargetDestroyed received." << std::endl;
+	tcout << "[UIManager] TargetDestroyed delivered to GUI." << std::endl;
 }
 
 /************************************************************************

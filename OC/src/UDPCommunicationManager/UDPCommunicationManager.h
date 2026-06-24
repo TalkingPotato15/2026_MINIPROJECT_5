@@ -49,6 +49,7 @@ private:
 	void interpretTargetDetection(const shared_ptr<NOM>& nomMsg);
 	void interpretTargetDestroyed(const shared_ptr<NOM>& nomMsg);
 	void relayATSInformationToRSS(const shared_ptr<NOM>& atsStatusMsg);
+	void relayMSSInformationDownlinkToRSS(const shared_ptr<NOM>& mssStatusMsg);
 	
 public:
 	std::unique_ptr<NOMParser> nomParser;

@@ -1,0 +1,41 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\User\\Desktop\\2026_MINIPROJECT_5\\OC\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D0397AE5-864E-401F-93CE-1075DCD4A9F7}|src\\UDPCommunicationManager\\UDPCommunicationManager.vcxproj|C:\\Users\\User\\Desktop\\2026_MINIPROJECT_5\\OC\\bin\\UDPCommunicationManager\\CommLinkInfo.ini||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{D0397AE5-864E-401F-93CE-1075DCD4A9F7}|src\\UDPCommunicationManager\\UDPCommunicationManager.vcxproj|solutionrelative:bin\\UDPCommunicationManager\\CommLinkInfo.ini||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CommLinkInfo.ini",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\2026_MINIPROJECT_5\\OC\\bin\\UDPCommunicationManager\\CommLinkInfo.ini",
+              "RelativeDocumentMoniker": "bin\\UDPCommunicationManager\\CommLinkInfo.ini",
+              "ToolTip": "C:\\Users\\User\\Desktop\\2026_MINIPROJECT_5\\OC\\bin\\UDPCommunicationManager\\CommLinkInfo.ini*",
+              "RelativeToolTip": "bin\\UDPCommunicationManager\\CommLinkInfo.ini*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002768|",
+              "WhenOpened": "2026-06-22T15:50:49.26Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -26,10 +26,6 @@
       <NOM:parameter name="missileID" dataType="uintBE" />
       <NOM:parameter name="isIntercepted" dataType="boolean" />
     </NOM:interaction>
-    <NOM:interaction name="MissionFailed" id="0x11" sharing="Publish" orderType="Receive" alignment="false" semantics="임무 실패 통보 (OC → ATS/MSS)">
-      <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
-      <NOM:parameter name="missionFlag" dataType="boolean" />
-    </NOM:interaction>
     <!-- OC Subscribe -->
     <NOM:interaction name="ATSStatus" id="0x02" sharing="Subscribe" orderType="Receive" alignment="false" semantics="ATS 상태/위치 주기 수신 (1Hz)">
       <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
@@ -50,7 +46,8 @@
     </NOM:interaction>
     <NOM:interaction name="TargetDestroyed" id="0x0d" sharing="Subscribe" orderType="Receive" alignment="false" semantics="요격 판정 결과 수신 (RSS → OC)">
       <NOM:parameter name="Header" dataType="MessageHeaderStruct" />
-      <NOM:parameter name="missionSuccess" dataType="boolean" />
+      <NOM:parameter name="targetID" dataType="uintBE" />
+      <NOM:parameter name="missionFlag" dataType="uintBE" />
     </NOM:interaction>
   </NOM:interactions>
   <NOM:dataTypes>
@@ -60,3 +57,4 @@
   </NOM:dataTypes>
   <NOM:notes />
 </NOM:Nex1ObjectModel>
+

@@ -206,7 +206,9 @@ UDPCommunicationManager::removeMsg(shared_ptr<NOM> nomMsg)
 void
 UDPCommunicationManager::sendMsg(shared_ptr<NOM> nomMsg)
 {
-	std::wstringstream s; s << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() ;
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::sendMsg] publish to internal MEB: "
+		<< nomMsg->getName();
 	l.info(s);
 
 	mec->sendMsg(nomMsg);
@@ -215,7 +217,9 @@ UDPCommunicationManager::sendMsg(shared_ptr<NOM> nomMsg)
 void
 UDPCommunicationManager::recvMsg(shared_ptr<NOM> nomMsg)
 {
-	std::wstringstream s; s << "[" << __FUNCTIONT__ << "] " << nomMsg->getName() ;
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::recvMsg] internal MEB delivered for external UDP send: "
+		<< nomMsg->getName();
 	l.info(s);
 
 	commInterface->sendCommMsg(nomMsg);
@@ -313,7 +317,16 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 		return;
 	}
 
-	auto nomMsg = meb->getNOMInstance(name, commMsgHandler.getMsgName(msgID));
+	const auto msgName = commMsgHandler.getMsgName(msgID);
+
+	std::wstringstream rxLog;
+	rxLog << L"[UDPCommunicationManager::processRecvMessage] external UDP received: msgID=0x"
+		<< std::hex << msgID << std::dec
+		<< L", msgName=" << msgName
+		<< L", size=" << size;
+	l.info(rxLog);
+
+	auto nomMsg = meb->getNOMInstance(name, msgName);
 
 	if (nomMsg.get())
 	{
@@ -363,6 +376,7 @@ UDPCommunicationManager::interpretReceivedNom(const shared_ptr<NOM>& nomMsg)
 	else if (msgName == L"MSSStatus")
 	{
 		interpretMSSStatus(nomMsg);
+		relayMSSInformationDownlinkToRSS(nomMsg);
 	}
 	else if (msgName == L"MLSStatus")
 	{
@@ -508,7 +522,73 @@ UDPCommunicationManager::relayATSInformationToRSS(const shared_ptr<NOM>& atsStat
 	}
 
 	std::wstringstream s;
-	s << L"[UDPCommunicationManager::relayATSInformationToRSS] send ATSInformationToRSS, length="
+	s << L"[UDPCommunicationManager::relayATSInformationToRSS] external UDP send: ATSInformationToRSS, length="
+		<< relayMsg->getLength();
+	l.info(s);
+
+	commInterface->sendCommMsg(relayMsg);
+}
+
+void
+UDPCommunicationManager::relayMSSInformationDownlinkToRSS(const shared_ptr<NOM>& mssStatusMsg)
+{
+	if (!mssStatusMsg || !meb || !commInterface)
+	{
+		return;
+	}
+
+	auto relayMsg = meb->getNOMInstance(name, L"MSSInformationDownlinkToRSS");
+	if (!relayMsg)
+	{
+		std::wstringstream s;
+		s << L"[UDPCommunicationManager::relayMSSInformationDownlinkToRSS] MSSInformationDownlinkToRSS NOM instance not found";
+		l.info(s);
+		return;
+	}
+
+	relayMsg->setOwner(name);
+
+	NUShort messageId(0x0c);
+	NUShort messageLength(144);
+	relayMsg->setValue(L"Header.MessageID", &messageId);
+	relayMsg->setValue(L"Header.MessageLength", &messageLength);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		const auto posX = readArrayDouble(mssStatusMsg, L"missileInfo", i, L"MSSPos.x");
+		const auto posY = readArrayDouble(mssStatusMsg, L"missileInfo", i, L"MSSPos.y");
+		const auto posZ = readArrayDouble(mssStatusMsg, L"missileInfo", i, L"MSSPos.z");
+		const auto missileId = readArrayUInt(mssStatusMsg, L"missileInfo", i, L"missileId", static_cast<uint32_t>(i + 1));
+		const auto targetId = readArrayUInt(mssStatusMsg, L"missileInfo", i, L"targetId");
+		const auto mssStatus = readArrayUInt(mssStatusMsg, L"missileInfo", i, L"mssStatus");
+
+		NDouble relayX(posX);
+		NDouble relayY(posY);
+		NDouble relayZ(posZ);
+		NUInteger relayMissileId(missileId);
+		NUInteger relayTargetId(targetId);
+		NUInteger relayMssStatus(mssStatus);
+
+		auto setOk = true;
+		setOk &= setArrayValue(relayMsg, L"missileInfo", i, L"MSSPos.x", &relayX);
+		setOk &= setArrayValue(relayMsg, L"missileInfo", i, L"MSSPos.y", &relayY);
+		setOk &= setArrayValue(relayMsg, L"missileInfo", i, L"MSSPos.z", &relayZ);
+		setOk &= setArrayValue(relayMsg, L"missileInfo", i, L"missileId", &relayMissileId);
+		setOk &= setArrayValue(relayMsg, L"missileInfo", i, L"targetId", &relayTargetId);
+		setOk &= setArrayValue(relayMsg, L"missileInfo", i, L"mssStatus", &relayMssStatus);
+
+		std::wstringstream row;
+		row << L"[UDPCommunicationManager::relayMSSInformationDownlinkToRSS] missileInfo[" << i
+			<< L"] missileId=" << missileId
+			<< L", targetId=" << targetId
+			<< L", mssStatus=" << mssStatus
+			<< L", setOk=" << setOk
+			<< L", pos=(" << posX << L"," << posY << L"," << posZ << L")";
+		l.info(row);
+	}
+
+	std::wstringstream s;
+	s << L"[UDPCommunicationManager::relayMSSInformationDownlinkToRSS] external UDP send: MSSInformationDownlinkToRSS, length="
 		<< relayMsg->getLength();
 	l.info(s);
 

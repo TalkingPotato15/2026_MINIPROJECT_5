@@ -13,7 +13,7 @@ using namespace nom;
  * @brief  교전 통제 Manager
  *         수신: TargetDetection(0x08), TargetDestroyed(0x0d), ATSStatus(0x02), MSSStatus(0x04)
  *         발행: ATSInformationToRSS(0x07), LaunchCommand(0x09), MSSInformationDownlinkToRSS(0x0c),
- *               ATSInterceptionResult(0x0e), MSSInterceptionResult(0x0f), MissionFailed(0x11)
+ *               ATSInterceptionResult(0x0e), MSSInterceptionResult(0x0f)
  */
 class BASEMGRDLL_API EngagementManager : public BaseManager
 {
@@ -53,7 +53,6 @@ private:
 	void sendMSSInformationDownlinkToRSS();
 	void sendLaunchCommand(unsigned int targetID);
 	void sendInterceptionResult(unsigned int targetID, bool success);
-	void sendMissionFailed();
 
 private:
 	IMEBComponent* meb = nullptr;

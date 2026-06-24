@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using nframework.log4nf;
 using nframework.nom;
@@ -21,7 +21,7 @@ namespace MiniProject_GUI
         public double PosY { get; set; }
         public double PosZ { get; set; }
         public uint Speed { get; set; }
-        public string StatusText { get; set; } = "기동중";
+        public string StatusText { get; set; } = "\uAE30\uB3D9\uC911";
     }
 
     public class OcMssMissileItem
@@ -31,8 +31,13 @@ namespace MiniProject_GUI
         public double PosX { get; set; }
         public double PosY { get; set; }
         public double PosZ { get; set; }
-        public string StatusText { get; set; } = "대기";
-        public string SummaryText => $"{MissileId}번 유도탄 : {StatusText}  X:{PosX:F0} Y:{PosY:F0} Z:{PosZ:F0}";
+        public string LauncherStatusText { get; set; } = "\uB300\uAE30";
+        public string FlightStatusText { get; set; } = "";
+        public bool HasFlightStatus { get; set; }
+        public string StatusText { get; set; } = "\uB300\uAE30";
+        public string SummaryText => HasFlightStatus
+            ? $"{MissileId}\uBC88 \uC720\uB3C4\uD0C4: {StatusText}  X:{PosX:F0} Y:{PosY:F0} Z:{PosZ:F0}"
+            : $"{MissileId}\uBC88 \uC720\uB3C4\uD0C4: {StatusText}";
     }
 
     public class OcDetectionEventItem
@@ -66,16 +71,51 @@ namespace MiniProject_GUI
 
     public partial class OcAirThreatInput : ObservableObject
     {
+        private static readonly (string X, string Y, string Z)[] FirstThreatDefaultRoute =
+        {
+            ("-160", "300", "10"),
+            ("140", "160", "10"),
+            ("-100", "20", "10"),
+            ("80", "-120", "10")
+        };
+
+        private static readonly (string X, string Y, string Z)[] SecondThreatDefaultRoute =
+        {
+            ("-250", "40", "10"),
+            ("-90", "35", "10"),
+            ("90", "-30", "10"),
+            ("245", "-80", "10")
+        };
+
+        private static readonly (string X, string Y, string Z)[] ThirdThreatDefaultRoute =
+        {
+            ("40", "40", "10"),
+            ("110", "70", "10"),
+            ("185", "115", "10"),
+            ("245", "150", "10")
+        };
+
+        private static readonly (string X, string Y, string Z)[] FourthThreatDefaultRoute =
+        {
+            ("-245", "220", "10"),
+            ("-230", "260", "10"),
+            ("210", "300", "10"),
+            ("255", "340", "10")
+        };
+
         public OcAirThreatInput(int index)
         {
             Index = index;
-            Name = $"공중위협 {index}";
+            Name = $"\uACF5\uC911\uC704\uD611 {index}";
             _isEnabled = true;
             _targetId = (index - 1).ToString();
             _speed = "300";
 
-            Points.Add(new OcScenarioPointInput("시작점", "120", "120", "10"));
-            Points.Add(new OcScenarioPointInput("종료점", "0", "0", "10"));
+            var defaultRoute = GetDefaultRoute(index);
+            var startPoint = defaultRoute[0];
+            var endPoint = defaultRoute[defaultRoute.Length - 1];
+            Points.Add(new OcScenarioPointInput("\uC2DC\uC791\uC810", startPoint.X, startPoint.Y, startPoint.Z));
+            Points.Add(new OcScenarioPointInput("\uC885\uB8CC\uC810", endPoint.X, endPoint.Y, endPoint.Z));
         }
 
         public int Index { get; }
@@ -95,12 +135,16 @@ namespace MiniProject_GUI
             var endPoint = Points[Points.Count - 1];
             var previousPoint = Points[Points.Count - 2];
             Points.RemoveAt(Points.Count - 1);
+            var insertionIndex = Points.Count;
 
-            Points.Add(new OcScenarioPointInput(
-                "",
-                Midpoint(previousPoint.X, endPoint.X),
-                Midpoint(previousPoint.Y, endPoint.Y),
-                Midpoint(previousPoint.Z, endPoint.Z)));
+            var defaultWaypoint = GetDefaultWaypoint(insertionIndex);
+            Points.Add(defaultWaypoint.HasValue
+                ? new OcScenarioPointInput("", defaultWaypoint.Value.X, defaultWaypoint.Value.Y, defaultWaypoint.Value.Z)
+                : new OcScenarioPointInput(
+                    "",
+                    Midpoint(previousPoint.X, endPoint.X),
+                    Midpoint(previousPoint.Y, endPoint.Y),
+                    Midpoint(previousPoint.Z, endPoint.Z)));
             Points.Add(endPoint);
             RenumberPoints();
         }
@@ -119,9 +163,9 @@ namespace MiniProject_GUI
             {
                 Points[i].Label = i switch
                 {
-                    0 => "시작점",
-                    var last when last == Points.Count - 1 => "종료점",
-                    _ => $"경유점 {i}"
+                    0 => "\uC2DC\uC791\uC810",
+                    var last when last == Points.Count - 1 => "\uC885\uB8CC\uC810",
+                    _ => $"\uACBD\uC720\uC810{i}"
                 };
             }
 
@@ -135,6 +179,29 @@ namespace MiniProject_GUI
             var second = double.TryParse(b, out var parsedB) ? parsedB : 0;
             return ((first + second) / 2).ToString("F0");
         }
+
+        private static (string X, string Y, string Z)[] GetDefaultRoute(int index)
+        {
+            return index switch
+            {
+                1 => FirstThreatDefaultRoute,
+                2 => SecondThreatDefaultRoute,
+                3 => ThirdThreatDefaultRoute,
+                4 => FourthThreatDefaultRoute,
+                _ => FirstThreatDefaultRoute
+            };
+        }
+
+        private (string X, string Y, string Z)? GetDefaultWaypoint(int insertionIndex)
+        {
+            var defaultRoute = GetDefaultRoute(Index);
+            if (insertionIndex > 0 && insertionIndex < defaultRoute.Length - 1)
+            {
+                return defaultRoute[insertionIndex];
+            }
+
+            return null;
+        }
     }
 
     public class OcAirThreatDisplay
@@ -146,6 +213,7 @@ namespace MiniProject_GUI
         public string PosZ { get; set; } = "";
         public string CoordinateText => $"X:{PosX}  Y:{PosY}  Z:{PosZ}";
         public Brush NameBrush { get; set; } = Brushes.Lime;
+        public Visibility LaunchButtonVisibility { get; set; } = Visibility.Collapsed;
         public double PanelHeight { get; set; } = 118;
         public double NameFontSize { get; set; } = 20;
         public double CoordinateFontSize { get; set; } = 22;
@@ -166,6 +234,22 @@ namespace MiniProject_GUI
         public double Angle { get; set; }
         public string Label { get; set; } = "";
         public Brush Fill { get; set; } = Brushes.Gray;
+    }
+
+    public class OcMissileMarkerItem
+    {
+        public double Left { get; set; }
+        public double Top { get; set; }
+        public double Angle { get; set; }
+        public string Label { get; set; } = "";
+        public Brush Fill { get; set; } = Brushes.OrangeRed;
+    }
+
+    public class OcExplosionMarkerItem
+    {
+        public double Left { get; set; }
+        public double Top { get; set; }
+        public double Size { get; set; } = 84;
     }
 
     public class OcMapPathItem
@@ -227,6 +311,8 @@ namespace MiniProject_GUI
         private const double MapCenterX = 310;
         private const double MapCenterY = 405;
         private const double MapScale = 1.15;
+        private const double ThreatEndReachTolerance = 5.0;
+        private const double ThreatEndPathTolerance = 25.0;
 
         private static readonly TimeSpan SimulatorConnectionTimeout = TimeSpan.FromSeconds(5);
         private readonly DispatcherTimer simulatorConnectionTimer;
@@ -240,9 +326,14 @@ namespace MiniProject_GUI
         private uint? lastEngagedTargetId;
         private readonly HashSet<uint> detectedTargetIds = new();
         private readonly HashSet<uint> destroyedTargetIds = new();
+        private readonly HashSet<uint> failedTargetIds = new();
+        private readonly HashSet<uint> failedMissileIds = new();
+        private readonly Dictionary<uint, uint> sentInterceptionResultFlags = new();
         private readonly Dictionary<uint, (double X, double Y, double Z)> latestTargetPositions = new();
         private readonly Dictionary<uint, double> latestTargetHeadings = new();
         private readonly Dictionary<uint, OcMssMissileItem> missileDisplays = new();
+        private readonly Dictionary<uint, uint> reportedHitMissileByTargetId = new();
+        private readonly Dictionary<uint, uint> successfulMissileByTargetId = new();
 
         [ObservableProperty] private bool _isPlugInEnabled = false;
         [ObservableProperty] private bool _isPlugOutEnabled = false;
@@ -253,17 +344,17 @@ namespace MiniProject_GUI
         [ObservableProperty] private string _rssPosX = "0";
         [ObservableProperty] private string _rssPosY = "0";
         [ObservableProperty] private string _rssPosZ = "0";
-        [ObservableProperty] private string _rssRadius = "50";
-        [ObservableProperty] private string _mlsPosX = "50";
+        [ObservableProperty] private string _rssRadius = "175";
+        [ObservableProperty] private string _mlsPosX = "100";
         [ObservableProperty] private string _mlsPosY = "0";
         [ObservableProperty] private string _mlsPosZ = "0";
         [ObservableProperty] private string _targetCount = "0";
         [ObservableProperty] private string _launchTargetId = "0";
 
-        [ObservableProperty] private string _atsStatusText = "ATS 미연결";
-        [ObservableProperty] private string _rssStatusText = "RSS 미연결";
-        [ObservableProperty] private string _mlsStatusText = "MLS 미연결";
-        [ObservableProperty] private string _mssStatusText = "MSS 미연결";
+        [ObservableProperty] private string _atsStatusText = "ATS \uBBF8\uC5F0\uACB0";
+        [ObservableProperty] private string _rssStatusText = "RSS \uBBF8\uC5F0\uACB0";
+        [ObservableProperty] private string _mlsStatusText = "MLS \uBBF8\uC5F0\uACB0";
+        [ObservableProperty] private string _mssStatusText = "MSS \uBBF8\uC5F0\uACB0";
 
         [ObservableProperty] private SolidColorBrush _atsStatusColor = new SolidColorBrush(Color.FromRgb(255, 0, 0));
         [ObservableProperty] private SolidColorBrush _rssStatusColor = new SolidColorBrush(Color.FromRgb(255, 0, 0));
@@ -281,6 +372,8 @@ namespace MiniProject_GUI
         [ObservableProperty] private ObservableCollection<OcAirThreatDisplay> _scenarioThreatDisplays = new();
         [ObservableProperty] private ObservableCollection<OcMapMarkerItem> _mapThreatMarkers = new();
         [ObservableProperty] private ObservableCollection<OcAircraftMarkerItem> _mapAircraftMarkers = new();
+        [ObservableProperty] private ObservableCollection<OcMissileMarkerItem> _mapMissileMarkers = new();
+        [ObservableProperty] private ObservableCollection<OcExplosionMarkerItem> _mapExplosionMarkers = new();
         [ObservableProperty] private ObservableCollection<OcMapPathItem> _mapThreatPaths = new();
 
         [ObservableProperty] private double _radarRangeLeft;
@@ -296,9 +389,10 @@ namespace MiniProject_GUI
         [ObservableProperty] private string _mlsMissile3 = "-";
         [ObservableProperty] private string _mlsMissile4 = "-";
         [ObservableProperty] private string _mlsStock = "-";
+        [ObservableProperty] private string _remainingMissileCountText = "-";
 
-        [ObservableProperty] private string _interceptionResultText = "대기중";
-        [ObservableProperty] private string _interceptionResultDetail = "모의 시작 및 표적 탐지 대기";
+        [ObservableProperty] private string _interceptionResultText = "\uC694\uACA9 \uB300\uAE30";
+        [ObservableProperty] private string _interceptionResultDetail = "\uD310\uC815 \uB300\uAE30";
         [ObservableProperty] private SolidColorBrush _interceptionResultColor =
             new SolidColorBrush(Color.FromRgb(37, 40, 64));
 
@@ -338,13 +432,13 @@ namespace MiniProject_GUI
 
                 IsPlugOutEnabled = true;
                 IsStartEnabled = true;
-                AddLog("[시스템] nFramework 연결 성공.");
+                AddLog("[SYSTEM] nFramework connected.");
             }
             else
             {
                 IsPlugInEnabled = true;
-                AddLog("[오류] nFramework 연결 실패. Plug In을 다시 시도하십시오.");
-                MessageBox.Show("nFramework 연결에 실패했습니다.");
+                AddLog("[WARN] nFramework connection failed. Use Plug In to retry.");
+                MessageBox.Show("nFramework connection failed.");
             }
         }
 
@@ -372,12 +466,12 @@ namespace MiniProject_GUI
                 nomHandler.ExecStart();
                 IsPlugOutEnabled = true;
                 IsStartEnabled = true;
-                AddLog("[시스템] Plug In 완료.");
+                AddLog("[SYSTEM] Plug In succeeded.");
             }
             else
             {
                 IsPlugInEnabled = true;
-                AddLog("[오류] Plug In 실패.");
+                AddLog("[WARN] Plug In failed.");
             }
         }
 
@@ -392,7 +486,7 @@ namespace MiniProject_GUI
             IsLaunchEnabled = false;
             IsPlugInEnabled = true;
             ResetSimulatorConnectionStates();
-            AddLog("[시스템] Plug Out.");
+            AddLog("[SYSTEM] Plug Out.");
         }
 
         [RelayCommand]
@@ -421,7 +515,7 @@ namespace MiniProject_GUI
                 var nom = nomHandler.GetNMessage("Scenario")?.createNOMInstance();
                 if (nom == null)
                 {
-                    AddLog("[오류] Scenario NOM 인스턴스 없음");
+                    AddLog("[ERR] Scenario NOM not found");
                     return;
                 }
 
@@ -462,18 +556,18 @@ namespace MiniProject_GUI
                 nom.setValue("rssPos.x", new NDouble(ParseDouble(RssPosX, 0)));
                 nom.setValue("rssPos.y", new NDouble(ParseDouble(RssPosY, 0)));
                 nom.setValue("rssPos.z", new NDouble(ParseDouble(RssPosZ, 0)));
-                nom.setValue("rssRadius", new NUInteger(ToUInt(ParseDouble(RssRadius, 50))));
+                nom.setValue("rssRadius", new NUInteger(ToUInt(ParseDouble(RssRadius, 175))));
 
                 nom.setValue("mlsPos.x", new NDouble(ParseDouble(MlsPosX, 0)));
                 nom.setValue("mlsPos.y", new NDouble(ParseDouble(MlsPosY, 0)));
                 nom.setValue("mlsPos.z", new NDouble(ParseDouble(MlsPosZ, 0)));
 
                 nomHandler.SendNOMMessage(nom);
-                AddLog($"[송신] Scenario 배포 완료. 공중위협 수={count}, 슬롯={string.Join(", ", slotSummary)}");
+                AddLog($"[TX] Scenario distributed - targetCount={count}, slots={string.Join(", ", slotSummary)}");
             }
             catch (Exception ex)
             {
-                AddLog($"[오류] Scenario 송신 실패: {ex.Message}");
+                AddLog($"[ERR] Scenario distribution failed: {ex.Message}");
             }
         }
 
@@ -483,7 +577,7 @@ namespace MiniProject_GUI
             try
             {
                 var nom = nomHandler.GetNMessage("StartSimulation")?.createNOMInstance();
-                if (nom == null) { AddLog("[오류] StartSimulation NOM 없음"); return; }
+                if (nom == null) { AddLog("[ERR] StartSimulation NOM not found"); return; }
 
                 nom.setValue("Header.MessageID", new NUShort(0x06));
                 nom.setValue("Header.MessageLength", new NUShort(4));
@@ -495,11 +589,11 @@ namespace MiniProject_GUI
                 IsLaunchEnabled = true;
                 isSimulationRunning = true;
                 RefreshScenarioPreview();
-                AddLog("[송신] StartSimulation - 모의 시작.");
+                AddLog("[TX] StartSimulation - startFlag=1");
             }
             catch (Exception ex)
             {
-                AddLog($"[오류] StartSimulation 실패: {ex.Message}");
+                AddLog($"[ERR] StartSimulation failed: {ex.Message}");
             }
         }
 
@@ -509,7 +603,7 @@ namespace MiniProject_GUI
             try
             {
                 var nom = nomHandler.GetNMessage("Stop")?.createNOMInstance();
-                if (nom == null) { AddLog("[오류] Stop NOM 없음"); return; }
+                if (nom == null) { AddLog("[ERR] Stop NOM not found"); return; }
 
                 nom.setValue("Header.MessageID", new NUShort(0x10));
                 nom.setValue("Header.MessageLength", new NUShort(4));
@@ -520,11 +614,11 @@ namespace MiniProject_GUI
                 IsStopEnabled = false;
                 IsLaunchEnabled = false;
                 ClearAppliedScenarioState();
-                AddLog("[송신] Stop - 모의 중지.");
+                AddLog("[TX] Stop - stopFlag=1");
             }
             catch (Exception ex)
             {
-                AddLog($"[오류] Stop 실패: {ex.Message}");
+                AddLog($"[ERR] Stop failed: {ex.Message}");
             }
         }
 
@@ -610,6 +704,7 @@ namespace MiniProject_GUI
             var threatPanelHeight = GetThreatPanelHeight(activeThreats.Count);
             var threatNameFontSize = activeThreats.Count >= 4 ? 18 : 20;
             var threatCoordinateFontSize = activeThreats.Count >= 4 ? 14 : 16;
+            var showScenarioRoutes = !isSimulationRunning;
 
             foreach (var threat in activeThreats)
             {
@@ -618,8 +713,9 @@ namespace MiniProject_GUI
                 var position = GetThreatPosition(targetId, firstPoint);
                 var aircraftPoint = ToMapPoint(position.X, position.Y);
                 var brush = GetThreatStateBrush(targetId);
+                var modelBrush = GetThreatModelBrush(targetId);
+                var canLaunch = detectedTargetIds.Contains(targetId) && !destroyedTargetIds.Contains(targetId);
                 var aircraftHeading = GetThreatHeading(targetId, threat);
-                var pathBrush = ThreatBrushes[Math.Max(0, threat.Index - 1) % ThreatBrushes.Length];
 
                 ScenarioThreatDisplays.Add(new OcAirThreatDisplay
                 {
@@ -629,41 +725,51 @@ namespace MiniProject_GUI
                     PosY = FormatCoordinate(position.Y),
                     PosZ = FormatCoordinate(position.Z),
                     NameBrush = brush,
+                    LaunchButtonVisibility = canLaunch ? Visibility.Visible : Visibility.Collapsed,
                     PanelHeight = threatPanelHeight,
                     NameFontSize = threatNameFontSize,
                     CoordinateFontSize = threatCoordinateFontSize
                 });
 
-                var path = new PointCollection();
-                for (var p = 0; p < threat.Points.Count && p < 4; p++)
+                if (showScenarioRoutes)
                 {
-                    var point = threat.Points[p];
-                    var mapped = ToMapPoint(ParseDouble(point.X, 0), ParseDouble(point.Y, 0));
-                    path.Add(mapped);
-                    MapThreatMarkers.Add(new OcMapMarkerItem
+                    var pathBrush = ThreatBrushes[Math.Max(0, threat.Index - 1) % ThreatBrushes.Length];
+                    var path = new PointCollection();
+                    for (var p = 0; p < threat.Points.Count && p < 4; p++)
                     {
-                        Left = mapped.X - 7,
-                        Top = mapped.Y - 7,
-                        Label = $"{threat.Index}-{p + 1}",
-                        Fill = pathBrush
+                        var point = threat.Points[p];
+                        var mapped = ToMapPoint(ParseDouble(point.X, 0), ParseDouble(point.Y, 0));
+                        path.Add(mapped);
+                        MapThreatMarkers.Add(new OcMapMarkerItem
+                        {
+                            Left = mapped.X - 7,
+                            Top = mapped.Y - 7,
+                            Label = $"{threat.Index}-{p + 1}",
+                            Fill = pathBrush
+                        });
+                    }
+
+                    MapThreatPaths.Add(new OcMapPathItem
+                    {
+                        Points = path,
+                        Stroke = pathBrush
                     });
                 }
 
-                MapThreatPaths.Add(new OcMapPathItem
+                if (!destroyedTargetIds.Contains(targetId))
                 {
-                    Points = path,
-                    Stroke = pathBrush
-                });
-
-                MapAircraftMarkers.Add(new OcAircraftMarkerItem
-                {
-                    Left = aircraftPoint.X - 19,
-                    Top = aircraftPoint.Y - 19,
-                    Angle = aircraftHeading,
-                    Label = threat.Index.ToString(),
-                    Fill = brush
-                });
+                    MapAircraftMarkers.Add(new OcAircraftMarkerItem
+                    {
+                        Left = aircraftPoint.X - 19,
+                        Top = aircraftPoint.Y - 19,
+                        Angle = aircraftHeading,
+                        Label = threat.Index.ToString(),
+                        Fill = modelBrush
+                    });
+                }
             }
+
+            RebuildMissileMapMarkers();
         }
 
         private void ClearAppliedScenarioState()
@@ -674,8 +780,8 @@ namespace MiniProject_GUI
             DetectionEventList.Clear();
             EngagementResultList.Clear();
             LaunchTargetId = "0";
-            InterceptionResultText = "대기중";
-            InterceptionResultDetail = "모의 시작 및 표적 탐지 대기";
+            InterceptionResultText = "\uC694\uACA9 \uB300\uAE30";
+            InterceptionResultDetail = "\uD310\uC815 \uB300\uAE30";
             InterceptionResultColor = new SolidColorBrush(Color.FromRgb(37, 40, 64));
         }
 
@@ -685,6 +791,8 @@ namespace MiniProject_GUI
             ScenarioThreatDisplays.Clear();
             MapThreatMarkers.Clear();
             MapAircraftMarkers.Clear();
+            MapMissileMarkers.Clear();
+            MapExplosionMarkers.Clear();
             MapThreatPaths.Clear();
         }
 
@@ -705,9 +813,15 @@ namespace MiniProject_GUI
             lastEngagedTargetId = null;
             detectedTargetIds.Clear();
             destroyedTargetIds.Clear();
+            failedTargetIds.Clear();
+            failedMissileIds.Clear();
+            sentInterceptionResultFlags.Clear();
+            reportedHitMissileByTargetId.Clear();
+            successfulMissileByTargetId.Clear();
             latestTargetPositions.Clear();
             latestTargetHeadings.Clear();
             AtsTargetList.Clear();
+            MapExplosionMarkers.Clear();
             ResetMissileDisplays();
         }
 
@@ -772,12 +886,60 @@ namespace MiniProject_GUI
             );
         }
 
+        private OcAirThreatInput? FindScenarioThreat(uint targetId)
+        {
+            return ScenarioThreats
+                .Take(4)
+                .FirstOrDefault(threat => ParseUInt(threat.TargetId, (uint)(threat.Index - 1)) == targetId);
+        }
+
+        private bool HasThreatReachedEnd(uint targetId, double posX, double posY)
+        {
+            var threat = FindScenarioThreat(targetId);
+            if (threat == null || threat.Points.Count < 2) return false;
+
+            var end = threat.Points[^1];
+            var beforeEnd = threat.Points[^2];
+            var endX = ParseDouble(end.X, 0);
+            var endY = ParseDouble(end.Y, 0);
+            if (Distance2D(posX, posY, endX, endY) <= ThreatEndReachTolerance)
+            {
+                return true;
+            }
+
+            var startX = ParseDouble(beforeEnd.X, 0);
+            var startY = ParseDouble(beforeEnd.Y, 0);
+            var vx = endX - startX;
+            var vy = endY - startY;
+            var lengthSquared = vx * vx + vy * vy;
+            if (lengthSquared < 0.0001) return false;
+
+            var projection = ((posX - startX) * vx + (posY - startY) * vy) / lengthSquared;
+            if (projection < 1.0) return false;
+
+            var projectedX = startX + projection * vx;
+            var projectedY = startY + projection * vy;
+            return Distance2D(posX, posY, projectedX, projectedY) <= ThreatEndPathTolerance;
+        }
+
+        private static double Distance2D(double ax, double ay, double bx, double by)
+        {
+            var dx = ax - bx;
+            var dy = ay - by;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
         private Brush GetThreatStateBrush(uint targetId)
         {
-            if (destroyedTargetIds.Contains(targetId)) return Brushes.Red;
-            if (detectedTargetIds.Contains(targetId)) return Brushes.Lime;
-            if (isSimulationRunning) return Brushes.Yellow;
-            return Brushes.Gray;
+            if (destroyedTargetIds.Contains(targetId)) return Brushes.Gray;
+            if (detectedTargetIds.Contains(targetId)) return Brushes.Red;
+            return Brushes.Yellow;
+        }
+
+        private Brush GetThreatModelBrush(uint targetId)
+        {
+            if (failedTargetIds.Contains(targetId)) return Brushes.Gray;
+            return detectedTargetIds.Contains(targetId) ? Brushes.Red : Brushes.Yellow;
         }
 
         private double GetThreatHeading(uint targetId, OcAirThreatInput threat)
@@ -820,7 +982,7 @@ namespace MiniProject_GUI
 
         private static double NormalizeCoordinate(double value)
         {
-            return Math.Abs(value) >= 1000 ? value / 1000.0 : value;
+            return value;
         }
 
         partial void OnRssPosXChanged(string value) => RefreshMapGeometry();
@@ -849,7 +1011,6 @@ namespace MiniProject_GUI
         {
             var index = ScenarioThreats.Count + 1;
             var threat = new OcAirThreatInput(index);
-            OffsetDefaultThreatPath(threat, index);
             ScenarioThreats.Add(threat);
         }
 
@@ -857,17 +1018,6 @@ namespace MiniProject_GUI
         {
             OnPropertyChanged(nameof(CanAddScenarioThreat));
             OnPropertyChanged(nameof(CanRemoveScenarioThreat));
-        }
-
-        private void OffsetDefaultThreatPath(OcAirThreatInput threat, int index)
-        {
-            var xOffset = (index - 1) * 25;
-            var yOffset = (index - 1) * -18;
-            foreach (var point in threat.Points)
-            {
-                point.X = (ParseDouble(point.X, 0) - xOffset).ToString("F0");
-                point.Y = (ParseDouble(point.Y, 0) + yOffset).ToString("F0");
-            }
         }
 
         private static Point ToMapPoint(double x, double y)
@@ -878,7 +1028,7 @@ namespace MiniProject_GUI
         private void RefreshMapGeometry()
         {
             var radarCenter = ToMapPoint(ParseDouble(RssPosX, 0), ParseDouble(RssPosY, 0));
-            var radarRadius = Math.Max(6, NormalizeCoordinate(ParseDouble(RssRadius, 50)) * MapScale);
+            var radarRadius = Math.Max(6, NormalizeCoordinate(ParseDouble(RssRadius, 175)) * MapScale);
             RadarRangeDiameter = radarRadius * 2;
             RadarRangeLeft = radarCenter.X - radarRadius;
             RadarRangeTop = radarCenter.Y - radarRadius;
@@ -895,7 +1045,7 @@ namespace MiniProject_GUI
             try
             {
                 var nom = nomHandler.GetNMessage("LaunchCommand")?.createNOMInstance();
-                if (nom == null) { AddLog("[오류] LaunchCommand NOM 없음"); return; }
+                if (nom == null) { AddLog("[ERR] LaunchCommand NOM not found"); return; }
 
                 var targetId = ParseUInt(targetIdText, 0);
                 nom.setValue("Header.MessageID", new NUShort(0x09));
@@ -904,11 +1054,11 @@ namespace MiniProject_GUI
                 nomHandler.SendNOMMessage(nom);
 
                 lastEngagedTargetId = targetId;
-                AddLog($"[송신] LaunchCommand - targetID={targetId}");
+                AddLog($"[TX] LaunchCommand - targetID={targetId}");
             }
             catch (Exception ex)
             {
-                AddLog($"[오류] LaunchCommand 실패: {ex.Message}");
+                AddLog($"[ERR] LaunchCommand failed: {ex.Message}");
             }
         }
 
@@ -927,7 +1077,7 @@ namespace MiniProject_GUI
                 }
                 catch (Exception ex)
                 {
-                    AddLog($"[오류] 수신 처리 예외: {ex.Message}");
+                    AddLog($"[ERR] Receive processing exception: {ex.Message}");
                 }
             });
         }
@@ -935,6 +1085,13 @@ namespace MiniProject_GUI
         private void RouteReceivedMessage(NOM nom)
         {
             MarkSimulatorConnectedByMessageId(nom);
+
+            var messageId = nom.getValue("Header.MessageID")?.toUInt();
+            if (messageId == 0x0d)
+            {
+                HandleTargetDestroyed(nom);
+                return;
+            }
 
             switch (nom.name)
             {
@@ -975,7 +1132,8 @@ namespace MiniProject_GUI
                 var posY = NormalizeCoordinate(slot.PosY);
                 var posZ = NormalizeCoordinate(slot.PosZ);
                 var atsStatus = slot.AtsStatus;
-                var isDestroyed = atsStatus == 2;
+                var isFailed = failedTargetIds.Contains(targetId);
+                var isDestroyed = atsStatus == 2 && !isFailed;
 
                 if (latestTargetPositions.TryGetValue(targetId, out var previousPosition))
                 {
@@ -987,6 +1145,11 @@ namespace MiniProject_GUI
                 {
                     destroyedTargetIds.Add(targetId);
                 }
+                else if (!failedTargetIds.Contains(targetId) && HasThreatReachedEnd(targetId, posX, posY))
+                {
+                    RegisterInterceptionFailure(targetId, "ATS reached endpoint");
+                    isFailed = true;
+                }
 
                 AtsTargetList.Add(new OcAtsTargetItem
                 {
@@ -995,7 +1158,7 @@ namespace MiniProject_GUI
                     PosY = posY,
                     PosZ = posZ,
                     Speed = slot.Speed,
-                    StatusText = isDestroyed ? "격추" : atsStatus == 0 ? "대기" : "기동중"
+                    StatusText = isFailed ? "\uC694\uACA9\uC2E4\uD328" : isDestroyed ? "\uACA9\uCD94" : atsStatus == 0 ? "\uB300\uAE30" : "\uAE30\uB3D9\uC911"
                 });
             }
 
@@ -1016,12 +1179,14 @@ namespace MiniProject_GUI
             MlsMissile3 = GetMissileStatusText(nom.getValue("launcherInfo.missileStatus3"));
             MlsMissile4 = GetMissileStatusText(nom.getValue("launcherInfo.missileStatus4"));
             var stock = nom.getValue("launcherInfo.missileStock");
-            MlsStock = stock != null ? stock.toUInt().ToString() : "-";
+            var stockText = stock != null ? stock.toUInt().ToString() : "-";
+            MlsStock = stockText;
+            RemainingMissileCountText = stockText;
 
-            UpdateMissileDisplayStatus(1, MlsMissile1);
-            UpdateMissileDisplayStatus(2, MlsMissile2);
-            UpdateMissileDisplayStatus(3, MlsMissile3);
-            UpdateMissileDisplayStatus(4, MlsMissile4);
+            UpdateMissileLauncherStatus(1, MlsMissile1);
+            UpdateMissileLauncherStatus(2, MlsMissile2);
+            UpdateMissileLauncherStatus(3, MlsMissile3);
+            UpdateMissileLauncherStatus(4, MlsMissile4);
             RebuildMissileDisplayList();
         }
 
@@ -1041,15 +1206,63 @@ namespace MiniProject_GUI
                 var pz = nom.getValue($"{prefix}.MSSPos.z");
                 var st = nom.getValue($"{prefix}.mssStatus");
                 var missileId = mid != null ? mid.toUInt() : i + 1;
+                var rawTargetId = tid != null ? tid.toUInt() : (lastEngagedTargetId ?? ParseUInt(LaunchTargetId, 0));
                 var mssStatus = st != null ? st.toUInt() : 0;
 
                 var missile = GetOrCreateMissileDisplay(missileId);
-                missile.TargetId = tid != null ? tid.toUInt() : 0;
+                missile.TargetId = ResolveInterceptionTargetId(rawTargetId);
                 missile.PosX = px != null ? NormalizeCoordinate(px.toDouble()) : 0;
                 missile.PosY = py != null ? NormalizeCoordinate(py.toDouble()) : 0;
                 missile.PosZ = pz != null ? NormalizeCoordinate(pz.toDouble()) : 0;
-                missile.StatusText = mssStatus == 2 ? "요격성공" :
-                                     mssStatus == 1 ? "추적중" : "대기";
+
+                if (failedMissileIds.Contains(missileId))
+                {
+                    MarkMissileAsFailed(missile);
+                    continue;
+                }
+
+                if (failedTargetIds.Contains(missile.TargetId) && (missile.HasFlightStatus || mssStatus == 1 || mssStatus == 2 || mssStatus == 3))
+                {
+                    MarkMissileAsFailed(missile);
+                    continue;
+                }
+
+                if (successfulMissileByTargetId.TryGetValue(missile.TargetId, out var winnerMissileId))
+                {
+                    if (winnerMissileId == missileId)
+                    {
+                        MarkMissileAsSucceeded(missile);
+                    }
+                    else if (missile.HasFlightStatus || mssStatus == 1 || mssStatus == 2)
+                    {
+                        MarkMissileAsFailed(missile);
+                    }
+
+                    continue;
+                }
+
+                if (mssStatus == 2)
+                {
+                    reportedHitMissileByTargetId[missile.TargetId] = missileId;
+                    missile.FlightStatusText = GetMssFlightStatusText(mssStatus);
+                    missile.HasFlightStatus = true;
+                    RefreshMissileDisplayStatus(missile);
+                    AddLog($"[RX] MSSStatus - missileID={missileId}, targetID={missile.TargetId}, waiting RSS decision");
+                }
+                else if (mssStatus == 1)
+                {
+                    missile.FlightStatusText = GetMssFlightStatusText(mssStatus);
+                    missile.HasFlightStatus = true;
+                    RefreshMissileDisplayStatus(missile);
+                }
+                else if (mssStatus == 3)
+                {
+                    MarkMissileAsFailed(missile);
+                }
+                else
+                {
+                    RefreshMissileDisplayStatus(missile);
+                }
             }
 
             RebuildMissileDisplayList();
@@ -1069,10 +1282,15 @@ namespace MiniProject_GUI
                     PosX = launchX,
                     PosY = launchY,
                     PosZ = launchZ,
-                    StatusText = "대기"
+                    LauncherStatusText = "\uB300\uAE30",
+                    FlightStatusText = "",
+                    HasFlightStatus = false,
+                    StatusText = "\uB300\uAE30"
                 };
             }
 
+            MlsStock = "-";
+            RemainingMissileCountText = "-";
             RebuildMissileDisplayList();
         }
 
@@ -1083,7 +1301,10 @@ namespace MiniProject_GUI
                 missile = new OcMssMissileItem
                 {
                     MissileId = missileId,
-                    StatusText = "대기"
+                    LauncherStatusText = "\uB300\uAE30",
+                    FlightStatusText = "",
+                    HasFlightStatus = false,
+                    StatusText = "\uB300\uAE30"
                 };
                 missileDisplays[missileId] = missile;
             }
@@ -1091,9 +1312,18 @@ namespace MiniProject_GUI
             return missile;
         }
 
-        private void UpdateMissileDisplayStatus(uint missileId, string statusText)
+        private void UpdateMissileLauncherStatus(uint missileId, string statusText)
         {
-            GetOrCreateMissileDisplay(missileId).StatusText = statusText;
+            var missile = GetOrCreateMissileDisplay(missileId);
+            missile.LauncherStatusText = statusText;
+            RefreshMissileDisplayStatus(missile);
+        }
+
+        private static void RefreshMissileDisplayStatus(OcMssMissileItem missile)
+        {
+            missile.StatusText = missile.HasFlightStatus
+                ? missile.FlightStatusText
+                : missile.LauncherStatusText;
         }
 
         private void RebuildMissileDisplayList()
@@ -1103,7 +1333,48 @@ namespace MiniProject_GUI
                     .OrderBy(item => item.Key)
                     .Take(4)
                     .Select(item => item.Value));
+            RebuildMissileMapMarkers();
         }
+
+        private void RebuildMissileMapMarkers()
+        {
+            MapMissileMarkers.Clear();
+            if (!isScenarioApplied || !isSimulationRunning) return;
+
+            foreach (var missile in missileDisplays
+                         .OrderBy(item => item.Key)
+                         .Take(4)
+                         .Select(item => item.Value))
+            {
+                if (!missile.HasFlightStatus) continue;
+                if (IsTerminalMissileStatus(missile.StatusText)) continue;
+
+                var point = ToMapPoint(missile.PosX, missile.PosY);
+                MapMissileMarkers.Add(new OcMissileMarkerItem
+                {
+                    Left = point.X - 14,
+                    Top = point.Y - 22,
+                    Angle = GetMissileHeading(missile),
+                    Label = missile.MissileId.ToString(),
+                    Fill = Brushes.Lime
+                });
+            }
+        }
+
+        private double GetMissileHeading(OcMssMissileItem missile)
+        {
+            if (latestTargetPositions.TryGetValue(missile.TargetId, out var targetPosition))
+            {
+                return CalculateHeading(missile.PosX, missile.PosY, targetPosition.X, targetPosition.Y);
+            }
+
+            return CalculateHeading(
+                NormalizeCoordinate(ParseDouble(MlsPosX, 0)),
+                NormalizeCoordinate(ParseDouble(MlsPosY, 0)),
+                missile.PosX,
+                missile.PosY);
+        }
+
 
         private void HandleTargetDetection(NOM nom)
         {
@@ -1119,10 +1390,10 @@ namespace MiniProject_GUI
             {
                 TimeStr = DateTime.Now.ToString("HH:mm:ss"),
                 TargetId = targetId,
-                Success = success ? "탐지 성공" : "탐지 실패"
+                Success = success ? "\uD0D0\uC9C0 \uC131\uACF5" : "\uD0D0\uC9C0 \uC2E4\uD328"
             });
 
-            AddLog($"[수신] TargetDetection - targetID={targetId}, 탐지={success}");
+            AddLog($"[RX] TargetDetection - targetID={targetId}, detected={success}");
 
             if (success)
             {
@@ -1143,35 +1414,240 @@ namespace MiniProject_GUI
             if (!ShouldApplyRuntimeUpdates()) return;
 
             var idVal = nom.getValue("targetID");
-            var flagVal = nom.getValue("missionFlag") ?? nom.getValue("missionSuccess");
-            var targetIdFromMessage = idVal != null ? idVal.toUInt() : 0;
-            var missionFlag = flagVal != null ? flagVal.toUInt() : 1;
+            var missionFlagVal = nom.getValue("missionFlag");
+            var targetIdFromMessage = ResolveInterceptionTargetId(idVal != null ? idVal.toUInt() : (lastEngagedTargetId ?? ParseUInt(LaunchTargetId, 0)));
+
+            if (missionFlagVal == null)
+            {
+                AddLog("[ERR] TargetDestroyed missionFlag field missing");
+                return;
+            }
+
+            var missionFlag = missionFlagVal.toUInt();
             var success = missionFlag == 0;
 
             if (success)
             {
-                var targetId = idVal != null ? targetIdFromMessage : lastEngagedTargetId ?? ParseUInt(LaunchTargetId, 0);
-                destroyedTargetIds.Add(targetId);
-
-                InterceptionResultText = "요격 성공!";
-                InterceptionResultDetail = DateTime.Now.ToString("HH:mm:ss") + " 임무 완료";
-                InterceptionResultColor = new SolidColorBrush(Color.FromRgb(29, 92, 56));
+                RegisterInterceptionSuccess(targetIdFromMessage, "TargetDestroyed");
             }
             else
             {
-                InterceptionResultText = "임무 실패";
-                InterceptionResultDetail = DateTime.Now.ToString("HH:mm:ss") + " 표적 통과";
-                InterceptionResultColor = new SolidColorBrush(Color.FromRgb(122, 26, 26));
+                RegisterInterceptionFailure(targetIdFromMessage, "TargetDestroyed");
             }
 
-            EngagementResultList.Add(new OcEngagementResultItem
-            {
-                TimeStr = DateTime.Now.ToString("HH:mm:ss"),
-                Result = success ? "요격 성공" : "임무 실패"
-            });
-
-            AddLog($"[수신] TargetDestroyed - targetID={targetIdFromMessage}, missionFlag={missionFlag}");
+            AddLog($"[RX] TargetDestroyed - targetID={targetIdFromMessage}, missionFlag={missionFlag}, success={success}");
             RefreshScenarioPreview();
+        }
+
+        private void RegisterInterceptionSuccess(uint targetId, string source, uint? winningMissileId = null)
+        {
+            targetId = ResolveInterceptionTargetId(targetId);
+            failedTargetIds.Remove(targetId);
+
+            var resolvedWinningMissileId = ResolveWinningMissileId(targetId, winningMissileId);
+            if (resolvedWinningMissileId.HasValue)
+            {
+                successfulMissileByTargetId[targetId] = resolvedWinningMissileId.Value;
+            }
+
+            var firstSuccess = destroyedTargetIds.Add(targetId);
+            detectedTargetIds.Remove(targetId);
+            lastEngagedTargetId = targetId;
+
+            InterceptionResultText = "\uC694\uACA9 \uC131\uACF5";
+            InterceptionResultDetail = DateTime.Now.ToString("HH:mm:ss") + " \uC784\uBB34 \uC644\uB8CC";
+            InterceptionResultColor = new SolidColorBrush(Color.FromRgb(29, 92, 56));
+
+            if (firstSuccess)
+            {
+                EngagementResultList.Add(new OcEngagementResultItem
+                {
+                    TimeStr = DateTime.Now.ToString("HH:mm:ss"),
+                    Result = "\uC694\uACA9 \uC131\uACF5"
+                });
+
+                ShowInterceptionExplosion(targetId);
+            }
+
+            if (resolvedWinningMissileId.HasValue)
+            {
+                var winner = GetOrCreateMissileDisplay(resolvedWinningMissileId.Value);
+                winner.TargetId = targetId;
+                MarkMissileAsSucceeded(winner);
+                MarkFlyingMissilesAsFailed(targetId, resolvedWinningMissileId.Value);
+            }
+
+            SendInterceptionResultToSimulatorsIfChanged(targetId, 0, source);
+
+            RefreshInterceptionUiState();
+        }
+
+        private uint? ResolveWinningMissileId(uint targetId, uint? explicitMissileId)
+        {
+            if (explicitMissileId.HasValue)
+            {
+                return explicitMissileId.Value;
+            }
+
+            if (reportedHitMissileByTargetId.TryGetValue(targetId, out var reportedMissileId))
+            {
+                return reportedMissileId;
+            }
+
+            return missileDisplays.Values
+                .Where(missile => missile.TargetId == targetId && missile.HasFlightStatus && !IsTerminalMissileStatus(missile.StatusText))
+                .OrderBy(missile => missile.MissileId)
+                .Select(missile => (uint?)missile.MissileId)
+                .FirstOrDefault();
+        }
+
+        private void RegisterInterceptionFailure(uint targetId, string source)
+        {
+            targetId = ResolveInterceptionTargetId(targetId);
+            if (destroyedTargetIds.Contains(targetId)) return;
+
+            var firstFailure = failedTargetIds.Add(targetId);
+            lastEngagedTargetId = targetId;
+            MarkFlyingMissilesAsFailed(targetId, null);
+
+            InterceptionResultText = "\uC694\uACA9 \uC2E4\uD328";
+            InterceptionResultDetail = DateTime.Now.ToString("HH:mm:ss") + " \uD45C\uC801 \uD1B5\uACFC";
+            InterceptionResultColor = new SolidColorBrush(Color.FromRgb(122, 26, 26));
+
+            if (firstFailure)
+            {
+                EngagementResultList.Add(new OcEngagementResultItem
+                {
+                    TimeStr = DateTime.Now.ToString("HH:mm:ss"),
+                    Result = "\uC694\uACA9 \uC2E4\uD328"
+                });
+            }
+
+            SendInterceptionResultToSimulatorsIfChanged(targetId, 1, source);
+
+            RefreshInterceptionUiState();
+        }
+
+        private void RefreshInterceptionUiState()
+        {
+            RebuildMissileDisplayList();
+            RefreshScenarioPreview();
+        }
+
+        private void ShowInterceptionExplosion(uint targetId)
+        {
+            var fallbackPoint = FindScenarioThreat(targetId)?.Points.FirstOrDefault();
+            var position = GetThreatPosition(targetId, fallbackPoint);
+            var point = ToMapPoint(position.X, position.Y);
+            var explosion = new OcExplosionMarkerItem
+            {
+                Left = point.X - 42,
+                Top = point.Y - 42,
+                Size = 84
+            };
+
+            MapExplosionMarkers.Add(explosion);
+
+            var timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(950)
+            };
+            timer.Tick += (_, _) =>
+            {
+                timer.Stop();
+                MapExplosionMarkers.Remove(explosion);
+            };
+            timer.Start();
+        }
+
+        private void MarkFlyingMissilesAsFailed(uint targetId, uint? excludedMissileId)
+        {
+            foreach (var missile in missileDisplays.Values)
+            {
+                if (excludedMissileId.HasValue && missile.MissileId == excludedMissileId.Value) continue;
+                if (missile.TargetId != targetId) continue;
+                if (!missile.HasFlightStatus) continue;
+                if (IsTerminalMissileStatus(missile.StatusText)) continue;
+
+                MarkMissileAsFailed(missile);
+            }
+        }
+
+        private void MarkMissileAsSucceeded(OcMssMissileItem missile)
+        {
+            missile.FlightStatusText = "\uC694\uACA9\uC131\uACF5";
+            missile.HasFlightStatus = true;
+            RefreshMissileDisplayStatus(missile);
+        }
+
+        private void MarkMissileAsFailed(OcMssMissileItem missile)
+        {
+            failedMissileIds.Add(missile.MissileId);
+            missile.FlightStatusText = "\uC694\uACA9\uC2E4\uD328";
+            missile.HasFlightStatus = true;
+            RefreshMissileDisplayStatus(missile);
+        }
+
+        private static bool IsTerminalMissileStatus(string statusText)
+        {
+            return statusText == "\uC694\uACA9\uC131\uACF5" || statusText == "\uC694\uACA9\uC2E4\uD328";
+        }
+
+        private uint ResolveInterceptionTargetId(uint candidateTargetId)
+        {
+            var activeTargetIds = GetActiveScenarioTargetIds();
+            if (activeTargetIds.Contains(candidateTargetId))
+            {
+                return candidateTargetId;
+            }
+
+            if (lastEngagedTargetId.HasValue && activeTargetIds.Contains(lastEngagedTargetId.Value))
+            {
+                return lastEngagedTargetId.Value;
+            }
+
+            return activeTargetIds.Count == 1 ? activeTargetIds.First() : candidateTargetId;
+        }
+
+        private void SendInterceptionResultToSimulatorsIfChanged(uint targetId, uint missionFlag, string source)
+        {
+            if (sentInterceptionResultFlags.TryGetValue(targetId, out var sentFlag) && sentFlag == missionFlag)
+            {
+                return;
+            }
+
+            sentInterceptionResultFlags[targetId] = missionFlag;
+            SendInterceptionResultToSimulators(targetId, missionFlag, source);
+        }
+
+        private void SendInterceptionResultToSimulators(uint targetId, uint missionFlag, string source)
+        {
+            SendInterceptionResultMessage("ATSInterceptionResult", 0x0e, targetId, missionFlag);
+            SendInterceptionResultMessage("MSSInterceptionResult", 0x0f, targetId, missionFlag);
+            AddLog($"[TX] Interception result - targetID={targetId}, missionFlag={missionFlag}, source={source}");
+        }
+
+        private void SendInterceptionResultMessage(string messageName, ushort messageId, uint targetId, uint missionFlag)
+        {
+            try
+            {
+                var nom = nomHandler.GetNMessage(messageName)?.createNOMInstance();
+                if (nom == null)
+                {
+                    AddLog($"[ERR] {messageName} NOM not found");
+                    return;
+                }
+
+                nom.setValue("Header.MessageID", new NUShort(messageId));
+                nom.setValue("Header.MessageLength", new NUShort(8));
+                nom.setValue("targetID", new NUInteger(targetId));
+                nom.setValue("missionFlag", new NUInteger(missionFlag));
+                nomHandler.SendNOMMessage(nom);
+            }
+            catch (Exception ex)
+            {
+                AddLog($"[ERR] {messageName} send failed: {ex.Message}");
+            }
         }
 
         private static readonly SolidColorBrush ConnectedColor =
@@ -1188,22 +1664,22 @@ namespace MiniProject_GUI
             {
                 case "ATS":
                     lastAtsStatusAt = now;
-                    AtsStatusText = "ATS 연결됨";
+                    AtsStatusText = "ATS \uC5F0\uACB0\uB428";
                     AtsStatusColor = ConnectedColor;
                     break;
                 case "RSS":
                     lastRssStatusAt = now;
-                    RssStatusText = "RSS 연결됨";
+                    RssStatusText = "RSS \uC5F0\uACB0\uB428";
                     RssStatusColor = ConnectedColor;
                     break;
                 case "MLS":
                     lastMlsStatusAt = now;
-                    MlsStatusText = "MLS 연결됨";
+                    MlsStatusText = "MLS \uC5F0\uACB0\uB428";
                     MlsStatusColor = ConnectedColor;
                     break;
                 case "MSS":
                     lastMssStatusAt = now;
-                    MssStatusText = "MSS 연결됨";
+                    MssStatusText = "MSS \uC5F0\uACB0\uB428";
                     MssStatusColor = ConnectedColor;
                     break;
             }
@@ -1229,25 +1705,25 @@ namespace MiniProject_GUI
 
             if (IsTimedOut(now, lastAtsStatusAt))
             {
-                AtsStatusText = "ATS 미연결";
+                AtsStatusText = "ATS \uBBF8\uC5F0\uACB0";
                 AtsStatusColor = DisconnectedColor;
             }
 
             if (IsTimedOut(now, lastRssStatusAt))
             {
-                RssStatusText = "RSS 미연결";
+                RssStatusText = "RSS \uBBF8\uC5F0\uACB0";
                 RssStatusColor = DisconnectedColor;
             }
 
             if (IsTimedOut(now, lastMlsStatusAt))
             {
-                MlsStatusText = "MLS 미연결";
+                MlsStatusText = "MLS \uBBF8\uC5F0\uACB0";
                 MlsStatusColor = DisconnectedColor;
             }
 
             if (IsTimedOut(now, lastMssStatusAt))
             {
-                MssStatusText = "MSS 미연결";
+                MssStatusText = "MSS \uBBF8\uC5F0\uACB0";
                 MssStatusColor = DisconnectedColor;
             }
         }
@@ -1271,10 +1747,21 @@ namespace MiniProject_GUI
             if (val == null) return "-";
             return val.toUInt() switch
             {
-                0 => "장입",
-                1 => "준비",
-                2 => "발사",
+                0 => "\uC7A5\uC785",
+                1 => "\uB300\uAE30",
+                2 => "\uBC1C\uC0AC",
                 _ => val.toUInt().ToString()
+            };
+        }
+
+        private static string GetMssFlightStatusText(uint status)
+        {
+            return status switch
+            {
+                1 => "\uCD94\uC801\uC911",
+                2 => "\uD310\uC815\uB300\uAE30",
+                3 => "\uC694\uACA9\uC2E4\uD328",
+                _ => ""
             };
         }
 

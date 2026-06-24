@@ -2,7 +2,7 @@
   MiniProjectMain.cpp
   _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
 C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Logger\Logger.h(211,38): warning C4101: 'e' :참조되지 않은 지역 변수입니다.
-  (소스 파일 '../MiniProjectMain/MiniProjectMain.cpp'을(를) 컴파일하는 중)
+  (소스 파일 'MiniProjectMain.cpp'을(를) 컴파일하는 중)
   
 MiniProjectMain.obj : warning LNK4075: '/EDITANDCONTINUE'이(가) '/INCREMENTAL:NO' 사양으로 인해 무시됩니다.
   MiniProjectMain.vcxproj -> C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\bin\MiniProjectMaind.exe

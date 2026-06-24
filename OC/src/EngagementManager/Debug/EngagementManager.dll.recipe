@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\lib\EngagementManager.dll</FullPath>
+      <FullPath>C:\LIG\nFrameworkv1.8.2\examples\MiniProject_SAMS_OC\src\EngagementManager\lib\EngagementManager.dll</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

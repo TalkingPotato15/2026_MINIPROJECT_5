@@ -102,7 +102,7 @@
                     <TextBlock Text="Y" Style="{StaticResource LabelText}"/>
                     <TextBox Text="{Binding RssPosY, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" Tag="MapY"/>
                     <TextBlock Text="Z" Style="{StaticResource LabelText}"/>
-                    <TextBox Text="{Binding RssPosZ, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" IsReadOnly="True" IsTabStop="False" Tag="NonNegative"/>
+                    <TextBox Text="{Binding RssPosZ, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" IsReadOnly="True" IsTabStop="False" Tag="AltitudeZ"/>
                     <TextBlock Text="R" Style="{StaticResource LabelText}" Margin="12,0,0,0"/>
                     <TextBox Text="{Binding RssRadius, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" Tag="NonNegative"/>
                 </StackPanel>
@@ -114,7 +114,7 @@
                     <TextBlock Text="Y" Style="{StaticResource LabelText}"/>
                     <TextBox Text="{Binding MlsPosY, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" Tag="MapY"/>
                     <TextBlock Text="Z" Style="{StaticResource LabelText}"/>
-                    <TextBox Text="{Binding MlsPosZ, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" IsReadOnly="True" IsTabStop="False" Tag="NonNegative"/>
+                    <TextBox Text="{Binding MlsPosZ, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" IsReadOnly="True" IsTabStop="False" Tag="AltitudeZ"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -230,7 +230,7 @@
                                                 <TextBlock Grid.Column="3" Text="Y" Style="{StaticResource LabelText}"/>
                                                 <TextBox Grid.Column="4" Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" Tag="MapY"/>
                                                 <TextBlock Grid.Column="5" Text="Z" Style="{StaticResource LabelText}"/>
-                                                <TextBox Grid.Column="6" Text="{Binding Z, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" Tag="NonNegative"/>
+                                                <TextBox Grid.Column="6" Text="{Binding Z, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputBox}" Tag="AltitudeZ"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
