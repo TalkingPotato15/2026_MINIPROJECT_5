@@ -55,7 +55,7 @@ void MSSManager::resetMissiles()
 	for (unsigned int i = 0; i < missileStates.size(); ++i)
 	{
 		missileStates[i] = MissileState();
-		missileStates[i].missileId = i + 1;
+		missileStates[i].missileId = i;
 	}
 }
 
@@ -176,15 +176,15 @@ void MSSManager::recvIgnitionCommand(std::shared_ptr<NOM> nomMsg)
 
 	const unsigned int missileId = missileIdValue->toUInt();
 	const unsigned int targetId = targetIdValue->toUInt();
-	if (missileId < 1 || missileId > missileStates.size())
+	if (missileId >= missileStates.size())
 	{
-		ntcout << _T("[MSS][IGNITION][ERROR] missileID must be 1..4: ")
+		ntcout << _T("[MSS][IGNITION][ERROR] missileID must be 0..3: ")
 			<< missileId << std::endl;
 		return;
 	}
 
 	std::lock_guard<std::mutex> lock(stateMutex);
-	auto& missile = missileStates[missileId - 1];
+	auto& missile = missileStates[missileId];
 	missile.missileId = missileId;
 	missile.targetId = targetId;
 
@@ -201,6 +201,44 @@ void MSSManager::recvIgnitionCommand(std::shared_ptr<NOM> nomMsg)
 		<< _T(",") << missile.z << _T(")") << std::endl;
 }
 
+void MSSManager::recvMSSInterceptionResult(std::shared_ptr<NOM> nomMsg)
+{
+	auto targetIdValue = nomMsg->getValue(_T("targetID"));
+	if (!targetIdValue || targetIdValue->toUInt() == 0)
+	{
+		ntcout << _T("[MSS][INTERCEPTION RESULT][ERROR] targetID is missing or zero") << std::endl;
+		return;
+	}
+
+	const unsigned int targetId = targetIdValue->toUInt();
+	auto missionFlagValue = nomMsg->getValue(_T("missionFlag"));
+	const unsigned int missionFlag = missionFlagValue ? missionFlagValue->toUInt() : 0;
+	std::lock_guard<std::mutex> lock(stateMutex);
+	bool removed = false;
+
+	for (unsigned int i = 0; i < missileStates.size(); ++i)
+	{
+		auto& missile = missileStates[i];
+		if (missile.targetId != targetId)
+		{
+			continue;
+		}
+
+		const unsigned int missileId = missile.missileId;
+		missile = MissileState();
+		missile.missileId = i;
+		removed = true;
+		ntcout << _T("[MSS][INTERCEPTION RESULT] removed missileID=") << missileId
+			<< _T(" targetID=") << targetId
+			<< _T(" missionFlag=") << missionFlag << std::endl;
+	}
+
+	if (!removed)
+	{
+		ntcout << _T("[MSS][INTERCEPTION RESULT][WARN] no missile for targetID=")
+			<< targetId << std::endl;
+	}
+}
 void MSSManager::updateMissilePaths()
 {
 	std::lock_guard<std::mutex> lock(stateMutex);
@@ -304,6 +342,10 @@ void MSSManager::recvMsg(std::shared_ptr<NOM> nomMsg)
 	else if (nomMsg->getName() == _T("InnerIgnitionCommandToMSS"))
 	{
 		recvIgnitionCommand(nomMsg);
+	}
+	else if (nomMsg->getName() == _T("InnerMSSInterceptionResultToMSS"))
+	{
+		recvMSSInterceptionResult(nomMsg);
 	}
 	else if (nomMsg->getName() == _T("InnerStartSimulationToModel"))
 	{

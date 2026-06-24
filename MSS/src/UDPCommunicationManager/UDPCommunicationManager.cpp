@@ -324,6 +324,9 @@ void UDPCommunicationManager::funcMapInit()
 	msgProc = bind(&UDPCommunicationManager::recvIgnitionCommand, this, placeholders::_1);
 	funcMap.insert({ _T("IgnitionCommand"), msgProc });
 
+	msgProc = bind(&UDPCommunicationManager::recvMSSInterceptionResult, this, placeholders::_1);
+	funcMap.insert({ _T("MSSInterceptionResult"), msgProc });
+
 	msgProc = bind(&UDPCommunicationManager::recvInnerSendScenarioAck, this, placeholders::_1);
 	funcMap.insert({ _T("InnerSendScenarioAck"), msgProc });
 
@@ -348,9 +351,6 @@ void UDPCommunicationManager::funcMapInit()
 
 	msgProc = bind(&UDPCommunicationManager::recvInnerMSSStatusToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerMSSStatusToComm"), msgProc });
-
-	msgProc = bind(&UDPCommunicationManager::recvInnerMSSInterceptionResultToComm, this, placeholders::_1);
-	funcMap.insert({ _T("InnerMSSInterceptionResultToComm"), msgProc });
 
 	msgProc = bind(&UDPCommunicationManager::recvInnerRouteToComm, this, placeholders::_1);
 	funcMap.insert({ _T("InnerRouteToComm"), msgProc });
@@ -463,6 +463,25 @@ void UDPCommunicationManager::recvIgnitionCommand(shared_ptr<NOM> nomMsg)
 		_T("missileID"), _T("targetID"),
 		_T("launchPos.x"), _T("launchPos.y"), _T("launchPos.z")
 	};
+	for (const auto& field : fields)
+	{
+		auto value = nomMsg->getValue(field);
+		if (value) innerMsg->setValue(field, value);
+	}
+
+	this->sendMsg(innerMsg);
+}
+
+void UDPCommunicationManager::recvMSSInterceptionResult(shared_ptr<NOM> nomMsg)
+{
+	auto innerMsg = meb->getNOMInstance(name, _T("InnerMSSInterceptionResultToMSS"));
+	if (!innerMsg.get())
+	{
+		tcerr << _T("[UDPCommunicationManager] InnerMSSInterceptionResultToMSS NOM is undefined.") << endl;
+		return;
+	}
+
+	const tstring fields[] = { _T("targetID"), _T("missionFlag") };
 	for (const auto& field : fields)
 	{
 		auto value = nomMsg->getValue(field);
@@ -718,11 +737,6 @@ void UDPCommunicationManager::recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg)
 	sendExternalMsg(statusMsg, _T("periodic MSS status"));
 }
 
-void UDPCommunicationManager::recvInnerMSSInterceptionResultToComm(shared_ptr<NOM> nomMsg)
-{
-	(void)nomMsg;
-}
-
 void UDPCommunicationManager::sendInnerMsg(shared_ptr<NOM> nomMsg)
 {
 	if (!nomMsg.get())
@@ -787,36 +801,41 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 		return;
 	}
 
-	unsigned int declaredPayloadLength = 0;
+	unsigned int declaredMessageLength = 0;
 	if (lengthPos + lengthSize <= static_cast<unsigned int>(size))
 	{
 		if (lengthSize == 2)
 		{
 			unsigned short rawLength = 0;
 			memcpy(&rawLength, data + lengthPos, lengthSize);
-			declaredPayloadLength = commConfig->getLengthBigEndian() ? ntohs(rawLength) : rawLength;
+			declaredMessageLength = commConfig->getLengthBigEndian() ? ntohs(rawLength) : rawLength;
 		}
 		else if (lengthSize == 4)
 		{
 			unsigned int rawLength = 0;
 			memcpy(&rawLength, data + lengthPos, lengthSize);
-			declaredPayloadLength = commConfig->getLengthBigEndian() ? ntohl(rawLength) : rawLength;
+			declaredMessageLength = commConfig->getLengthBigEndian() ? ntohl(rawLength) : rawLength;
 		}
 	}
 
 	const tstring msgName = commMsgHandler.getMsgName((unsigned short)msgID);
+	const bool suppressStatusLog = msgName == _T("ATSStatus")
+		|| msgName == _T("MLSStatus")
+		|| msgName == _T("RSSStatus");
 	std::wostringstream idStream;
 	idStream << _T("0x") << std::uppercase << std::hex
 		<< std::setw(2) << std::setfill(_T('0')) << msgID;
-	tcout << _T("[COMM][RX] id=") << idStream.str()
-		<< _T(" name=") << (msgName.empty() ? _T("<unknown>") : msgName)
-		<< _T(" packetBytes=") << size
-		<< _T(" declaredPayloadLength=") << declaredPayloadLength
-		<< _T(" expectedPacketBytes=") << (headerSize + declaredPayloadLength) << endl;
-	if (declaredPayloadLength > 0 && headerSize + declaredPayloadLength != static_cast<unsigned int>(size))
+	if (!suppressStatusLog)
+	{
+		tcout << _T("[COMM][RX] id=") << idStream.str()
+			<< _T(" name=") << (msgName.empty() ? _T("<unknown>") : msgName)
+			<< _T(" packetBytes=") << size
+			<< _T(" declaredMessageLength=") << declaredMessageLength << endl;
+	}
+	if (declaredMessageLength > 0 && declaredMessageLength != static_cast<unsigned int>(size))
 	{
 		tcerr << _T("[COMM][RX][WARN] header length mismatch: actual=") << size
-			<< _T(" expected=") << (headerSize + declaredPayloadLength) << endl;
+			<< _T(" expected=") << declaredMessageLength << endl;
 	}
 	if (msgName.empty())
 	{

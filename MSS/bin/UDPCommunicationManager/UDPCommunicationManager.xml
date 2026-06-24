@@ -131,7 +131,7 @@
 			<NOM:parameter name="matchedTarget" dataType="ATSInformationStruct"/>
 		</NOM:interaction>
 
-		<NOM:interaction name="InnerMSSInterceptionResultToComm" id="0x65" sharing="Subscribe" orderType="Receive" alignment="false">
+		<NOM:interaction name="InnerMSSInterceptionResultToMSS" id="0x65" sharing="Publish" orderType="Receive" alignment="false">
 			<NOM:parameter name="targetID" dataType="uintBE"/>
 			<NOM:parameter name="missionFlag" dataType="uintBE"/>
 		</NOM:interaction>

@@ -232,7 +232,7 @@ void ATSManager::recvInnerStartSimulationToModel(std::shared_ptr<NOM> nomMsg)
 
     // addTimer(콜백, 주기_ms, 인수) → 타이머 핸들 반환
     // 100ms(10Hz)마다 sendATInfo() 호출
-    timerHandle = nTimer->addPeriodicTask(500, sendATInfo_Periodic);
+    timerHandle = nTimer->addPeriodicTask(100, sendATInfo_Periodic);
     ntcout << _T("[ATSManager] 시뮬레이션 시작 - 타이머 핸들: ") << timerHandle << std::endl;
 }
 

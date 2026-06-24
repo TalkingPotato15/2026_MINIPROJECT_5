@@ -1,4 +1,5 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(516,5): warning MSB8004: Intermediate 디렉터리가 슬래시로 끝나지 않습니다. Intermediate 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
+﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppClean.targets(77,5): warning : 'c:\users\user\desktop\msss_v3\bin\udpcommunicationmanager\udpcommunicationmanagerd.dll' 경로에 대한 액세스가 거부되었습니다.
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(516,5): warning MSB8004: Intermediate 디렉터리가 슬래시로 끝나지 않습니다. Intermediate 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
 C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8004: Output 디렉터리가 슬래시로 끝나지 않습니다. Output 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
 cl : 명령줄  warning D9035: 'experimental:preprocessor' 옵션은 더 이상 사용되지 않으므로 이후 릴리스에서 제거될 예정입니다.
 cl : 명령줄  warning D9036: 'Zc:preprocessor'을(를) 사용하고 'experimental:preprocessor'은(는) 사용하지 마십시오.
@@ -9,24 +10,24 @@ cl : 명령줄  warning D9036: 'Zc:preprocessor'을(를) 사용하고 'experimen
   - add _WIN32_WINNT=0x0601 to your project's Preprocessor Definitions.
   Assuming _WIN32_WINNT=0x0601 (i.e. Windows 7 target).
 C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Appender\FileAppender.h(90,38): warning C4275: DLL 인터페이스가 아닌 class 'nframework::log4nf::IAppender'이(가) DLL 인터페이스 class 'nframework::log4nf::FileAppender'의 기본으로 사용되었습니다.
-  (소스 파일 'UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../UDPCommunicationManager/UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
       C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Appender\IAppender.h(61,8):
       'nframework::log4nf::IAppender' 선언을 참조하십시오.
       C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Appender\FileAppender.h(90,17):
       'nframework::log4nf::FileAppender' 선언을 참조하십시오.
   
 C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(93,42): warning C4275: DLL 인터페이스가 아닌 class 'nframework::log4nf::IAppender'이(가) DLL 인터페이스 class 'nframework::log4nf::HTMLFileAppender'의 기본으로 사용되었습니다.
-  (소스 파일 'UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../UDPCommunicationManager/UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
       C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Appender\IAppender.h(61,8):
       'nframework::log4nf::IAppender' 선언을 참조하십시오.
       C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Appender\HTMLFileAppender.h(93,17):
       'nframework::log4nf::HTMLFileAppender' 선언을 참조하십시오.
   
 C:\LIG\nFrameworkv1.8.2\include\nFramework\Log4nF\Logger\Logger.h(211,38): warning C4101: 'e' :참조되지 않은 지역 변수입니다.
-  (소스 파일 'UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../UDPCommunicationManager/UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
   
 C:\LIG\nFrameworkv1.8.2\include\nFramework\nLineLog\NLineLog.h(16,42): warning C4275: DLL 인터페이스가 아닌 class 'nframework::nlinelog::INLineLog'이(가) DLL 인터페이스 class 'nframework::nlinelog::NLineLog'의 기본으로 사용되었습니다.
-  (소스 파일 'UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
+  (소스 파일 '../UDPCommunicationManager/UDPCommunicationManager.cpp'을(를) 컴파일하는 중)
       C:\LIG\nFrameworkv1.8.2\include\nFramework\NLineLog\INLineLog.h(47,8):
       'nframework::nlinelog::INLineLog' 선언을 참조하십시오.
       C:\LIG\nFrameworkv1.8.2\include\nFramework\nLineLog\NLineLog.h(16,24):

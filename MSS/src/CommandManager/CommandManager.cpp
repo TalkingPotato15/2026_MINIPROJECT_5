@@ -215,7 +215,7 @@ CommandManager::start()
 			this->testSend();*/
 			wchar_t* args = _T("SAAM");
 			STDFUNCTION testPeriodic = std::bind(&CommandManager::testSendArgs, this, args);
-			timerHandle = nTimer->addPeriodicTask(1000, testPeriodic, (void*)args);
+			timerHandle = nTimer->addPeriodicTask(100, testPeriodic, (void*)args);
 			this->testSendArgs(args);
 		}
 		else if (cmdStr == _T("break"))

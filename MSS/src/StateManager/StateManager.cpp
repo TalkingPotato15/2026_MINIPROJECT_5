@@ -35,7 +35,7 @@ StateManager::initialize(void)
 	periodicFunc = std::bind(&StateManager::sendSimulatorState, this);
 
 	nTimer = &(NTimer::getInstance());
-	timerHandle = nTimer->addPeriodicTask(1000, periodicFunc);
+	timerHandle = nTimer->addPeriodicTask(100, periodicFunc);
 }
 
 void

@@ -38,6 +38,7 @@ private:
 	void sendMSSStatus();
 	void recvATSInformation(std::shared_ptr<NOM> nomMsg);
 	void recvIgnitionCommand(std::shared_ptr<NOM> nomMsg);
+	void recvMSSInterceptionResult(std::shared_ptr<NOM> nomMsg);
 	void updateMissilePaths();
 	void resetMissiles();
 	void resetTargets();

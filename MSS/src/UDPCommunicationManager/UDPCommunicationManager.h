@@ -50,6 +50,7 @@ private:
 	void recvScenario(shared_ptr<NOM> nomMsg);
 	void recvATSInformationUplink(shared_ptr<NOM> nomMsg);
 	void recvIgnitionCommand(shared_ptr<NOM> nomMsg);
+	void recvMSSInterceptionResult(shared_ptr<NOM> nomMsg);
 	void recvSendScenario(shared_ptr<NOM> nomMsg);
 	void recvStartSimulation(shared_ptr<NOM> nomMsg);
 	void recvStop(shared_ptr<NOM> nomMsg);
@@ -61,7 +62,6 @@ private:
 	void recvInnerStopSimulationAck(shared_ptr<NOM> nomMsg);
 	void recvInnerSimulatorStateComm(shared_ptr<NOM> nomMsg);
 	void recvInnerMSSStatusToComm(shared_ptr<NOM> nomMsg);
-	void recvInnerMSSInterceptionResultToComm(shared_ptr<NOM> nomMsg);
 	void recvInnerRouteToComm(shared_ptr<NOM> nomMsg);
 	void recvInnerAirThreatInfo(shared_ptr<NOM> nomMsg);
 	void recvMissileDetonation(shared_ptr<NOM> nomMsg);

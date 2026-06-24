@@ -1,29 +1,29 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(516,5): warning MSB8004: Intermediate 디렉터리가 슬래시로 끝나지 않습니다. Intermediate 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
 C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8004: Output 디렉터리가 슬래시로 끝나지 않습니다. Output 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
   StateManager.cpp
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4ba 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4bb 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4bc 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4bd 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4be 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4bf 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4c3 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4c8 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4cb 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4c7 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0x4ca 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdb6 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdb7 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdb8 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdba 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdbc 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdbe 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc1 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdb9 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdbb 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdbd 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc0 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc4 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc5 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc6 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc7 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc8 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdc9 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdd3 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdd4 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdd5 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdd7 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdda 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdd6 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xdd9 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xddb 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xddc 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
-C:\Users\User\Desktop\MSSS_v3\src\StateManager\StateManager.cpp(1,1): warning C4828: 파일에 0xddd 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
 C:\LIG\nFrameworkv1.8.2\include\nFramework\util\IniHandler.h(251,12): warning C4251: 'IniHandler::m_strIniFilePath': 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>'에서는 'IniHandler'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 함
   (소스 파일 'StateManager.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.42.34433\include\xstring(527,7):
