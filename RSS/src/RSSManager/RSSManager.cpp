@@ -325,15 +325,6 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		if (mssInfo.mssStatus == 2)
-		{
-			ntcout << _T("[RSSManager] Target intercepted by MSS status: targetId=") << mssInfo.targetId
-				<< _T(", missileId=") << mssInfo.missileId << std::endl;
-			sendTargetDestroyed(mssInfo.targetId, 0);
-			detonationManager.markDestroyed(mssInfo.targetId);
-			continue;
-		}
-
 		if (!detectionManager.isDetected(mssInfo.targetId))
 		{
 			continue;
