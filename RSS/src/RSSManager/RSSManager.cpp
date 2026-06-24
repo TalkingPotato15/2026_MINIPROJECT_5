@@ -336,11 +336,18 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		if (detonationManager.isIntercepted(*atsInfo, mssInfo))
+		double distance = detonationManager.getDistance(*atsInfo, mssInfo);
+		bool intercepted = detonationManager.isIntercepted(*atsInfo, mssInfo);
+		ntcout << _T("[RSSManager] ATS-MSS distance: targetId=") << mssInfo.targetId
+			<< _T(", missileId=") << mssInfo.missileId
+			<< _T(", distance=") << distance
+			<< _T(", intercepted=") << (intercepted ? 1 : 0) << std::endl;
+
+		if (intercepted)
 		{
 			ntcout << _T("[RSSManager] Target intercepted: targetId=") << mssInfo.targetId
 				<< _T(", missileId=") << mssInfo.missileId
-				<< _T(", distance=") << detonationManager.getDistance(*atsInfo, mssInfo) << std::endl;
+				<< _T(", distance=") << distance << std::endl;
 			sendTargetDestroyed(mssInfo.targetId, 1);
 			detonationManager.markDestroyed(mssInfo.targetId);
 			continue;
