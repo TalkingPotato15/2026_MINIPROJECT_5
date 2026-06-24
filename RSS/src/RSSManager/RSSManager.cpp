@@ -234,7 +234,8 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		bool inRange = detectionManager.isInRange(atsInfo);
+		bool wasDetected = detectionManager.isDetected(atsInfo.targetId);
+		bool isCurrentlyInRange = detectionManager.isInRange(atsInfo);
 		double distance = detectionManager.hasDetectionArea() ? detectionManager.getDistanceToRSS(atsInfo) : 0.0;
 		ntcout << _T("[RSSManager] ATSInformation received: index=") << i
 			<< _T(", targetId=") << atsInfo.targetId
@@ -244,7 +245,7 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 		if (detectionManager.hasDetectionArea())
 		{
 			ntcout << _T(", distance=") << distance
-				<< _T(", inRange=") << (inRange ? 1 : 0);
+				<< _T(", inRange=") << (isCurrentlyInRange ? 1 : 0);
 		}
 		else
 		{
@@ -262,9 +263,9 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		if (!detectionManager.isDetected(atsInfo.targetId))
+		if (!wasDetected)
 		{
-			if (!inRange)
+			if (!isCurrentlyInRange)
 			{
 				continue;
 			}
@@ -276,12 +277,13 @@ void RSSManager::recvInnerATSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		if (!inRange)
+		if (!isCurrentlyInRange)
 		{
 			auto cachedTarget = detectionManager.findDetectedTarget(atsInfo.targetId);
 			if (cachedTarget != nullptr)
 			{
 				CachedATSInfo lastDetectedTarget = *cachedTarget;
+				lastDetectedTarget.atsStatus = 0;
 				ntcout << _T("[RSSManager] Target left RSS range: targetId=") << atsInfo.targetId
 					<< _T(", lastPos=(") << lastDetectedTarget.x << _T(", ")
 					<< lastDetectedTarget.y << _T(", ") << lastDetectedTarget.z << _T(")") << std::endl;
