@@ -833,7 +833,7 @@ UDPCommunicationManager::getObjectInstanceID(shared_ptr<NOM> nomMsg)
 
 		if (nom->getMessageID() == nomMsg->getMessageID())
 		{
-			printf("[TCPCommunicationManager]Found object instance id : %u\n", key);
+			printf("[UDPCommunicationManager]Found object instance id : %u\n", key);
 			oid = key;
 			break;
 		}

@@ -1,5 +1,14 @@
 #pragma once
+/**
+ * @file MFRSHeader.h
+ * @brief OC-RSS 간 UDP ICD 메시지 ID와 내부 시뮬레이터 식별자 열거형을 정의한다.
+ */
 
+/**
+ * @brief 외부 UDP ICD 메시지 식별자.
+ *
+ * UDPCommunicationManager가 OC 및 타 모의기와 송수신하는 외부 메시지 ID이다.
+ */
 enum class ICD_MessageID
 {
 	// OC SAMS ICD
@@ -22,6 +31,11 @@ enum class ICD_MessageID
 	MissionFailed,
 };
 
+/**
+ * @brief 내부 NOM 메시지 식별자.
+ *
+ * UDPCommunicationManager와 RSS 내부 매니저 사이에서 사용되는 내부 메시지 ID이다.
+ */
 enum class InnerICD_MessageID
 {
 	// 공용 ICD 내부 메시지
@@ -64,6 +78,9 @@ enum class InnerICD_MessageID
 	InnerAirThreatDetonation,
 };
 
+/**
+ * @brief 시뮬레이터 구성 요소 식별자.
+ */
 enum class SimulatorID
 {
 	TCC = 100,
@@ -73,6 +90,9 @@ enum class SimulatorID
 	MFRS,
 };
 
+/**
+ * @brief 전장 객체의 상태 구분값.
+ */
 enum class TrackState
 {
 	// ATS
