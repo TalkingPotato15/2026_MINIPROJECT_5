@@ -320,8 +320,17 @@ void RSSManager::recvInnerMSSInformationToRSS(std::shared_ptr<NOM> nomMsg)
 			continue;
 		}
 
-		if (mssInfo.targetId == 0 || detonationManager.isDestroyed(mssInfo.targetId))
+		if (mssInfo.mssStatus == 0 || detonationManager.isDestroyed(mssInfo.targetId))
 		{
+			continue;
+		}
+
+		if (mssInfo.mssStatus == 2)
+		{
+			ntcout << _T("[RSSManager] Target intercepted by MSS status: targetId=") << mssInfo.targetId
+				<< _T(", missileId=") << mssInfo.missileId << std::endl;
+			sendTargetDestroyed(mssInfo.targetId, 0);
+			detonationManager.markDestroyed(mssInfo.targetId);
 			continue;
 		}
 
@@ -387,7 +396,8 @@ bool RSSManager::tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, const tstring& miss
 	auto xValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.x"));
 	auto yValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.y"));
 	auto zValue = nomMsg->getValue(missilePrefix + _T(".MSSPos.z"));
-	if (!targetIDValue || !missileIDValue || !xValue || !yValue || !zValue)
+	auto statusValue = nomMsg->getValue(missilePrefix + _T(".mssStatus"));
+	if (!targetIDValue || !missileIDValue || !xValue || !yValue || !zValue || !statusValue)
 	{
 		return false;
 	}
@@ -397,6 +407,7 @@ bool RSSManager::tryReadMSSInfo(std::shared_ptr<NOM> nomMsg, const tstring& miss
 	mssInfo.x = xValue->toDouble();
 	mssInfo.y = yValue->toDouble();
 	mssInfo.z = zValue->toDouble();
+	mssInfo.mssStatus = statusValue->toUInt();
 
 	return true;
 }

@@ -19,4 +19,5 @@ struct CachedMSSInfo
 	double z = 0.0;
 	uint32_t targetId = 0;
 	uint32_t missileId = 0;
+	uint32_t mssStatus = 0;
 };
