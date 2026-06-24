@@ -234,7 +234,7 @@ UDPCommunicationManager::recvMsg(shared_ptr<NOM> nomMsg)
 	}
 	else
 	{
-		tcerr << _T("[COMM][INNER RX][WARN] no handler for ") << nomMsg->getName() << endl;
+		// tcerr << _T("[COMM][INNER RX][WARN] no handler for ") << nomMsg->getName() << endl;
 	}
 
 	//commInterface->sendCommMsg(nomMsg);
@@ -738,7 +738,7 @@ void UDPCommunicationManager::sendInnerMsg(shared_ptr<NOM> nomMsg)
 	}
 	else
 	{
-		tcerr << _T("[COMM][DISPATCH][WARN] no handler for ") << nomMsg->getName() << endl;
+		// tcerr << _T("[COMM][DISPATCH][WARN] no handler for ") << nomMsg->getName() << endl;
 	}
 }
 
@@ -836,7 +836,7 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 				tcerr << _T("[COMM][RX][ERROR] deserialize failed for object ") << msgName << endl;
 				return;
 			}
-			tcout << _T("[COMM][RX] deserialize succeeded for object ") << msgName << endl;
+			// tcout << _T("[COMM][RX] deserialize succeeded for object ") << msgName << endl;
 			this->updateMsg(nomMsg);
 		}
 		else
@@ -848,7 +848,7 @@ UDPCommunicationManager::processRecvMessage(unsigned char* data, int size)
 				tcerr << _T("[COMM][RX][ERROR] deserialize failed for interaction ") << msgName << endl;
 				return;
 			}
-			tcout << _T("[COMM][RX] deserialize succeeded for interaction ") << msgName << endl;
+			// tcout << _T("[COMM][RX] deserialize succeeded for interaction ") << msgName << endl;
 			nomMsgCP->setOwner(name);
 			sendInnerMsg(nomMsgCP);
 			//this->sendMsg(nomMsgCP);

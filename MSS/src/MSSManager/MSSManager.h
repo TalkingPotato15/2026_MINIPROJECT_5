@@ -77,6 +77,7 @@ private:
 	unsigned int simulatorStatus;
 	unsigned int updateIntervalMs;
 	double missileSpeedMultiplier;
+	double targetSpeedMultiplier;
 	double interceptDistance;
 	std::mutex stateMutex;
 

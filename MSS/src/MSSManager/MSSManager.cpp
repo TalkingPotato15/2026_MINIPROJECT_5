@@ -31,6 +31,7 @@ void MSSManager::initialize(void)
 	simulatorStatus = 0;
 	updateIntervalMs = 1000;
 	missileSpeedMultiplier = 1.8;
+	targetSpeedMultiplier = 0.03; //ATS = 0.05 화면이 작은데 속도가 너무 빨라 ATS측에서 multiply함.
 	interceptDistance = 50.0;
 	resetMissiles();
 	resetTargets();
@@ -158,14 +159,6 @@ void MSSManager::recvATSInformation(std::shared_ptr<NOM> nomMsg)
 	target->speed = targetSpeed;
 	target->valid = true;
 
-	for (auto& missile : missileStates)
-	{
-		if (missile.status == 1 && (missile.targetId == 0 || missile.targetId == targetId))
-		{
-			missile.targetId = targetId;
-		}
-	}
-
 	ntcout << _T("[MSS][RX] targetID=") << targetId
 		<< _T(" pos=(") << targetX << _T(",") << targetY
 		<< _T(",") << targetZ << _T(") speed=") << targetSpeed << std::endl;
@@ -174,25 +167,38 @@ void MSSManager::recvATSInformation(std::shared_ptr<NOM> nomMsg)
 void MSSManager::recvIgnitionCommand(std::shared_ptr<NOM> nomMsg)
 {
 	auto missileIdValue = nomMsg->getValue(_T("missileID"));
-	if (!missileIdValue)
+	auto targetIdValue = nomMsg->getValue(_T("targetID"));
+	if (!missileIdValue || !targetIdValue)
 	{
+		ntcout << _T("[MSS][IGNITION][ERROR] missileID or targetID is missing") << std::endl;
 		return;
 	}
 
 	const unsigned int missileId = missileIdValue->toUInt();
-	std::lock_guard<std::mutex> lock(stateMutex);
-	const unsigned int index = (missileId >= 1 && missileId <= missileStates.size())
-		? missileId - 1 : missileId % missileStates.size();
-	auto& missile = missileStates[index];
-	missile.missileId = missileId;
+	const unsigned int targetId = targetIdValue->toUInt();
+	if (missileId < 1 || missileId > missileStates.size())
+	{
+		ntcout << _T("[MSS][IGNITION][ERROR] missileID must be 1..4: ")
+			<< missileId << std::endl;
+		return;
+	}
 
-	if (auto value = nomMsg->getValue(_T("targetID"))) missile.targetId = value->toUInt();
+	std::lock_guard<std::mutex> lock(stateMutex);
+	auto& missile = missileStates[missileId - 1];
+	missile.missileId = missileId;
+	missile.targetId = targetId;
+
 	if (auto value = nomMsg->getValue(_T("launchPos.x"))) missile.x = value->toDouble();
 	if (auto value = nomMsg->getValue(_T("launchPos.y"))) missile.y = value->toDouble();
 	if (auto value = nomMsg->getValue(_T("launchPos.z"))) missile.z = value->toDouble();
 
 	missile.status = 1; // LAUNCHED
 	simulatorStatus = 2; // RUNNING
+
+	ntcout << _T("[MSS][IGNITION] missileID=") << missileId
+		<< _T(" targetID=") << targetId
+		<< _T(" launchPos=(") << missile.x << _T(",") << missile.y
+		<< _T(",") << missile.z << _T(")") << std::endl;
 }
 
 void MSSManager::updateMissilePaths()
@@ -220,7 +226,7 @@ void MSSManager::updateMissilePaths()
 		{
 			continue;
 		}
-		const double moveDistance = target->speed * missileSpeedMultiplier * deltaTime;
+		const double moveDistance = target->speed * targetSpeedMultiplier * missileSpeedMultiplier * deltaTime;
 		if (moveDistance <= 0.0)
 		{
 			continue;
